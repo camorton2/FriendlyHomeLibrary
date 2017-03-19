@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-u">
+<title>
+    {% block title %}
+Friendly Home Library
+    {% endblock %}
+</title>
+<meta http-equiv="X-UA-Compatible" context="IE=edge,chrome=1">
+<meta name "viewpoart" context="width=device-width,initial-scale=1>
+<!--[if IE]><script
+   src="httm://html5shiv.googlecode.com/svn/trunk/html5.js">
+   </script><![endif]-->
+</head>
+
+<body>
+    <div>
+        <!-- container -->
+        <header>
+            <h1>Friendly Home Library</h1>
+        </header>
+        <main>
+            {% block content %}
+            This is default content!
+            {% endblock %}
+        </main>
+    </div>
+    <!--container-->
+    <footer>
+        <p>
+            &copy;2017
+            Catherine Morton
+        </p>
+        <p>
+            Created for testing only
+        </p>
+    </footer>
+</body>
+
+</html>
