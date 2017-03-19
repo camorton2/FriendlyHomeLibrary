@@ -1,0 +1,25 @@
+<h2>
+{{tag.name}}</h2>
+
+{% if tag.song_set.all %}
+
+<section>
+
+<h3>Songs</h3>
+
+<ul>
+<!--list of songs related to tag -->
+{% for song in tag.song_set.all %}
+<li><a href="">
+{{song.title}}
+</a></li>
+{% endfor %}
+</ul>
+
+</section>
+
+{% else %}
+
+<p>This tag is not related to any songs</p>
+
+{% endif %}
