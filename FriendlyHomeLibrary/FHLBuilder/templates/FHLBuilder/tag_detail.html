@@ -1,17 +1,25 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{block.super}} - Tag List
+{% endblock %}
+
+{% block content %}
+
 <h2>
 {{tag.name}}</h2>
 
-{% if tag.song_set.all %}
+{% if tag.common_set.count %}
 
 <section>
 
-<h3>Songs</h3>
+<h3>Objects associated with {{tag.name}}</h3>
 
 <ul>
-<!--list of songs related to tag -->
-{% for song in tag.song_set.all %}
+<!--list of objects related to tag -->
+{% for obj in tag.common_set.all %}
 <li><a href="">
-{{song.title}}
+{{obj.title}}
 </a></li>
 {% endfor %}
 </ul>
@@ -23,3 +31,4 @@
 <p>This tag is not related to any songs</p>
 
 {% endif %}
+{% endblock %}
