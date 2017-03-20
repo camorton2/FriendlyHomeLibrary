@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.core.urlresolvers import reverse
 
 # Create your models here.
 
@@ -20,7 +21,8 @@ class Tag(models.Model):
 
     class Meta:
         ordering = ['name']
-
+    def get_absolute_url(self):
+        return reverse('builder_tag_detail',kwargs={'slug': self.slug})
 
 class FHLUser(models.Model):
     BUILDER = 'B'
@@ -83,15 +85,27 @@ class DisLikes(models.Model):
     disLikedBy = models.ManyToManyField(FHLUser)
 
 
-class Movie(Common):
-    director = models.CharField(max_length=63)
-    actors = models.ManyToManyField(Tag)
 
 # Audio book chapter
 class Chapter(Common):
     author = models.CharField(max_length=63)
     chapterNumber = models.IntegerField()
 
+class Actor(models.Model):
+    firstName = models.CharField(max_length=63)
+    lastName = models.CharField(max_length=63)
+    
+class Director(models.Model):
+    firstName = models.CharField(max_length=63)
+    lastName = models.CharField(max_length=63)
+    
+class Musician(models.Model):
+    firstName = models.CharField(max_length=63)
+    lastName = models.CharField(max_length=63)
+
+class Band(models.Model):
+    bandName = models.CharField(max_length=63)
+    
 class AudioBook(Common):
     chapters = models.ForeignKey(Chapter, 
       models.SET_NULL,
@@ -99,7 +113,14 @@ class AudioBook(Common):
       null=True)
 
 class Song(Common):
-    artist = models.CharField(max_length=63)
+    musician = models.ForeignKey(Musician, 
+      models.SET_NULL,
+      blank=True,
+      null=True)
+    band = models.ForeignKey(Band, 
+      models.SET_NULL,
+      blank=True,
+      null=True)
     track = models.IntegerField()
 
 class Album(Common):
@@ -108,4 +129,14 @@ class Album(Common):
       blank=True,
       null=True)       
     
+class Movie(Common):
+    director = models.ForeignKey(Director, 
+      models.SET_NULL,
+      blank=True,
+      null=True)
+
+    actor = models.ForeignKey(Actor, 
+      models.SET_NULL,
+      blank=True,
+      null=True)
 
