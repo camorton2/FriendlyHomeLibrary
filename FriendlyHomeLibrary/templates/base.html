@@ -23,12 +23,28 @@ Friendly Home Library
         </header>
         <main>
             {% block content %}
-            This is default content!
+            <br>Welcome to the Friendly Home Library
+            
+                <li><a href="">Library Builder</a></li>
+                <li><a href="">Library Reader</a></li>
+                <li><a href="">Library Channel</a></li>
+            
             {% endblock %}
         </main>
     </div>
     <!--container-->
     <footer>
+    <br>
+    <div>
+    <nav>
+        
+            <a href="{% url 'builder_common_list' %}">All Media</a>
+            <a href="{% url 'builder_song_list' %}">Songs</a>
+            <a href="{% url 'builder_tag_list' %}">Tags</a>
+        
+    </nav>
+    </div>
+        
         <p>
             &copy;2017
             Catherine Morton
