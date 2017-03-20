@@ -1,0 +1,11 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+Title
+{% endblock %}
+
+{% block content %}
+{% for x in tl %}
+<br>Song {{x}}
+{% endfor %}
+{% endblock %}
