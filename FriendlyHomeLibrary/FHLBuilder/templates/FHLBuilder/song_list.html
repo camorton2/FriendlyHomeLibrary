@@ -5,7 +5,14 @@ Title
 {% endblock %}
 
 {% block content %}
-{% for x in tl %}
-<br>Song {{x}}
+{% for song in tl %}
+<li>
+<a href="{{ song.get_absolute_url}}"> {{x.title|title}}
+</a>
+</li>
 {% endfor %}
+<ul>
+    <li><a href="{% url 'builder_song_create' %}">Create Song</a></li>
+</ul>
+
 {% endblock %}

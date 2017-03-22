@@ -31,4 +31,8 @@
 <p>This tag is not related to any songs</p>
 
 {% endif %}
+<ul>
+    <li><a href="{{tag.get_update_url}}">Edit Tag</a></li>
+    <li><a href="{{tag.get_delete_url}}">Delete Tag</a></li>
+</ul>
 {% endblock %}
