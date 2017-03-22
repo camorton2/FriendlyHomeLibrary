@@ -1,0 +1,50 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{block.super}} - Tag List
+{% endblock %}
+
+{% block content %}
+
+<h2>
+{{song.title}}</h2>
+
+
+<section>
+<ul>
+    <li>FileName: {{song.filename}}</li>
+    <li>FilePath: {{song.filePath}}</li>
+    <li>Year: {{song.year}}</li>
+    <li>Musician: {{song.musician}}</li>
+    <li>Band: {{song.band}}</li>
+    <li>Track: {{song.track}}</li>
+</ul>
+</section>
+<section>
+{% if song.tag_set.count %}
+<h3>Tags associated with {{song.name}}</h3>
+<ul>
+<!--list of objects related to tag -->
+{% for tag in song.tag_set.all %}
+<li><a href="tag.get_absolute_url">{{tag.name}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+</section>
+<section>
+{% if song.likedby_set.count %}
+<h3>Liked by:</h3>
+<ul>
+<!--list of objects related to tag -->
+{% for likr in song.likedby_set.all %}
+<li><a href="tag.get_absolute_url">{{tag.name}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+</section>
+
+<ul>
+    <li><a href="{{song.get_update_url}}">Edit Tag</a></li>
+    <li><a href="{{song.get_delete_url}}">Delete Tag</a></li>
+</ul>
+{% endblock %}

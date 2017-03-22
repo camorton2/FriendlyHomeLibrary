@@ -1,0 +1,14 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - Create Tag
+{% endblock %}
+
+{% block content %}
+<form action="{% url 'builder_tag_create' %}" method = "post">
+{% csrf_token %}
+{{form.as_p}}
+<button type="submit">Create Tag</button>
+</form>
+{% endblock %}
+

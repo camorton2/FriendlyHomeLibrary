@@ -1,0 +1,17 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - Delete Song
+{% endblock %}
+
+{% block content %}
+<form action="{{song.get_delete_url}}" method = "post">
+{% csrf_token %}
+<p>
+    Are you sure you want to delete song{{tag.title}}?
+</p>
+<a href="{{song.get_absolute_url}}">Cancel</a>
+<button type="submit">Delete Song</button>
+</form>
+{% endblock %}
+
