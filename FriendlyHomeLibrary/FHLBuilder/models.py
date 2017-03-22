@@ -23,6 +23,11 @@ class Tag(models.Model):
         ordering = ['name']
     def get_absolute_url(self):
         return reverse('builder_tag_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_tag_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_tag_delete',kwargs={'slug': self.slug})
+
 
 class FHLUser(models.Model):
     BUILDER = 'B'
@@ -56,7 +61,7 @@ class Common(models.Model):
     fileKind = models.CharField(
        max_length=1,
        choices = KIND_CHOICES,
-       default = AUDIO)    
+       default = AUDIO)
     filename = models.FileField()
     filepath = models.FilePathField()
     tag = models.ManyToManyField(Tag)
@@ -94,48 +99,55 @@ class Chapter(Common):
 class Actor(models.Model):
     firstName = models.CharField(max_length=63)
     lastName = models.CharField(max_length=63)
-    
+
 class Director(models.Model):
     firstName = models.CharField(max_length=63)
     lastName = models.CharField(max_length=63)
-    
+
 class Musician(models.Model):
     firstName = models.CharField(max_length=63)
     lastName = models.CharField(max_length=63)
 
 class Band(models.Model):
     bandName = models.CharField(max_length=63)
-    
+
 class AudioBook(Common):
-    chapters = models.ForeignKey(Chapter, 
+    chapters = models.ForeignKey(Chapter,
       models.SET_NULL,
       blank=True,
       null=True)
 
 class Song(Common):
-    musician = models.ForeignKey(Musician, 
+    musician = models.ForeignKey(Musician,
       models.SET_NULL,
       blank=True,
       null=True)
-    band = models.ForeignKey(Band, 
+    band = models.ForeignKey(Band,
       models.SET_NULL,
       blank=True,
       null=True)
     track = models.IntegerField()
+    def get_absolute_url(self):
+        return reverse('builder_song_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_song_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_song_delete',kwargs={'slug': self.slug})
+
 
 class Album(Common):
     songs = models.ForeignKey(Song,
       models.SET_NULL,
       blank=True,
-      null=True)       
-    
+      null=True)
+
 class Movie(Common):
-    director = models.ForeignKey(Director, 
+    director = models.ForeignKey(Director,
       models.SET_NULL,
       blank=True,
       null=True)
 
-    actor = models.ForeignKey(Actor, 
+    actor = models.ForeignKey(Actor,
       models.SET_NULL,
       blank=True,
       null=True)
