@@ -1,13 +1,13 @@
 {% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
 
 {% block title %}
-Title
+{{ block.super }} - Songs
 {% endblock %}
 
 {% block content %}
 {% for song in tl %}
 <li>
-<a href="{{ song.get_absolute_url}}"> {{x.title|title}}
+<a href="{{ song.get_absolute_url}}"> {{song.title|title}}
 </a>
 </li>
 {% endfor %}

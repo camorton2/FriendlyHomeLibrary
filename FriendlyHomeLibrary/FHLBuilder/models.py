@@ -6,7 +6,6 @@ from django.core.urlresolvers import reverse
 
 # Create your models here.
 
-
 class Tag(models.Model):
     name = models.CharField(
        max_length=31,
@@ -27,7 +26,6 @@ class Tag(models.Model):
         return reverse('builder_tag_update',kwargs={'slug': self.slug})
     def get_delete_url(self):
         return reverse('builder_tag_delete',kwargs={'slug': self.slug})
-
 
 class FHLUser(models.Model):
     BUILDER = 'B'
@@ -50,6 +48,10 @@ class FHLUser(models.Model):
     class Meta:
         ordering = ['name']
 
+class Setup(models.Model):
+    songsHead = models.CharField(max_length=100)
+    moviesHead = models.CharField(max_length=100)
+    booksHead = models.CharField(max_length=100)
 
 class Common(models.Model):
     AUDIO = 'A'
@@ -62,8 +64,8 @@ class Common(models.Model):
        max_length=1,
        choices = KIND_CHOICES,
        default = AUDIO)
-    filename = models.FileField()
-    filepath = models.FilePathField()
+    filename = models.CharField(max_length=100)
+
     tag = models.ManyToManyField(Tag)
     title = models.CharField(
        max_length=31,
@@ -77,6 +79,119 @@ class Common(models.Model):
         ordering = ['title']
     year = models.IntegerField(default=0000)
 
+# Directory which is also an album or an audio book
+class Collection(models.Model):
+    filepath = models.CharField(max_length=100)
+    members = models.ForeignKey(Common,
+      models.SET_NULL,
+      blank=True,
+      null=True)
+    slug = models.SlugField(
+       max_length=31,
+       unique=True)
+    def get_absolute_url(self):
+        return reverse('builder_collection_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_collection_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_collection_delete',kwargs={'slug': self.slug})
+
+class Movie(Common):
+    def get_absolute_url(self):
+        return reverse('builder_movie_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_movie_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_movie_delete',kwargs={'slug': self.slug})
+
+class Concert(Movie):
+    def get_absolute_url(self):
+        return reverse('builder_concert_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_concert_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_concert_delete',kwargs={'slug': self.slug})
+
+
+class Song(Common):
+    track = models.IntegerField()
+    def get_absolute_url(self):
+        return reverse('builder_song_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_song_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_song_delete',kwargs={'slug': self.slug})
+
+class Album(Collection):
+    songs = models.ForeignKey(Song,
+      models.SET_NULL,
+      blank=True,
+      null=True)
+    def get_absolute_url(self):
+        return reverse('builder_album_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_album_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_album_delete',kwargs={'slug': self.slug})
+
+
+class Series(Collection):
+    episodes = models.ForeignKey(Movie,
+      models.SET_NULL,
+      blank=True,
+      null=True)
+    def get_absolute_url(self):
+        return reverse('builder_series_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_series_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_series_delete',kwargs={'slug': self.slug})
+
+
+class Person(models.Model):
+    firstName = models.CharField(max_length=63)
+    lastName = models.CharField(max_length=63)
+    def get_absolute_url(self):
+        return reverse('builder_person_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_person_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_person_delete',kwargs={'slug': self.slug})
+
+class Actor(Person):
+    movies = models.ManyToManyField(Movie)
+    def get_absolute_url(self):
+        return reverse('builder_actor_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_actor_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_actor_delete',kwargs={'slug': self.slug})
+
+class Director(Person):
+    movies = models.ManyToManyField(Movie)
+    def get_absolute_url(self):
+        return reverse('builder_director_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_director_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_director_delete',kwargs={'slug': self.slug})
+
+class Musician(Person):
+    albums = models.ManyToManyField(Album)
+    concerts = models.ManyToManyField(Concert)
+    def get_absolute_url(self):
+        return reverse('builder_musician_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_musician_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_misucian_delete',kwargs={'slug': self.slug})
+
+class Band(models.Model):
+    bandName = models.CharField(max_length=63)
+    albums = models.ManyToManyField(Album)
+    concerts = models.ManyToManyField(Concert)
+
+############# not implemented ############
 class Likes(models.Model):
     liked = models.ManyToManyField(Common)
     likedBy = models.ManyToManyField(FHLUser)
@@ -88,67 +203,3 @@ class Loves(models.Model):
 class DisLikes(models.Model):
     disLiked = models.ManyToManyField(Common)
     disLikedBy = models.ManyToManyField(FHLUser)
-
-
-
-# Audio book chapter
-class Chapter(Common):
-    author = models.CharField(max_length=63)
-    chapterNumber = models.IntegerField()
-
-class Actor(models.Model):
-    firstName = models.CharField(max_length=63)
-    lastName = models.CharField(max_length=63)
-
-class Director(models.Model):
-    firstName = models.CharField(max_length=63)
-    lastName = models.CharField(max_length=63)
-
-class Musician(models.Model):
-    firstName = models.CharField(max_length=63)
-    lastName = models.CharField(max_length=63)
-
-class Band(models.Model):
-    bandName = models.CharField(max_length=63)
-
-class AudioBook(Common):
-    chapters = models.ForeignKey(Chapter,
-      models.SET_NULL,
-      blank=True,
-      null=True)
-
-class Song(Common):
-    musician = models.ForeignKey(Musician,
-      models.SET_NULL,
-      blank=True,
-      null=True)
-    band = models.ForeignKey(Band,
-      models.SET_NULL,
-      blank=True,
-      null=True)
-    track = models.IntegerField()
-    def get_absolute_url(self):
-        return reverse('builder_song_detail',kwargs={'slug': self.slug})
-    def get_update_url(self):
-        return reverse('builder_song_update',kwargs={'slug': self.slug})
-    def get_delete_url(self):
-        return reverse('builder_song_delete',kwargs={'slug': self.slug})
-
-
-class Album(Common):
-    songs = models.ForeignKey(Song,
-      models.SET_NULL,
-      blank=True,
-      null=True)
-
-class Movie(Common):
-    director = models.ForeignKey(Director,
-      models.SET_NULL,
-      blank=True,
-      null=True)
-
-    actor = models.ForeignKey(Actor,
-      models.SET_NULL,
-      blank=True,
-      null=True)
-

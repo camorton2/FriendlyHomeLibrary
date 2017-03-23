@@ -3,8 +3,8 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.http import HttpResponse
-from FHLBuilder.models import Tag, Song, Common
-from FHLBuilder.forms import TagForm, SongForm
+from FHLBuilder.models import Tag, Song, Common, Collection
+from FHLBuilder.forms import TagForm, SongForm, CollectionForm
 from django.template import RequestContext,loader
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
@@ -42,16 +42,6 @@ class CommonList(View):
           self.template_name,
           test1)
 
-class SongList(View):
-    template_name='FHLBuilder/song_list.html'
-    def get(self,request):
-        tl = Song.objects.all()
-        test1 = {'tl': tl}
-
-        return render(
-          request,
-          self.template_name,
-          test1)
 
 # Tags
 class TagDetailView(View):
@@ -117,6 +107,17 @@ class TagDelete(View):
         return redirect('builder_tag_list')
 
 # songs
+class SongList(View):
+    template_name='FHLBuilder/song_list.html'
+    def get(self,request):
+        tl = Song.objects.all()
+        test1 = {'tl': tl}
+
+        return render(
+          request,
+          self.template_name,
+          test1)
+
 class SongDetailView(View):
     template_name = 'FHLBuilder/song_detail.html'
     def get(self,request,slug):
@@ -179,5 +180,77 @@ class SongDelete(View):
         song.delete()
         return redirect('builder_song_list')
 
+#Collections
+class CollectionList(View):
+    template_name='FHLBuilder/collection_list.html'
+    def get(self,request):
+        tl = Collection.objects.all()
+        test1 = {'tl': tl}
+        return render(
+          request,
+          self.template_name,
+          test1)
+
+class CollectionDetailView(View):
+    template_name = 'FHLBuilder/collection_detail.html'
+    def get(self,request,slug):
+        collection=get_object_or_404(Collection,slug__iexact=slug)
+        return render(request, self.template_name, {'collection':collection})
+
+class CollectionFormView(View):
+    form_class=CollectionForm
+    template_name = 'FHLBuilder/collection_form.html'
+    def get(self, request):
+        return render(request,self.template_name,
+                      {'form':self.form_class()})
+    def post(self,request):
+        bound_form=self.form_class(request.POST)
+        if bound_form.is_valid():
+            new_collection=bound_form.save()
+            return redirect(new_collection)
+        else:
+            return render(request,self.template_name,
+                          {'form':bound_form})
+
+class CollectionUpdate(View):
+    form_class=CollectionForm
+    model=Collection
+    template_name='FHLBuilder/collection_update.html'
+    def get_object(self,slug):
+        return get_object_or_404(self.model,slug=slug)
+    def get(self,request,slug):
+        collection = self.get_object(slug)
+        context={
+           'form': self.form_class(instance=collection),
+           'collection': collection,
+        }
+        return render(request,self.template_name,context)
+
+    def post(self,request,slug):
+        collection = self.get_object(slug)
+        bound_form = self.form_class(request.POST,instance=collection)
+        if bound_form.is_valid():
+            new_collection = bound_form.save()
+            return redirect(new_collection)
+        else:
+            context={
+                'form': bound_form,
+                'collection': collection,
+            }
+            return render(request,self.template_name,context)
+
+class CollectionDelete(View):
+    form_class=CollectionForm
+    model = Collection
+    template_name='FHLBuilder/collection_confirm_delete.html'
+    def get_object(self,slug):
+        return get_object_or_404(self.model,slug=slug)
+    def get(self,request,slug):
+        collection = self.get_object(slug)
+        return render(request,self.template_name,{'collection': collection})
+    def post(self,request,slug):
+        collection = self.get_object(slug)
+        collection.delete()
+        return redirect('builder_collection_list')
 
 

@@ -25,9 +25,7 @@ Friendly Home Library
             {% block content %}
             <br>Welcome to the Friendly Home Library
             
-                <li><a href="">Library Builder</a></li>
-                <li><a href="">Library Reader</a></li>
-                <li><a href="">Library Channel</a></li>
+                <li><a href="{% url 'builder_collection_create' %}">Add Collection</a></li>
             
             {% endblock %}
         </main>
@@ -41,6 +39,7 @@ Friendly Home Library
             <a href="{% url 'builder_common_list' %}">All Media</a>
             <a href="{% url 'builder_song_list' %}">Songs</a>
             <a href="{% url 'builder_tag_list' %}">Tags</a>
+            <a href="{% url 'builder_collection_list' %}">Collections</a>
         
     </nav>
     </div>
