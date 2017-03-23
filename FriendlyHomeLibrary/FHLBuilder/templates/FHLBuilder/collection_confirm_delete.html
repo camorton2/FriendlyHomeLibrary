@@ -1,0 +1,17 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - Delete Collection
+{% endblock %}
+
+{% block content %}
+<form action="{{collection.get_delete_url}}" method = "post">
+{% csrf_token %}
+<p>
+    Are you sure you want to delete song{{tag.title}}?
+</p>
+<a href="{{collection.get_absolute_url}}">Cancel</a>
+<button type="submit">Delete Collection</button>
+</form>
+{% endblock %}
+

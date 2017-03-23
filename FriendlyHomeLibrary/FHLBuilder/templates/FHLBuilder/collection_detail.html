@@ -1,0 +1,23 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{block.super}} - Collection List
+{% endblock %}
+
+{% block content %}
+
+<h2>
+{{collection.name}}</h2>
+
+
+<section>
+<ul>
+    This section should be a list of what is in the collection
+</ul>
+</section>
+
+<ul>
+    <li><a href="{{collection.get_update_url}}">Edit Collection</a></li>
+    <li><a href="{{collection.get_delete_url}}">Delete Collection</a></li>
+</ul>
+{% endblock %}

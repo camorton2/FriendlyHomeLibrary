@@ -1,0 +1,18 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} - Collections
+{% endblock %}
+
+{% block content %}
+{% for collection in tl %}
+<li>
+<a href="{{ collection.get_absolute_url}}"> {{collection.filepath|title}}
+</a>
+</li>
+{% endfor %}
+<ul>
+    <li><a href="{% url 'builder_collection_create' %}">Create Collection</a></li>
+</ul>
+
+{% endblock %}
