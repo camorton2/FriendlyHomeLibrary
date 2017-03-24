@@ -66,7 +66,7 @@ class Common(models.Model):
        default = AUDIO)
     filename = models.CharField(max_length=100)
 
-    tag = models.ManyToManyField(Tag)
+    tag = models.ManyToManyField(Tag, blank=True)
     title = models.CharField(
        max_length=31,
        unique=True)
@@ -104,15 +104,6 @@ class Movie(Common):
     def get_delete_url(self):
         return reverse('builder_movie_delete',kwargs={'slug': self.slug})
 
-class Concert(Movie):
-    def get_absolute_url(self):
-        return reverse('builder_concert_detail',kwargs={'slug': self.slug})
-    def get_update_url(self):
-        return reverse('builder_concert_update',kwargs={'slug': self.slug})
-    def get_delete_url(self):
-        return reverse('builder_concert_delete',kwargs={'slug': self.slug})
-
-
 class Song(Common):
     track = models.IntegerField()
     def get_absolute_url(self):
@@ -134,7 +125,6 @@ class Album(Collection):
     def get_delete_url(self):
         return reverse('builder_album_delete',kwargs={'slug': self.slug})
 
-
 class Series(Collection):
     episodes = models.ForeignKey(Movie,
       models.SET_NULL,
@@ -147,10 +137,11 @@ class Series(Collection):
     def get_delete_url(self):
         return reverse('builder_series_delete',kwargs={'slug': self.slug})
 
-
-class Person(models.Model):
-    firstName = models.CharField(max_length=63)
-    lastName = models.CharField(max_length=63)
+class Artist(models.Model):
+    fullName = models.CharField(max_length=100)
+    slug = models.SlugField(
+       max_length=31,
+       unique=True)
     def get_absolute_url(self):
         return reverse('builder_person_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
@@ -158,8 +149,8 @@ class Person(models.Model):
     def get_delete_url(self):
         return reverse('builder_person_delete',kwargs={'slug': self.slug})
 
-class Actor(Person):
-    movies = models.ManyToManyField(Movie)
+class Actor(Artist):
+    movies = models.ManyToManyField(Movie, blank=True)
     def get_absolute_url(self):
         return reverse('builder_actor_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
@@ -167,8 +158,8 @@ class Actor(Person):
     def get_delete_url(self):
         return reverse('builder_actor_delete',kwargs={'slug': self.slug})
 
-class Director(Person):
-    movies = models.ManyToManyField(Movie)
+class Director(Artist):
+    movies = models.ManyToManyField(Movie, blank=True)
     def get_absolute_url(self):
         return reverse('builder_director_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
@@ -176,9 +167,9 @@ class Director(Person):
     def get_delete_url(self):
         return reverse('builder_director_delete',kwargs={'slug': self.slug})
 
-class Musician(Person):
-    albums = models.ManyToManyField(Album)
-    concerts = models.ManyToManyField(Concert)
+class Musician(Artist):
+    albums = models.ManyToManyField(Album, blank=True)
+    concerts = models.ManyToManyField(Movie, blank=True)
     def get_absolute_url(self):
         return reverse('builder_musician_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
@@ -186,20 +177,16 @@ class Musician(Person):
     def get_delete_url(self):
         return reverse('builder_misucian_delete',kwargs={'slug': self.slug})
 
-class Band(models.Model):
-    bandName = models.CharField(max_length=63)
-    albums = models.ManyToManyField(Album)
-    concerts = models.ManyToManyField(Concert)
-
 ############# not implemented ############
-class Likes(models.Model):
-    liked = models.ManyToManyField(Common)
-    likedBy = models.ManyToManyField(FHLUser)
-
-class Loves(models.Model):
-    loved = models.ManyToManyField(Common)
-    lovedBy = models.ManyToManyField(FHLUser)
-
-class DisLikes(models.Model):
-    disLiked = models.ManyToManyField(Common)
-    disLikedBy = models.ManyToManyField(FHLUser)
+##class Likes(models.Model):
+##    liked = models.ManyToManyField(Common)
+##    likedBy = models.ManyToManyField(FHLUser)
+##
+##class Loves(models.Model):
+##    loved = models.ManyToManyField(Common)
+##    lovedBy = models.ManyToManyField(FHLUser)
+##
+##class DisLikes(models.Model):
+##    disLiked = models.ManyToManyField(Common)
+##    disLikedBy = models.ManyToManyField(FHLUser)
+####################################################
