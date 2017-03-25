@@ -7,7 +7,7 @@
 {% block content %}
 {% for collection in tl %}
 <li>
-<a href="{{ collection.get_absolute_url}}"> {{collection.filepath|title}}
+<a href="{{ collection.get_absolute_url}}"> {{collection.filePath|title}}
 </a>
 </li>
 {% endfor %}

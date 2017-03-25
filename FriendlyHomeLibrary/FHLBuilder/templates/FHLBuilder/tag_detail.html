@@ -9,7 +9,7 @@
 <h2>
 {{tag.name}}</h2>
 
-{% if tag.common_set.count %}
+{% if tag.commonfile_set.count %}
 
 <section>
 
@@ -17,7 +17,7 @@
 
 <ul>
 <!--list of objects related to tag -->
-{% for obj in tag.common_set.all %}
+{% for obj in tag.commonfile_set.all %}
 <li><a href="">
 {{obj.title}}
 </a></li>

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.http import HttpResponse
-from FHLBuilder.models import Tag, Song, Common, Collection
+from FHLBuilder.models import Tag, Song, CommonFile, Collection
 from FHLBuilder.forms import TagForm, SongForm, CollectionForm
 from django.template import RequestContext,loader
 from django.shortcuts import get_object_or_404, render, redirect
@@ -19,6 +19,7 @@ class HomePage(View):
           request,
           self.template_name,)
 
+# Tags
 class TagList(View):
     template_name = 'FHLBuilder/tag_list.html'
     def get(self, request):
@@ -30,20 +31,6 @@ class TagList(View):
           self.template_name,
           test1)
 
-
-class CommonList(View):
-    template_name='FHLBuilder/common_list.html'
-    def get(self,request):
-        tl = Common.objects.all()
-        test1 = {'tl': tl}
-
-        return render(
-          request,
-          self.template_name,
-          test1)
-
-
-# Tags
 class TagDetailView(View):
     template_name = 'FHLBuilder/tag_detail.html'
     def get(self,request,slug):
@@ -252,5 +239,4 @@ class CollectionDelete(View):
         collection = self.get_object(slug)
         collection.delete()
         return redirect('builder_collection_list')
-
 

@@ -1,6 +1,6 @@
 # urls
 from django.conf.urls import url
-from .views import HomePage, TagList, CommonList, SongList, CollectionList
+from .views import HomePage, TagList, SongList, CollectionList
 from .views import TagFormView, TagUpdate, TagDelete, TagDetailView
 from .views import SongFormView, SongUpdate, SongDelete, SongDetailView
 from .views import CollectionFormView, CollectionUpdate, CollectionDelete, CollectionDetailView
@@ -12,9 +12,6 @@ urlpatterns = [
     url(r'^tag/$',
       TagList.as_view(),
       name='builder_tag_list'),
-    url(r'^common/$',
-      CommonList.as_view(),
-      name='builder_common_list'),
     url(r'^song/$',
       SongList.as_view(),
       name='builder_song_list'),
