@@ -1,0 +1,14 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - Create Musician
+{% endblock %}
+
+{% block content %}
+<form action="{% url 'builder_musician_create' %}" method = "post">
+{% csrf_token %}
+{{form.as_p}}
+<button type="submit">Create Musician</button>
+</form>
+{% endblock %}
+

@@ -1,0 +1,17 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - Delete Actor
+{% endblock %}
+
+{% block content %}
+<form action="{{actor.get_delete_url}}" method = "post">
+{% csrf_token %}
+<p>
+    Are you sure you want to delete actor{{actor.fullName}}?
+</p>
+<a href="{{actor.get_absolute_url}}">Cancel</a>
+<button type="submit">Delete Actor</button>
+</form>
+{% endblock %}
+

@@ -1,0 +1,18 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} - Actors
+{% endblock %}
+
+{% block content %}
+{% for actor in tl %}
+<li>
+<a href="{{ actor.get_absolute_url}}"> {{actor.fullName|title}}
+</a>
+</li>
+{% endfor %}
+<ul>
+    <li><a href="{% url 'builder_actor_create' %}">Create Actor</a></li>
+</ul>
+
+{% endblock %}

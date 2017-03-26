@@ -1,0 +1,44 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{block.super}} - Movie
+{% endblock %}
+
+{% block content %}
+
+<h2>{{movie.title}}</h2>
+
+<section>
+<ul>
+    <li>Title: {{movie.title}}</li>
+    <li>FileName: {{movie.fileName}}</li>
+    {% if movie.year > 0 %}
+    <li>Year: {{movie.year}}</li>
+    {% endif %}
+</ul>
+</section>
+<section>
+{% if movie.tags.count %}
+<h3>Tags associated with {{movie.name}}</h3>
+<ul>
+<!--list of objects related to tag -->
+{% for tag in movie.tags.all %}
+<li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+</section>
+
+<section>
+    <video width="320" height="240" controls>
+    <source src="{{movie.filePath}}/{{movie.fileName}}" type="video/mp4">
+    </video>
+</section>
+
+
+<ul>
+    <li><a href="{{movie.get_update_url}}">Edit Movie</a></li>
+    <li><a href="{{movie.get_delete_url}}">Delete Movie</a></li>
+    
+</ul>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} - Directors
+{% endblock %}
+
+{% block content %}
+{% for director in tl %}
+<li>
+<a href="{{ director.get_absolute_url}}"> {{director.fullName|title}}
+</a>
+</li>
+{% endfor %}
+<ul>
+    <li><a href="{% url 'builder_director_create' %}">Create Director</a></li>
+</ul>
+
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{block.super}} - Musician
+{% endblock %}
+
+{% block content %}
+
+<h2>{{musician.fullName}}</h2>
+
+{% if musician.albums.count %}
+<section>
+<h3>Albums associated with {{musician.fullName}}</h3>
+<ul>
+{% for album in musician.albums.all %}
+<li><a href="{{album.get_absolute_url}}">{{album.title}}</a></li>
+{% endfor %}
+</ul>
+</section>
+{% else %}
+<p>This musician is not related to any albums</p>
+{% endif %}
+
+
+{% if musician.songs.count %}
+<section>
+<h3>Songs associated with {{musician.fullName}}</h3>
+<ul>
+{% for song in musician.songs.all %}
+<li><a href="{{song.get_absolute_url}}">{{song.title}}</a></li>
+{% endfor %}
+</ul>
+</section>
+{% else %}
+<p>This musician is not related to any songs</p>
+{% endif %}
+
+{% if musician.concerts.count %}
+<section>
+<h3>Concerts and videos associated with {{musician.fullName}}</h3>
+<ul>
+{% for video in musician.concerts.all %}
+<li><a href="{{video.get_absolute_url}}">{{video.title}}</a></li>
+{% endfor %}
+</ul>
+</section>
+{% else %}
+<p>This musician is not related to any concerts or videos</p>
+{% endif %}
+
+<ul>
+    <li><a href="{{musician.get_update_url}}">Edit Musician</a></li>
+    <li><a href="{{musician.get_delete_url}}">Delete Musician</a></li>
+</ul>
+{% endblock %}

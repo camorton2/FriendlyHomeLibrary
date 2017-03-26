@@ -1,0 +1,18 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} - Movies
+{% endblock %}
+
+{% block content %}
+{% for movie in tl %}
+<li>
+<a href="{{ movie.get_absolute_url}}"> {{movie.title|title}}
+</a>
+</li>
+{% endfor %}
+<ul>
+    <li><a href="{% url 'builder_movie_create' %}">Create Movie</a></li>
+</ul>
+
+{% endblock %}

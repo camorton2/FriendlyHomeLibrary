@@ -1,0 +1,14 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - Update Actor
+{% endblock %}
+
+{% block content %}
+<form action="{{actor.get_update_url}}" method = "post">
+{% csrf_token %}
+{{form.as_p}}
+<button type="submit">Update Actor</button>
+</form>
+{% endblock %}
+

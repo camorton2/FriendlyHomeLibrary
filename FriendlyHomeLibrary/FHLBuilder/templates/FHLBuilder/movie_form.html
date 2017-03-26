@@ -1,0 +1,14 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - Create Movie
+{% endblock %}
+
+{% block content %}
+<form action="{% url 'builder_movie_create' %}" method = "post">
+{% csrf_token %}
+{{form.as_p}}
+<button type="submit">Create Movie</button>
+</form>
+{% endblock %}
+

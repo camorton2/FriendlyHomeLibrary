@@ -1,0 +1,14 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - Create Actor
+{% endblock %}
+
+{% block content %}
+<form action="{% url 'builder_actor_create' %}" method = "post">
+{% csrf_token %}
+{{form.as_p}}
+<button type="submit">Create Actor</button>
+</form>
+{% endblock %}
+
