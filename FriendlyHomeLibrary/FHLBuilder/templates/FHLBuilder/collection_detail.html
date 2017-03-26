@@ -12,7 +12,11 @@
 
 <section>
 <ul>
-    This section should be a list of what is in the collection
+{% for obj in collection.song_set.all %}
+<li><a href="{{obj.get_absolute_url}}">
+{{obj.title}}
+</a></li>
+{% endfor %}
 </ul>
 </section>
 

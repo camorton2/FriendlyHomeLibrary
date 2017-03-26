@@ -1,48 +1,51 @@
 {% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
 
 {% block title %}
-{{block.super}} - Tag List
+{{block.super}} - Song
 {% endblock %}
 
 {% block content %}
 
-<h2>
-{{song.title}}</h2>
-
+<h2>{{song.title}}</h2>
 
 <section>
 <ul>
+    <li>Title: {{song.title}}</li>
+    {% if song.musician_set.count %}
+    {% for musician in song.musician_set.all %}
+    <li>Musician: {{musician.fullName}}</li>
+    {% endfor %}
+    {% endif %}
+    <li>Album: <a href="{{song.collection.get_absolute_url}}">{{song.collection.title}}</a></li>
     <li>FileName: {{song.fileName}}</li>
-    <li>FilePath: {{song.filePath}}</li>
+    {% if song.year > 0 %}
     <li>Year: {{song.year}}</li>
+    {% endif %}
     <li>Track: {{song.track}}</li>
 </ul>
 </section>
 <section>
-{% if song.tag_set.count %}
+{% if song.tags.count %}
 <h3>Tags associated with {{song.name}}</h3>
 <ul>
 <!--list of objects related to tag -->
-{% for tag in song.tag_set.all %}
-<li><a href="tag.get_absolute_url">{{tag.name}}</a></li>
+{% for tag in song.tags.all %}
+<li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
 {% endfor %}
 </ul>
 {% endif %}
 </section>
+
 <section>
-{% if song.likedby_set.count %}
-<h3>Liked by:</h3>
-<ul>
-<!--list of objects related to tag -->
-{% for likr in song.likedby_set.all %}
-<li><a href="tag.get_absolute_url">{{tag.name}}</a></li>
-{% endfor %}
-</ul>
-{% endif %}
+    {% load static %}
+    <audio controls>
+        <source src="static/{{song.collection.filePath}}/{{song.fileName}}"  type="audio/mpeg">
+    </audio>
 </section>
 
 <ul>
     <li><a href="{{song.get_update_url}}">Edit Song</a></li>
     <li><a href="{{song.get_delete_url}}">Delete Song</a></li>
+    
 </ul>
 {% endblock %}

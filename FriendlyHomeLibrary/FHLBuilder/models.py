@@ -85,13 +85,7 @@ class CommonFile(models.Model):
        choices = KIND_CHOICES,
        default = AUDIO)
     fileName = models.CharField(max_length=CHAR_LENGTH)
-    # path is in the collection
-    collection = models.ForeignKey(Collection,
-      models.SET_NULL,
-      blank=True,
-      null=True)
     year = models.IntegerField(default=0000)
-    tags = models.ManyToManyField(Tag, blank=True)
     title = models.CharField(
        max_length=CHAR_LENGTH,
        unique=True)
@@ -105,6 +99,11 @@ class CommonFile(models.Model):
 
 # any video is called a movie
 class Movie(CommonFile):
+    collection = models.ForeignKey(Collection,
+      models.SET_NULL,
+      blank=True,
+      null=True)
+    tags = models.ManyToManyField(Tag, blank=True)
     def get_absolute_url(self):
         return reverse('builder_movie_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
@@ -113,7 +112,12 @@ class Movie(CommonFile):
         return reverse('builder_movie_delete',kwargs={'slug': self.slug})
 
 class Song(CommonFile):
+    collection = models.ForeignKey(Collection,
+      models.SET_NULL,
+      blank=True,
+      null=True)
     track = models.IntegerField()
+    tags = models.ManyToManyField(Tag, blank=True)
     def get_absolute_url(self):
         return reverse('builder_song_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
@@ -160,7 +164,7 @@ class Musician(Artist):
     def get_update_url(self):
         return reverse('builder_musician_update',kwargs={'slug': self.slug})
     def get_delete_url(self):
-        return reverse('builder_misucian_delete',kwargs={'slug': self.slug})
+        return reverse('builder_musician_delete',kwargs={'slug': self.slug})
 
 ############# not implemented ############
 ##class Likes(models.Model):

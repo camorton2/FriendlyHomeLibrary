@@ -9,27 +9,19 @@
 <h2>
 {{tag.name}}</h2>
 
-{% if tag.commonfile_set.count %}
-
+{% if tag.song_set.count %}
 <section>
-
 <h3>Objects associated with {{tag.name}}</h3>
-
 <ul>
-<!--list of objects related to tag -->
-{% for obj in tag.commonfile_set.all %}
-<li><a href="">
+{% for obj in tag.song_set.all %}
+<li><a href="{{obj.get_absolute_url}}">
 {{obj.title}}
 </a></li>
 {% endfor %}
 </ul>
-
 </section>
-
 {% else %}
-
 <p>This tag is not related to any songs</p>
-
 {% endif %}
 <ul>
     <li><a href="{{tag.get_update_url}}">Edit Tag</a></li>
