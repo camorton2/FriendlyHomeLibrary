@@ -113,7 +113,9 @@ class SongDetailView(View):
     template_name = 'FHLBuilder/song_detail.html'
     def get(self,request,slug):
         song=get_object_or_404(Song,slug__iexact=slug)
-        return render(request, self.template_name, {'song':song})
+        playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
+        print("HERE HERE HERE HERE %s" % (playit))
+        return render(request, self.template_name, {'song':song, 'playit':playit})
 
 class SongFormView(View):
     form_class=SongForm
@@ -280,7 +282,11 @@ class MovieDetailView(View):
     template_name = 'FHLBuilder/movie_detail.html'
     def get(self,request,slug):
         movie=get_object_or_404(Movie,slug__iexact=slug)
-        return render(request, self.template_name, {'movie':movie})
+        
+        playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
+        print("HERE HERE HERE HERE %s" % (playit))        
+        
+        return render(request, self.template_name, {'movie':movie, 'playit':playit})
 
 class MovieFormView(View):
     form_class=MovieForm
@@ -350,7 +356,7 @@ class ActorList(View):
           test1)
 
 class ActorDetailView(View):
-    template_name = 'FHLBuilder/Actor_detail.html'
+    template_name = 'FHLBuilder/actor_detail.html'
     def get(self,request,slug):
         actor=get_object_or_404(Actor,slug__iexact=slug)
         return render(request, self.template_name, {'actor':actor})

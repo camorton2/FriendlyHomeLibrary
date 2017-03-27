@@ -29,7 +29,7 @@ class TagForm(ModelForm):
 
 class ActorForm(ModelForm):
     class Meta:
-        model=Tag
+        model=Actor
         fields='__all__'
     def clean_slug(self):
         new_slug=(self.cleaned_data['slug'].lower())
@@ -39,7 +39,7 @@ class ActorForm(ModelForm):
 
 class DirectorForm(ModelForm):
     class Meta:
-        model=Tag
+        model=Director
         fields='__all__'
     def clean_slug(self):
         new_slug=(self.cleaned_data['slug'].lower())

@@ -39,7 +39,7 @@
 <section>
     {% load static %}
     <audio controls>
-        <source src="static/{{song.collection.filePath}}/{{song.fileName}}"  type="audio/mpeg">
+        <source src="{% static playit %}"  type="audio/mpeg">
     </audio>
 </section>
 

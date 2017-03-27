@@ -11,7 +11,7 @@ from .views import MusicianFormView, MusicianUpdate, MusicianDelete, MusicianDet
 from .views import CollectionFormView, CollectionUpdate, CollectionDelete, CollectionDetailView
 
 urlpatterns = [
-    url(r'^$',HomePage.as_view()),
+    url(r'^$',HomePage.as_view(),name='homepage'),
 
 #lists
     url(r'^tag/$',

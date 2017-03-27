@@ -30,11 +30,30 @@
 </section>
 
 <section>
+    {% load static %}
     <video width="320" height="240" controls>
-    <source src="{{movie.filePath}}/{{movie.fileName}}" type="video/mp4">
+    <source src="{% static playit %}"  type="video/mp4">
     </video>
 </section>
 
+{% load static %}
+<embed type="application/x-vlc-plugin"
+         name="video1"
+                  autoplay="yes" loop="yes" width="400" height="300"
+                           target="{% static playit %}" />
+                           <br />
+                             <a href="javascript:;"
+                             onclick='document.video1.play()'>Play
+                             video1</a>
+                               <a href="javascript:;"
+                               onclick='document.video1.pause()'>Pause
+                               video1</a>
+                                 <a href="javascript:;"
+                                 onclick='document.video1.stop()'>Stop
+                                 video1</a>
+                                   <a href="javascript:;"
+
+onclick='document.video1.fullscreen()'>Fullscreen</a>
 
 <ul>
     <li><a href="{{movie.get_update_url}}">Edit Movie</a></li>

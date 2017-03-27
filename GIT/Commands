@@ -1,3 +1,6 @@
 git status
-git commit -m "some message"
+git commit -a -m "some message"
+
+git add .
+git commit -a -m "add new files"
 
