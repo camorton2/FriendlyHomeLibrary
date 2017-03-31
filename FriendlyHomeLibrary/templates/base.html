@@ -17,22 +17,31 @@ Friendly Home Library
 
 <body>
     <div>
-        <!-- container -->
         <header>
             <h1>Friendly Home Library</h1>
         </header>
         <main>
             {% block content %}
             <br>Welcome to the Friendly Home Library
-            
-                <li><a href="{% url 'builder_collection_create' %}">Add Collection from directory</a></li>
-            
+
+<div class="status row">
+    <div class="offset-by-eight four columns">
+    <ul class="inline">
+        {% if user.is_authenticated %}
+        <li><a href="{% url 'FHLUser_Logout' %}">Log Out</a></li>
+        {% else %}
+        <li><a href="{% url 'FHLUser_Login' %}">Log In</a></li>
+        {% endif %}
+    </ul>
+    </div>
+</div>
+                        
             {% endblock %}
         </main>
     </div>
-    <!--container-->
+
     <footer>
-    <br>
+    <br>    
     <div>
     <nav>
             <a href="{% url 'homepage' %}">Home</a>

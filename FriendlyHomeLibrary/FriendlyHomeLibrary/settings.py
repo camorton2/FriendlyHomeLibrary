@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
 import os
+from django.core.urlresolvers import reverse_lazy
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,9 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sites',
     'django.contrib.staticfiles',
     'FHLBuilder',
-    'FHLReader'
+    'FHLReader',
 ]
 
 MIDDLEWARE = [
@@ -110,6 +112,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGIN_REDIRECT_URL=reverse_lazy('homepage')
+LOGIN_URL=reverse_lazy('dj-auth:login')
+LOGOUT_URL=reverse_lazy('dj-auth:logout')
+REDIRECT_FIELD_NAME='next'
 
 # Internationalization
 # https://docs.djangoproject.com/en/dev/topics/i18n/
@@ -133,4 +139,6 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"), '/home/catherin/Media/',
     ("mediafiles", "/home/catherin/Media"),
 ]
+
+SITE_ID=1
 
