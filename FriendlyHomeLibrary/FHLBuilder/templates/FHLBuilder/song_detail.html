@@ -37,6 +37,15 @@
 </section>
 
 <section>
+<h3>Command line to vlc player</h3>
+<form action="" method = "post">
+{% csrf_token %}
+<button type="submit">Play Song</button>
+</form>
+</section>
+
+
+<section>
     {% load static %}
     <audio controls>
         <source src="{% static playit %}"  type="audio/mpeg">

@@ -113,8 +113,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_REDIRECT_URL=reverse_lazy('homepage')
-LOGIN_URL=reverse_lazy('dj-auth:login')
-LOGOUT_URL=reverse_lazy('dj-auth:logout')
+LOGIN_URL=reverse_lazy('FHLUser_Login')
+LOGOUT_URL=reverse_lazy('FHLUser_Logout')
 REDIRECT_FIELD_NAME='next'
 
 # Internationalization

@@ -30,12 +30,25 @@
 </section>
 
 <section>
+
+<h3>Command line to vlc player</h3>
+<form action="" method = "post">
+{% csrf_token %}
+<button type="submit">Play Movie</button>
+</form>
+</section>
+
+<h3>Using the html video</h3>
+
+<section>
     {% load static %}
     <video width="320" height="240" controls>
     <source src="{% static playit %}"  type="video/mp4">
     </video>
 </section>
 
+
+<h3>Using the vlc plugin</h3>
 {% load static %}
 <embed type="application/x-vlc-plugin"
          name="video1"

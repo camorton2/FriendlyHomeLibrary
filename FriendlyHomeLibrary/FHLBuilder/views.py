@@ -3,25 +3,30 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.http import HttpResponse
+
 from FHLBuilder.models import Tag, Song, CommonFile, Collection, Movie
 from FHLBuilder.models import Director,Actor,Musician
 from FHLBuilder.forms import TagForm, SongForm, CollectionForm, MovieForm
 from FHLBuilder.forms import ActorForm, DirectorForm, MusicianForm
+
 from django.template import RequestContext,loader
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
+
+from FHLUser.decorators import require_authenticated_permission
+
 import os
+
 from collection import add_file
+
+
 
 # Create your views here.
 
 class HomePage(View):
     template_name = 'FHLBuilder/base_fhlbuilder.html'
     def get(self, request):
-
-        return render(
-          request,
-          self.template_name,)
+        return render(request,self.template_name,)
 
 # Tags
 class TagList(View):
@@ -29,11 +34,7 @@ class TagList(View):
     def get(self, request):
         tl = Tag.objects.all()
         test1 = {'tl': tl}
-
-        return render(
-          request,
-          self.template_name,
-          test1)
+        return render(request,self.template_name,test1)
 
 class TagDetailView(View):
     template_name = 'FHLBuilder/tag_detail.html'
@@ -41,6 +42,7 @@ class TagDetailView(View):
         tag=get_object_or_404(Tag,slug__iexact=slug)
         return render(request, self.template_name, {'tag':tag})
 
+@require_authenticated_permission('FHLBuilder.tag_reader')
 class TagFormView(View):
     form_class=TagForm
     template_name = 'FHLBuilder/tag_form.html'
@@ -56,6 +58,7 @@ class TagFormView(View):
             return render(request,self.template_name,
                           {'form':bound_form})
 
+@require_authenticated_permission('FHLBuilder.tag_reader')
 class TagUpdate(View):
     form_class=TagForm
     model=Tag
@@ -83,6 +86,7 @@ class TagUpdate(View):
             }
             return render(request,self.template_name,context)
 
+@require_authenticated_permission('FHLBuilder.tag_builder')
 class TagDelete(View):
     form_class=TagForm
     model = Tag
@@ -116,7 +120,16 @@ class SongDetailView(View):
         playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
         print("HERE HERE HERE HERE %s" % (playit))
         return render(request, self.template_name, {'song':song, 'playit':playit})
+    def post(self,request,slug):
+        print ("SONG POST ----- does nothing, added for experiment")
+        print (slug)
+        movie=get_object_or_404(Movie,slug__iexact=slug)
+        playit = "/home/catherine/Media/" + movie.collection.filePath + '/' + movie.fileName
+        os.system("vlc %s" % playit)        
+        return render(request,self.template_name)
 
+
+@require_authenticated_permission('FHLBuilder.song_builder')
 class SongFormView(View):
     form_class=SongForm
     template_name = 'FHLBuilder/song_form.html'
@@ -132,6 +145,7 @@ class SongFormView(View):
             return render(request,self.template_name,
                           {'form':bound_form})
 
+@require_authenticated_permission('FHLBuilder.tag_reader')
 class SongUpdate(View):
     form_class=SongForm
     model=Song
@@ -159,6 +173,7 @@ class SongUpdate(View):
             }
             return render(request,self.template_name,context)
 
+@require_authenticated_permission('FHLBuilder.song_builder')
 class SongDelete(View):
     form_class=SongForm
     model = Song
@@ -202,6 +217,7 @@ class CollectionDetailView(View, CollectionMixins):
         collection=get_object_or_404(Collection,slug__iexact=slug)
         return render(request, self.template_name, {'collection':collection})
 
+@require_authenticated_permission('FHLBuilder.collection_builder')
 class CollectionFormView(View,CollectionMixins):
 
     form_class=CollectionForm
@@ -220,6 +236,7 @@ class CollectionFormView(View,CollectionMixins):
             return render(request,self.template_name,
                           {'form':bound_form})
 
+@require_authenticated_permission('FHLBuilder.collection_builder')
 class CollectionUpdate(View,CollectionMixins):
     form_class=CollectionForm
     model=Collection
@@ -252,6 +269,7 @@ class CollectionUpdate(View,CollectionMixins):
             }
             return render(request,self.template_name,context)
 
+@require_authenticated_permission('FHLBuilder.collection_builder')
 class CollectionDelete(View,CollectionMixins):
     form_class=CollectionForm
     model = Collection
@@ -282,12 +300,21 @@ class MovieDetailView(View):
     template_name = 'FHLBuilder/movie_detail.html'
     def get(self,request,slug):
         movie=get_object_or_404(Movie,slug__iexact=slug)
-        
-        playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
-        print("HERE HERE HERE HERE %s" % (playit))        
-        
-        return render(request, self.template_name, {'movie':movie, 'playit':playit})
 
+        playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
+        print("HERE HERE HERE HERE %s" % (playit))
+
+        return render(request, self.template_name, {'movie':movie, 'playit':playit})
+    def post(self,request,slug):
+        print ("MOVIE POST ----- does nothing, added for experiment")
+        print (slug)
+        movie=get_object_or_404(Movie,slug__iexact=slug)
+        playit = "/home/catherine/Media/" + movie.collection.filePath + '/' + movie.fileName
+        os.system("vlc %s" % playit)        
+        return render(request,self.template_name)
+
+
+@require_authenticated_permission('FHLBuilder.movie_builder')
 class MovieFormView(View):
     form_class=MovieForm
     template_name = 'FHLBuilder/movie_form.html'
@@ -303,6 +330,7 @@ class MovieFormView(View):
             return render(request,self.template_name,
                           {'form':bound_form})
 
+@require_authenticated_permission('FHLBuilder.tag_reader')
 class MovieUpdate(View):
     form_class=MovieForm
     model=Movie
@@ -330,6 +358,7 @@ class MovieUpdate(View):
             }
             return render(request,self.template_name,context)
 
+@require_authenticated_permission('FHLBuilder.movie_builder')
 class MovieDelete(View):
     form_class=MovieForm
     model = Movie
@@ -361,6 +390,7 @@ class ActorDetailView(View):
         actor=get_object_or_404(Actor,slug__iexact=slug)
         return render(request, self.template_name, {'actor':actor})
 
+@require_authenticated_permission('FHLBuilder.actor_reader')
 class ActorFormView(View):
     form_class=ActorForm
     template_name = 'FHLBuilder/actor_form.html'
@@ -376,6 +406,7 @@ class ActorFormView(View):
             return render(request,self.template_name,
                           {'form':bound_form})
 
+@require_authenticated_permission('FHLBuilder.actor_reader')
 class ActorUpdate(View):
     form_class=ActorForm
     model=Actor
@@ -403,6 +434,7 @@ class ActorUpdate(View):
             }
             return render(request,self.template_name,context)
 
+@require_authenticated_permission('FHLBuilder.actor_builder')
 class ActorDelete(View):
     form_class=ActorForm
     model = Actor
@@ -435,6 +467,7 @@ class DirectorDetailView(View):
         director=get_object_or_404(Director,slug__iexact=slug)
         return render(request, self.template_name, {'director':director})
 
+@require_authenticated_permission('FHLBuilder.director_reader')
 class DirectorFormView(View):
     form_class=DirectorForm
     template_name = 'FHLBuilder/director_form.html'
@@ -450,6 +483,7 @@ class DirectorFormView(View):
             return render(request,self.template_name,
                           {'form':bound_form})
 
+@require_authenticated_permission('FHLBuilder.director_reader')
 class DirectorUpdate(View):
     form_class=DirectorForm
     model=Director
@@ -477,6 +511,7 @@ class DirectorUpdate(View):
             }
             return render(request,self.template_name,context)
 
+@require_authenticated_permission('FHLBuilder.director_builder')
 class DirectorDelete(View):
     form_class=DirectorForm
     model = Director
@@ -509,6 +544,7 @@ class MusicianDetailView(View):
         musician=get_object_or_404(Musician,slug__iexact=slug)
         return render(request, self.template_name, {'musician':musician})
 
+@require_authenticated_permission('FHLBuilder.musician_reader')
 class MusicianFormView(View):
     form_class=MusicianForm
     template_name = 'FHLBuilder/musician_form.html'
@@ -524,6 +560,7 @@ class MusicianFormView(View):
             return render(request,self.template_name,
                           {'form':bound_form})
 
+@require_authenticated_permission('FHLBuilder.musician_reader')
 class MusicianUpdate(View):
     form_class=MusicianForm
     model=Musician
@@ -551,6 +588,7 @@ class MusicianUpdate(View):
             }
             return render(request,self.template_name,context)
 
+@require_authenticated_permission('FHLBuilder.musician_builder')
 class MusicianDelete(View):
     form_class=MusicianForm
     model = Musician
