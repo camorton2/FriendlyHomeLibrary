@@ -5,6 +5,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
+
 # Create your models here.
 
 CHAR_LENGTH=100
@@ -64,31 +65,29 @@ class Collection(models.Model):
 # the file itself
 class CommonFile(models.Model):
     MOVIE = 'MV'
-    MOVIE_CARTOON = 'MC'
+    MINI_MOVIE = 'MM'
     CONCERT = 'CC'
     DOCUMENTARY = 'DD'
     GAME = "GG"
-    TV_SITCOM = "TS"
-    TV_DRAMA = "TD"
-    TV_CARTOON = "TC"
-    TV_MINISERIES = "TM"
+    TV = "TV"
+    MINISERIES = "MS"
     AUDIO_BOOK = "AB"
     EBOOK = "EB"
     SONG = "SG"
+    PICTURE = "PT"
     UNKNOWN = "UN"
     KIND_CHOICES = (
         (MOVIE, 'Movie'),
-        (MOVIE_CARTOON, 'Movie-cartoon'),
+        (MINI_MOVIE, 'Mini-movie'),
         (CONCERT, 'Concert'),
         (DOCUMENTARY,'Documentary'),
         (GAME, 'Game'),
-        (TV_SITCOM, 'TV-Sitcom'),
-        (TV_DRAMA, 'TV-Drama'),
-        (TV_CARTOON, 'TV-cartoon'),
-        (TV_MINISERIES, 'TV-miniseries'),
+        (TV, 'TV-show'),
+        (MINISERIES, 'Mini-series'),
         (AUDIO_BOOK, 'audio-book'),
         (EBOOK, 'e-book'),
         (SONG, 'song'),
+        (PICTURE, 'picture'),
         (UNKNOWN, 'unknown')
     )
     fileKind = models.CharField(
@@ -105,6 +104,8 @@ class CommonFile(models.Model):
         ordering = ['title']
         permissions=(("common_builder", "common builder"),
                      ("common_reader", "common reader"))
+
+
 
 # any video is called a movie
 class Movie(CommonFile):
@@ -147,6 +148,8 @@ class Game(CommonFile):
         permissions=(("game_builder", "game builder"),
                      ("game_reader", "game reader"))
 
+
+
 # ebook
 class Book(CommonFile):
     collection = models.ForeignKey(Collection,
@@ -167,6 +170,27 @@ class Book(CommonFile):
     class Meta:
         permissions=(("book_builder", "book builder"),
                      ("book_reader", "book reader"))
+
+
+class Picture(CommonFile):
+    collection = models.ForeignKey(Collection,
+      models.SET_NULL,
+      blank=True,
+      null=True)
+    tags = models.ManyToManyField(Tag, blank=True, related_name='picture_tags')
+    likes = models.ManyToManyField(User, blank=True, related_name='picture_likes')
+    loves = models.ManyToManyField(User, blank=True, related_name='picture_loves')
+    dislikes = models.ManyToManyField(User, blank=True, related_name='picture_dislikes')
+
+    def get_absolute_url(self):
+        return reverse('builder_picture_detail',kwargs={'slug': self.slug})
+    def get_update_url(self):
+        return reverse('builder_picture_update',kwargs={'slug': self.slug})
+    def get_delete_url(self):
+        return reverse('builder_picture_delete',kwargs={'slug': self.slug})
+    class Meta:
+        permissions=(("picture_builder", "picture builder"),
+                     ("picture_reader", "picture reader"))
 
 
 class Song(CommonFile):
@@ -222,6 +246,7 @@ class Artist(models.Model):
         permissions=(("artist_builder", "artist builder"),
                      ("artist_reader", "artist reader"))
 
+
 class Actor(Artist):
     movies = models.ManyToManyField(Movie, blank=True)
     def get_absolute_url(self):
@@ -233,6 +258,7 @@ class Actor(Artist):
     class Meta:
         permissions=(("actor_builder", "actor builder"),
                      ("actor_reader", "actor reader"))
+
 
 
 class Director(Artist):
