@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.utils.text import slugify
 
 from FHLBuilder.models import Tag, Song, CommonFile, Collection, Movie
 from FHLBuilder.models import Director,Actor,Musician
@@ -14,6 +15,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
 
 from FHLUser.decorators import require_authenticated_permission
+from FHLBuilder.collection import add_tag, add_actor, add_director
 
 import os
 
@@ -117,15 +119,31 @@ class SongDetailView(View):
     template_name = 'FHLBuilder/song_detail.html'
     def get(self,request,slug):
         song=get_object_or_404(Song,slug__iexact=slug)
+        if 'tq' in request.GET and request.GET['tq']:
+            tq = request.GET['tq']
+            tqSlug = slugify(unicode(tq))
+            new_tag = add_tag(tq,tqSlug)
+            song.tags.add(new_tag)
+
+        if 'yr' in request.GET and request.GET['yr']:
+            year = request.GET['yr']
+            print("want to set year to %s" % year)
+            if year.isdigit():
+                year_num = int(year)
+                if year_num > 1800 and year_num < 3000:
+                    # have some rules for the year
+                    song.year = year_num
+                    song.save()
+
         playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
-        print("HERE HERE HERE HERE %s" % (playit))
+        print("HERE HERE HERE HERE %s user %s" % (playit,request.user))
         return render(request, self.template_name, {'song':song, 'playit':playit})
     def post(self,request,slug):
         print ("SONG POST ----- does nothing, added for experiment")
         print (slug)
         movie=get_object_or_404(Movie,slug__iexact=slug)
-        playit = "/home/catherine/Media/" + movie.collection.filePath + '/' + movie.fileName
-        os.system("vlc %s" % playit)        
+        #playit = "/home/catherine/Media/" + movie.collection.filePath + '/' + movie.fileName
+        #os.system("vlc %s" % playit)
         return render(request,self.template_name)
 
 
@@ -215,6 +233,14 @@ class CollectionDetailView(View, CollectionMixins):
     template_name = 'FHLBuilder/collection_detail.html'
     def get(self,request,slug):
         collection=get_object_or_404(Collection,slug__iexact=slug)
+        if 'tq' in request.GET and request.GET['tq']:
+            tq = request.GET['tq']
+            tqSlug = slugify(unicode(tq))
+            new_tag = add_tag(tq,tqSlug)
+            clist=collection.song_set.all()
+            for obj in clist:
+                print("obj %s" % (obj.title))
+                obj.tags.add(new_tag)        
         return render(request, self.template_name, {'collection':collection})
 
 @require_authenticated_permission('FHLBuilder.collection_builder')
@@ -300,6 +326,31 @@ class MovieDetailView(View):
     template_name = 'FHLBuilder/movie_detail.html'
     def get(self,request,slug):
         movie=get_object_or_404(Movie,slug__iexact=slug)
+        if 'yr' in request.GET and request.GET['yr']:
+            year = request.GET['yr']
+            print("want to set year to %s" % year)
+            if year.isdigit():
+                year_num = int(year)
+                if year_num > 1800 and year_num < 3000:
+                    # have some rules for the year
+                    movie.year = year_num
+                    movie.save()
+        if 'tq' in request.GET and request.GET['tq']:
+            tq = request.GET['tq']
+            tqSlug = slugify(unicode(tq))
+            new_tag = add_tag(tq,tqSlug)
+            movie.tags.add(new_tag)
+        if 'actor' in request.GET and request.GET['actor']:
+            act = request.GET['actor']
+            actSlug = slugify(unicode(act))
+            new_actor = add_actor(act,actSlug)
+            new_actor.movies.add(movie)
+        if 'director' in request.GET and request.GET['director']:
+            dtor = request.GET['director']
+            dtorSlug = slugify(unicode(dtor))
+            new_dtor = add_director(dtor,dtorSlug)
+            new_dtor.movies.add(movie)
+
 
         playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
         print("HERE HERE HERE HERE %s" % (playit))
@@ -310,7 +361,15 @@ class MovieDetailView(View):
         print (slug)
         movie=get_object_or_404(Movie,slug__iexact=slug)
         playit = "/home/catherine/Media/" + movie.collection.filePath + '/' + movie.fileName
-        os.system("vlc %s" % playit)        
+
+        clientip = request.META['REMOTE_ADDR']
+        hostip = request.get_host()
+        ##
+        # vlc -vvv /home/catherine/Media/Movie/walkHard.mkv --sout #rtp{dst=192.168.0.100,port=1234,sdp=rtsp://192.168.0.121:8080/test.sdp}
+        ##
+        sstr = ("vlc -vvv %s --sout \'#rtp{dst=%s,port=1234,sdp=rtsp://%s:8080/test.sdp}\'" % (playit,clientip,hostip[:-5]))
+        print(sstr)
+        os.system(sstr)
         return render(request,self.template_name)
 
 

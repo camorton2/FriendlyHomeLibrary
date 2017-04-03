@@ -248,7 +248,7 @@ class Artist(models.Model):
 
 
 class Actor(Artist):
-    movies = models.ManyToManyField(Movie, blank=True)
+    movies = models.ManyToManyField(Movie, blank=True, related_name='movie_actors')
     def get_absolute_url(self):
         return reverse('builder_actor_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
@@ -262,7 +262,7 @@ class Actor(Artist):
 
 
 class Director(Artist):
-    movies = models.ManyToManyField(Movie, blank=True)
+    movies = models.ManyToManyField(Movie, blank=True, related_name='movie_directors')
     def get_absolute_url(self):
         return reverse('builder_director_detail',kwargs={'slug': self.slug})
     def get_update_url(self):

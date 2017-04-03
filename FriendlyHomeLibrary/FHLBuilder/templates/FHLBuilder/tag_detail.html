@@ -6,23 +6,26 @@
 
 {% block content %}
 
-<h2>
-{{tag.name}}</h2>
+<h2>{{tag.name}}</h2>
 
-{% if tag.song_set.count %}
 <section>
-<h3>Objects associated with {{tag.name}}</h3>
+<h3>Songs associated with {{tag.name}}</h3>
 <ul>
-{% for obj in tag.song_set.all %}
-<li><a href="{{obj.get_absolute_url}}">
-{{obj.title}}
-</a></li>
+{% for song in tag.song_tags.all %}
+<li><a href="{{song.get_absolute_url}}">{{song.title}}</a></li>
 {% endfor %}
 </ul>
 </section>
-{% else %}
-<p>This tag is not related to any songs</p>
-{% endif %}
+<section>
+<h3>Movies associated with {{tag.name}}</h3>
+<ul>
+{% for mv in tag.movie_tags.all %}
+<li><a href="{{mv.get_absolute_url}}">{{mv.title}}</a></li>
+{% endfor %}
+</ul>
+</section>
+
+
 <ul>
     <li><a href="{{tag.get_update_url}}">Edit Tag</a></li>
     <li><a href="{{tag.get_delete_url}}">Delete Tag</a></li>

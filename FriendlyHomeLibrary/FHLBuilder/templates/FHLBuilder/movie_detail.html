@@ -6,20 +6,23 @@
 
 {% block content %}
 
-<h2>{{movie.title}}</h2>
+<h2>Movie: {{movie.title}}</h2>
 
 <section>
 <ul>
-    <li>Title: {{movie.title}}</li>
-    <li>FileName: {{movie.fileName}}</li>
     {% if movie.year > 0 %}
-    <li>Year: {{movie.year}}</li>
+        <li>Year: {{movie.year}}</li>
+    {% else %}
+        {% if user.is_authenticated %}
+        {% include "FHLBuilder/year_select.html" %}
+        {% endif %}
     {% endif %}
 </ul>
 </section>
-<section>
+
+<section>    
 {% if movie.tags.count %}
-<h3>Tags associated with {{movie.name}}</h3>
+<h3>Tags</h3>
 <ul>
 <!--list of objects related to tag -->
 {% for tag in movie.tags.all %}
@@ -28,13 +31,53 @@
 </ul>
 {% endif %}
 </section>
+<section>
+{% if user.is_authenticated %}
+{% include "FHLBuilder/tag_select.html" %}
+{% endif %}
+</section>
+
+<section>    
+{% if movie.movie_directors.count %}
+<h3>Directors</h3>
+<ul>
+<!--list of objects related to tag -->
+{% for director in movie.movie_directors.all %}
+<li><a href="{{director.get_absolute_url}}">{{director.fullName}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+</section>
+<section>
+{% if user.is_authenticated %}
+{% include "FHLBuilder/director_select.html" %}
+{% endif %}
+</section>
+
+<section>    
+{% if movie.movie_actors.count %}
+<h3>Actors</h3>
+<ul>
+<!--list of objects related to tag -->
+{% for actor in movie.movie_actors.all %}
+<li><a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+</section>
+<section>
+{% if user.is_authenticated %}
+{% include "FHLBuilder/actor_select.html" %}
+{% endif %}
+</section>
+
 
 <section>
 
-<h3>Command line to vlc player</h3>
+<h4>Command line to vlc player</h4>
 <form action="" method = "post">
 {% csrf_token %}
-<button type="submit">Play Movie</button>
+<button type="submit">Start Streaming Movie</button>
 </form>
 </section>
 
@@ -68,9 +111,4 @@
 
 onclick='document.video1.fullscreen()'>Fullscreen</a>
 
-<ul>
-    <li><a href="{{movie.get_update_url}}">Edit Movie</a></li>
-    <li><a href="{{movie.get_delete_url}}">Delete Movie</a></li>
-    
-</ul>
 {% endblock %}

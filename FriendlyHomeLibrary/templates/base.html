@@ -19,6 +19,12 @@ Friendly Home Library
     <div>
         <header>
             <h1>Friendly Home Library</h1>
+                {% if user.is_authenticated %}
+                   <p>User: {{user}}</p>
+                {% else %}
+                   <p>Anonymous user</p>
+                {% endif %}
+            
         </header>
         <main>
             {% block content %}
@@ -39,6 +45,11 @@ Friendly Home Library
             {% endblock %}
         </main>
     </div>
+
+<div>
+    {% block tag %}
+    {% endblock %}
+</div>
 
     <footer>
     <br>    

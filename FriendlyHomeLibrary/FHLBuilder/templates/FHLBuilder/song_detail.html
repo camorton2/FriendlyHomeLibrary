@@ -10,31 +10,41 @@
 
 <section>
 <ul>
-    <li>Title: {{song.title}}</li>
     {% if song.musician_set.count %}
     {% for musician in song.musician_set.all %}
-    <li>Musician: {{musician.fullName}}</li>
+    <li><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a></li>
     {% endfor %}
     {% endif %}
-    <li>Album: <a href="{{song.collection.get_absolute_url}}">{{song.collection.title}}</a></li>
-    <li>FileName: {{song.fileName}}</li>
+    <li><a href="{{song.collection.get_absolute_url}}">{{song.collection.title}}</a></li>
     {% if song.year > 0 %}
-    <li>Year: {{song.year}}</li>
+        <li>Year: {{song.year}}</li>
+    {% else %}
+        {% if user.is_authenticated %}
+        {% include "FHLBuilder/year_select.html" %}
+        {% endif %}
     {% endif %}
     <li>Track: {{song.track}}</li>
 </ul>
 </section>
+
 <section>
 {% if song.tags.count %}
-<h3>Tags associated with {{song.name}}</h3>
+<h3>Tags</h3>
 <ul>
-<!--list of objects related to tag -->
 {% for tag in song.tags.all %}
 <li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
 {% endfor %}
 </ul>
 {% endif %}
 </section>
+
+<section>
+{% if user.is_authenticated %}
+<p>Authenticated user - {{currentUser}}</p>
+{% include "FHLBuilder/tag_select.html" %}
+{% endif %}
+</section>
+
 
 <section>
 <h3>Command line to vlc player</h3>
@@ -52,9 +62,4 @@
     </audio>
 </section>
 
-<ul>
-    <li><a href="{{song.get_update_url}}">Edit Song</a></li>
-    <li><a href="{{song.get_delete_url}}">Delete Song</a></li>
-    
-</ul>
 {% endblock %}

@@ -7,6 +7,7 @@ import enzyme
 from eyed3 import id3, mp3
 from enzyme import MalformedMKVError
 from .models import Collection, CommonFile, Musician, Artist, Song, Tag, Movie
+from .models import Actor, Director
 from django.utils.text import slugify
 from django.db import models
 
@@ -45,6 +46,25 @@ def add_musician(aName, aSlug):
         dbobj = Musician(fullName=aName,slug=aSlug)
         dbobj.save()
     return dbobj
+
+def add_actor(aName, aSlug):
+    print("---> ADD Actor %s, slug %s" % (aName, aSlug))
+    try:
+        dbobj = Actor.objects.get(slug=aSlug)
+    except Actor.DoesNotExist:
+        dbobj = Actor(fullName=aName,slug=aSlug)
+        dbobj.save()
+    return dbobj
+
+def add_director(aName, aSlug):
+    print("---> ADD Director %s, slug %s" % (aName, aSlug))
+    try:
+        dbobj = Director.objects.get(slug=aSlug)
+    except Director.DoesNotExist:
+        dbobj = Director(fullName=aName,slug=aSlug)
+        dbobj.save()
+    return dbobj
+
 
 def add_tag(tName, tSlug):
     print("---> ADD Tag %s, slug %s" % (tName, tSlug))

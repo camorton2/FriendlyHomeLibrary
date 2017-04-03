@@ -6,8 +6,7 @@
 
 {% block content %}
 
-<h2>
-{{collection.name}}</h2>
+<h2>{{collection.title}}</h2>
 
 
 <section>
@@ -20,8 +19,12 @@
 </ul>
 </section>
 
-<ul>
-    <li><a href="{{collection.get_update_url}}">Edit Collection</a></li>
-    <li><a href="{{collection.get_delete_url}}">Delete Collection</a></li>
-</ul>
+{% if user.is_authenticated %}
+<p>Tag all members of collection</p>
+{% include "FHLBuilder/tag_select.html" %}
+{% else %}
+<p>User not authenticated</p>
+{% endif %}
+
+
 {% endblock %}
