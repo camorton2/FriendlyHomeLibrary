@@ -12,6 +12,7 @@ from django.utils.text import slugify
 from django.db import models
 from . import choices
 
+from utility import to_str
 
 def setFileKind(obj,kind):
     fKind = kind[0]
@@ -28,7 +29,9 @@ def add_collection(cAlbum, cSlug, cPath,saveIt=True):
     try:
         dbobj = Collection.objects.get(slug=cSlug)
     except Collection.DoesNotExist:
-        dbobj = Collection(filePath=cPath,title=cAlbum,slug=cSlug)
+        path = to_str(cPath)
+        album = to_str(cAlbum)
+        dbobj = Collection(filePath=path,title=album,slug=cSlug)
         if saveIt:
             dbobj.save()
     return dbobj
@@ -39,7 +42,10 @@ def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
         dbobj = Song.objects.get(slug=sSlug)
     except Song.DoesNotExist:
         sCollection.save()
-        dbobj = Song(track=sTrack,title=sTitle,slug=sSlug,fileName=sFileName, collection=sCollection)
+        track = to_str(sTrack)
+        title = to_str(sTitle)
+        fileName=to_str(sFileName)
+        dbobj = Song(track=track,title=title,slug=sSlug,fileName=fileName, collection=sCollection)
         dbobj.save()
     dbobj.fileKind = choices.SONG
     dbobj.save()
@@ -51,7 +57,9 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
         dbobj = Movie.objects.get(slug=mSlug)
     except Movie.DoesNotExist:
         mCollection.save()
-        dbobj = Movie(title=mTitle,slug=mSlug,fileName=mFileName, collection=mCollection)
+        title = to_str(mTitle)
+        fileName = to_str(mFileName)
+        dbobj = Movie(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
         dbobj.save()
     dbobj.fileKind = choices.MOVIE
     dbobj.save()
@@ -62,7 +70,8 @@ def add_musician(aName, aSlug):
     try:
         dbobj = Musician.objects.get(slug=aSlug)
     except Musician.DoesNotExist:
-        dbobj = Musician(fullName=aName,slug=aSlug)
+        name = to_str(aName)
+        dbobj = Musician(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
 
@@ -71,7 +80,8 @@ def add_actor(aName, aSlug):
     try:
         dbobj = Actor.objects.get(slug=aSlug)
     except Actor.DoesNotExist:
-        dbobj = Actor(fullName=aName,slug=aSlug)
+        name = to_str(aName)
+        dbobj = Actor(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
 
@@ -80,7 +90,8 @@ def add_director(aName, aSlug):
     try:
         dbobj = Director.objects.get(slug=aSlug)
     except Director.DoesNotExist:
-        dbobj = Director(fullName=aName,slug=aSlug)
+        name = to_str(aName)
+        dbobj = Director(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
 
@@ -90,7 +101,8 @@ def add_tag(tName, tSlug):
     try:
         dbobj = Tag.objects.get(slug=tSlug)
     except Tag.DoesNotExist:
-        dbobj = Tag(name=tName,slug=tSlug)
+        name = to_str(tName)
+        dbobj = Tag(name=name,slug=tSlug)
         dbobj.save()
     return dbobj
 

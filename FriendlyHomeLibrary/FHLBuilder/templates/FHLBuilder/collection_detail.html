@@ -11,9 +11,7 @@
 
 <section>
 <ul>
-{% for obj in collection.song_set.all %}
-<li><a href="{{obj.get_absolute_url}}">{{obj.title}}</a></li>
-{% endfor %}
+{% include "FHLBuilder/song_playlist.html" %}
 </ul>
 </section>
 

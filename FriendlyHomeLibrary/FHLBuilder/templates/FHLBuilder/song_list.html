@@ -5,10 +5,5 @@
 {% endblock %}
 
 {% block content %}
-{% for song in tl %}
-<li>
-<a href="{{ song.get_absolute_url}}"> {{song.title|title}}
-</a>
-</li>
-{% endfor %}
+{% include "FHLBuilder/song_playlist.html" %}
 {% endblock %}

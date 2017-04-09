@@ -27,21 +27,7 @@ import string
 from collection import add_file
 from . import choices
 
-#Utility functions
-def to_str(unicode_or_string):
-    if isinstance(unicode_or_string,unicode):
-        value = unicode_or_string.encode('utf-8')
-    #    print("Value %s " % (value))
-    else:
-        value = unicode_or_string
-    return value
-
-def slugCompare(s1,s2):
-    remove = to_str('-_')
-    c1 = to_str(s1).translate(None,remove)
-    c2 = to_str(s2).translate(None,remove)
-    #print("comparing %s with %s" % (c1,c2))
-    return c1==c2
+from .utility import to_str, slugCompare
 
 def findSongs(me):
     #print("FindLikedSongs %s" % user)
@@ -106,7 +92,8 @@ class TagDetailView(View):
     template_name = 'FHLBuilder/tag_detail.html'
     def get(self,request,slug):
         tag=get_object_or_404(Tag,slug__iexact=slug)
-        return render(request, self.template_name, {'tag':tag})
+        songlist = tag.song_tags.all()
+        return render(request, self.template_name, {'tag':tag,'songlist':songlist})
 
 @require_authenticated_permission('FHLBuilder.tag_reader')
 class TagFormView(View):
@@ -158,7 +145,7 @@ class SongList(View):
     template_name='FHLBuilder/song_list.html'
     def get(self,request):
         tl = Song.objects.all()
-        test1 = {'tl': tl}
+        test1 = {'songlist': tl}
 
         return render(
           request,
@@ -312,7 +299,8 @@ class CollectionDetailView(View, CollectionMixins):
             for obj in clist:
                 print("obj %s" % (obj.title))
                 obj.tags.add(new_tag)
-        return render(request, self.template_name, {'collection':collection})
+        songlist = collection.song_set.all()
+        return render(request, self.template_name, {'collection':collection,'songlist':songlist})
 
 
 @require_authenticated_permission('FHLBuilder.collection_builder')

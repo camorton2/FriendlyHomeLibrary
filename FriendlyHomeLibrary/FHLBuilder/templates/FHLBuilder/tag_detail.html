@@ -8,13 +8,11 @@
 
 <h2>{{tag.name}}</h2>
 
-{% if tag.songs.count %}
+{% if tag.song_tags.count %}
 <section>
 <h3>Songs associated with {{tag.name}}</h3>
 <ul>
-{% for song in tag.song_tags.all %}
-<li><a href="{{song.get_absolute_url}}">{{song.title}}</a></li>
-{% endfor %}
+{% include "FHLBuilder/song_playlist.html" %}
 </ul>
 </section>
 {% endif %}

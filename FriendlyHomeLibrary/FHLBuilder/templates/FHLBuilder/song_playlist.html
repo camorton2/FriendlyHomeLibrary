@@ -1,0 +1,10 @@
+
+{% for song in songlist %}
+<ul id="playlist">
+    {% if forloop.first %}
+    <li class="active"><a href="{{ song.get_absolute_url}}"> {{song.title|title}}</li>
+    {% else %}
+    <li><a href="{{ song.get_absolute_url}}"> {{song.title|title}}</li>
+    {% endif %}
+</ul>
+{% endfor %}
