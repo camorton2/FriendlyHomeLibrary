@@ -5,6 +5,7 @@ from django.db import models
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from FriendlyHomeLibrary import settings
+from . import choices
 
 # Create your models here.
 
@@ -32,21 +33,9 @@ class Tag(models.Model):
     def get_delete_url(self):
         return reverse('builder_tag_delete',kwargs={'slug': self.slug})
 
-## not used right now
-##class Setup(models.Model):
-##    songsHead = models.CharField(max_length=CHAR_LENGTH)
-##    moviesHead = models.CharField(max_length=CHAR_LENGTH)
-##    booksHead = models.CharField(max_length=CHAR_LENGTH)
-
 # holds the path, represents an Album/audioBook (audio) or Series (video)
 class Collection(models.Model):
     filePath = models.CharField(max_length=CHAR_LENGTH)
-    #filePath = models.FilePathField(
-    #    path=settings.MY_MEDIA_FILES_ROOT,
-    #    recursive=True,
-    #    allow_files=False,
-    #    allow_folders=True
-    #    )
     title = models.CharField(
        max_length=CHAR_LENGTH)
     slug = models.SlugField(
@@ -69,36 +58,10 @@ class Collection(models.Model):
 
 # the file itself
 class CommonFile(models.Model):
-    MOVIE = 'MV'
-    MINI_MOVIE = 'MM'
-    CONCERT = 'CC'
-    DOCUMENTARY = 'DD'
-    GAME = "GG"
-    TV = "TV"
-    MINISERIES = "MS"
-    AUDIO_BOOK = "AB"
-    EBOOK = "EB"
-    SONG = "SG"
-    PICTURE = "PT"
-    UNKNOWN = "UN"
-    KIND_CHOICES = (
-        (MOVIE, 'Movie'),
-        (MINI_MOVIE, 'Mini-movie'),
-        (CONCERT, 'Concert'),
-        (DOCUMENTARY,'Documentary'),
-        (GAME, 'Game'),
-        (TV, 'TV-show'),
-        (MINISERIES, 'Mini-series'),
-        (AUDIO_BOOK, 'audio-book'),
-        (EBOOK, 'e-book'),
-        (SONG, 'song'),
-        (PICTURE, 'picture'),
-        (UNKNOWN, 'unknown')
-    )
     fileKind = models.CharField(
-       max_length=2,
-       choices = KIND_CHOICES,
-       default = UNKNOWN)
+       max_length=10,
+       choices = choices.KIND_CHOICES,
+       default = choices.UNKNOWN)
     fileName = models.CharField(max_length=CHAR_LENGTH)
     year = models.IntegerField(default=0000)
     title = models.CharField(max_length=CHAR_LENGTH)
@@ -109,7 +72,6 @@ class CommonFile(models.Model):
         ordering = ['title']
         permissions=(("common_builder", "common builder"),
                      ("common_reader", "common reader"))
-
 
 
 # any video is called a movie

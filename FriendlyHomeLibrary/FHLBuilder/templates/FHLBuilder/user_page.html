@@ -1,0 +1,39 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} User {{user}}
+{% endblock %}
+
+{% block content %}
+
+<section>
+<h3>Songs I Love</h3>
+{% for song in lovedSongs %}
+<li><a href="{{song.get_absolute_url}}">{{song.title|title}}</a></li>
+{% endfor %}
+</section>
+
+<section>
+<h3>Movies I Love</h3>
+{% for movie in lovedMovies %}
+<li><a href="{{movie.get_absolute_url}}">{{movie.title|title}}</a></li>
+{% endfor %}
+</section>
+
+<section>
+<h3>Songs I Like</h3>
+{% for song in likedSongs %}
+<li><a href="{{song.get_absolute_url}}">{{song.title|title}}</a></li>
+{% endfor %}
+</section>
+
+<section>
+<h3>Movies I Like</h3>
+{% for movie in likedMovies %}
+<li><a href="{{movie.get_absolute_url}}">{{movie.title|title}}</a></li>
+{% endfor %}
+</section>
+
+
+
+{% endblock %}

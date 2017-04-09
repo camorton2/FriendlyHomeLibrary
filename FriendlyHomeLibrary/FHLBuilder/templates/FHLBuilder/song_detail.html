@@ -34,14 +34,17 @@
 {% endif %}
 </section>
 
-<section>
 {% if user.is_authenticated %}
-    {% include "FHLBuilder/tag_select.html" %}
-    {% include 'FHLBuilder/object_update.html' %}
-    {% include 'FHLBuilder/likesandloves.html' %}
-{% endif %}
+<section>
+{% include "FHLBuilder/tag_select.html" %}
 </section>
-
+<section>
+{% include "FHLBuilder/likesandloves.html" %}        
+</section>
+<section>
+{% include "FHLBuilder/object_update.html" %}        
+</section>
+{% endif %}
 
 <section>
     {% load static %}

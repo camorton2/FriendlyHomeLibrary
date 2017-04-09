@@ -5,12 +5,13 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.text import slugify
 from django.contrib.auth.models import User
+from django.db import models
 
 from FHLBuilder.models import Tag, Song, CommonFile, Collection, Movie
 from FHLBuilder.models import Director,Actor,Musician
 from FHLBuilder.forms import TagForm, SongForm, CollectionForm, MovieForm
 from FHLBuilder.forms import ActorForm, DirectorForm, MusicianForm
-from FHLBuilder.forms import DetailForm
+from FHLBuilder.forms import BasicCollectionForm
 
 from django.template import RequestContext,loader
 from django.shortcuts import get_object_or_404, render, redirect
@@ -21,12 +22,72 @@ from FHLBuilder.collection import add_tag, add_actor, add_director, add_collecti
 from FriendlyHomeLibrary import settings
 
 import os
+import string
 
 from collection import add_file
+from . import choices
+
+#Utility functions
+def to_str(unicode_or_string):
+    if isinstance(unicode_or_string,unicode):
+        value = unicode_or_string.encode('utf-8')
+    #    print("Value %s " % (value))
+    else:
+        value = unicode_or_string
+    return value
+
+def slugCompare(s1,s2):
+    remove = to_str('-_')
+    c1 = to_str(s1).translate(None,remove)
+    c2 = to_str(s2).translate(None,remove)
+    #print("comparing %s with %s" % (c1,c2))
+    return c1==c2
+
+def findSongs(me):
+    #print("FindLikedSongs %s" % user)
+    likedlist = []
+    lovedlist = []
+    for song in Song.objects.all():
+        if song.likes.count():
+            list = song.likes.filter(username=me)
+            if list.count():
+                likedlist.append(song)
+            list1 = song.loves.filter(username=me)
+            if list1.count():
+                lovedlist.append(song)
+    return likedlist,lovedlist
+
+def findMovies(me):
+    #print("FindLikedSongs %s" % user)
+    likedlist = []
+    lovedlist = []
+    for movie in Movie.objects.all():
+        if movie.likes.count():
+            list = movie.likes.filter(username=me)
+            if list.count():
+                likedlist.append(movie)
+            list1 = movie.loves.filter(username=me)
+            if list1.count():
+                print("love movie: %s" % movie.title)
+                lovedlist.append(movie)
+    return likedlist,lovedlist
 
 
+# Views
 
-# Create your views here.
+class UserDetail(View):
+    template_name = 'FHLBuilder/user_page.html'
+    def get(self, request):
+        me = User.objects.get(username=request.user)
+        print(me)
+        likedSongs,lovedSongs = findSongs(me)
+        likedMovies,lovedMovies = findMovies(me)
+        context = {'likedSongs':likedSongs,
+                   'lovedSongs':lovedSongs,
+                   'likedMovies':likedMovies,
+                   'lovedMovies':lovedMovies
+                  }
+        return render(request,self.template_name,context)
 
 class HomePage(View):
     template_name = 'FHLBuilder/base_fhlbuilder.html'
@@ -123,24 +184,25 @@ class SongDetailView(View):
                                  'objectForm':self.form_class(instance=song)})
     def post(self,request,slug):
         print ("SONG POST slug %s" % (slug))
-
         song=get_object_or_404(Song,slug__iexact=slug)
-        bound_form = self.form_class(request.POST,instance=song)
         playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
-        #os.system("vlc %s" % playit)
+        bound_form = self.form_class(request.POST,instance=song)
+        print("POST playit %s" % (playit))
 
         if 'UpdateObject' in request.POST:
+            #bound_form = self.form_class(request.POST,instance=movie)
+            print("User pressed UpdateObject")
             if bound_form.is_valid():
-                print("form is valid")
+                print("UPDATE with valid form")
                 new_song = bound_form.save()
                 song.title=new_song.title
                 song.year=new_song.year
                 song.save()
                 formContext = {'song':song,'playit':playit,'objectForm':bound_form}
                 return render(request,self.template_name, formContext)
-
             else:
                 print("form is NOT valid")
+                # no change in context
 
         # Still to do, should remove from the other lists so its not in more than 1
         if 'liked' in request.POST:
@@ -150,16 +212,14 @@ class SongDetailView(View):
         if 'loved' in request.POST:
             print("LOVED")
             song.loves.add(request.user)
-            song.save()
+            movie.save()
         if 'disliked' in request.POST:
             song.dislikes.add(request.user)
             song.save();
             print("DISLIKED")
 
-
-        return render(request, self.template_name, {'song':song,
-                                 'playit':playit,
-                                 'objectForm':bound_form} )
+        songContext = {'song':song,'playit':playit,'objectForm': self.form_class(instance=song)}
+        return render(request,self.template_name, songContext)
 
 
 @require_authenticated_permission('FHLBuilder.song_builder')
@@ -177,6 +237,7 @@ class SongFormView(View):
         else:
             return render(request,self.template_name,
                           {'form':bound_form})
+
 
 @require_authenticated_permission('FHLBuilder.tag_reader')
 class SongUpdate(View):
@@ -219,32 +280,23 @@ class CollectionList(View):
           self.template_name,
           test1)
 
-#Utility function
-def to_str(unicode_or_string):
-    if isinstance(unicode_or_string,unicode):
-        value = unicode_or_string.encode('utf-8')
-        print("Value %s " % (value))
-    else:
-        value = unicode_or_string
-    return value
-    
 
 class CollectionMixins:
     #hardCodeHead = '/home/catherine/Media/'
-    def add_members(self, path, newCollection):
+    def add_members(self, path, newCollection, formKind,formTag):
         print("ADD_MEMBERS path %s" % (path))
-        
+
         for root, dirs, files in os.walk(os.path.join(settings.MY_MEDIA_FILES_ROOT,path)):
             for obj in files:
                 try:
                     print("ADD_MEMBERS root %s obj %s" % (root,to_str(obj)))
-                    add_file(root,to_str(obj),path,newCollection)
+                    add_file(root,to_str(obj),path,newCollection,formKind,formTag)
                 except UnicodeDecodeError:
                     print("ERROR unable to deal with filename- skipping in collection %s" % (newCollection.title))
             for dobj in dirs:
                 newPath = path + '/' + dobj
                 print("ADD_MEMBERS subdir %s " % (to_str(dobj)))
-                self.add_members(newPath, newCollection)
+                self.add_members(newPath, newCollection,formKind,formTag)
 
 
 class CollectionDetailView(View, CollectionMixins):
@@ -252,18 +304,6 @@ class CollectionDetailView(View, CollectionMixins):
     def get(self,request,slug):
         print("CollectionDetail GET %s" % slug)
         collection=get_object_or_404(Collection,slug__iexact=slug)
-        if not collection.song_set.count():
-            print("No songs in collection")
-            if not collection.movie_set.count():
-                print("No movies in collection")
-                # No songs or movies, try to match musician instead
-                # not well functioning since artist name and directory name not matching
-                try:
-                   musician = Musician.objects.get(slug=slug)
-                   MusicianPage = 'FHLBuilder/musician_detail.html'
-                   return render(request, MusicianPage, {'musician':musician})
-                except Musician.DoesNotExist:
-                   print("UNEXPECTED empty collection does not match musician slug %s " % (slug))
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
@@ -274,14 +314,14 @@ class CollectionDetailView(View, CollectionMixins):
                 obj.tags.add(new_tag)
         return render(request, self.template_name, {'collection':collection})
 
+
 @require_authenticated_permission('FHLBuilder.collection_builder')
 class CollectionFormView(View,CollectionMixins):
     form_class=CollectionForm
     template_name = 'FHLBuilder/collection_form.html'
     def get(self, request):
         print("CollectionFormView GET")
-        return render(request,self.template_name,
-                      {'form':self.form_class()})
+        return render(request,self.template_name,{'form':self.form_class()})
     def post(self,request):
         print("CollectionFormView POST")
         bound_form=self.form_class(request.POST)
@@ -291,47 +331,64 @@ class CollectionFormView(View,CollectionMixins):
             cTitle = cPath.rpartition('/')[2]
             cSlug = slugify(unicode(cTitle))
             print("collection with title %s and slug %s and filePath %s " % (cTitle,cSlug,cPath))
-            collection = add_collection(cTitle,cSlug,cPath)
+            collection = add_collection(cTitle,cSlug,cPath,False)
+            #collection = Collection(filePath=cPath,title=cTitle,slug=cSlug)
             print("collection with title %s and slug %s and filePath %s " % (collection.title,collection.slug,collection.filePath))
-            self.add_members(cPath, collection)
-            collection.save()
-            return redirect(collection)
-        else:
-            return render(request,self.template_name,
-                          {'form':bound_form})
+            self.add_members(cPath, collection, bound_form.cleaned_data['kind'],bound_form.cleaned_data['tag'])
+            if collection.song_set.count() or collection.movie_set.count():
+                # mp3 files create their own collection leaving this one empty
+                # so it is not saved unless it has been populated
+                collection.save()
+                return redirect(collection)
+            else:
+                print("In Special Case in progress slug %s" % cSlug)
+                musician_detail = 'FHLBuilder/musician_detail.html'
+                for b in Musician.objects.all():
+                    print("musician found %s" % b.slug)
+                    if slugCompare(cSlug,b.slug):
+                        return render(request, musician_detail, {'musician':b})
+        return render(request,self.template_name,{'form':bound_form})
 
 @require_authenticated_permission('FHLBuilder.collection_builder')
 class CollectionUpdate(View,CollectionMixins):
-    form_class=CollectionForm
+    form_class=BasicCollectionForm
     model=Collection
     template_name='FHLBuilder/collection_update.html'
     def get_object(self,slug):
         return get_object_or_404(self.model,slug=slug)
     def get(self,request,slug):
+        print("CollectionUpdate POST")
         collection = self.get_object(slug)
         context={
            'form': self.form_class(instance=collection),
            'collection': collection,
         }
+        formKind = choices.UNKNOWN
+        formTag = ''
+        bound_form=self.form_class(request.POST)
+        if bound_form.is_valid():
+            formKind=bound_form.cleaned_data['kind']
+            formTag=bound_form.cleaned_data['tag']
         # rescan for additional files
-        self.add_members(collection.filePath, collection)
+        self.add_members(collection.filePath, collection,formKind,formTag)
         collection.save()
         return render(request,self.template_name,context)
 
     def post(self,request,slug):
+        print("Collection update POST")
         collection = self.get_object(slug)
         bound_form = self.form_class(request.POST,instance=collection)
+
+        formKind = choices.UNKNOWN
+        formTag = ''
+        bound_form=self.form_class(request.POST)
         if bound_form.is_valid():
-            new_collection = bound_form.save()
-            self.add_members(new_collection.filePath, new_collection)
-            new_collection.save()
-            return redirect(new_collection)
-        else:
-            context={
-                'form': bound_form,
-                'collection': collection,
-            }
-            return render(request,self.template_name,context)
+            formKind=bound_form.cleaned_data['kind']
+            formTag=bound_form.cleaned_data['tag']
+        # rescan for additional files
+        self.add_members(collection.filePath, collection,formKind,formTag)
+        collection.save()
+        return redirect(collection)
 
 
 # movies

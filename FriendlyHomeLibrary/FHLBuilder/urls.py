@@ -3,7 +3,7 @@ from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 
 from .views import HomePage, TagList, SongList, CollectionList,MovieList
-from .views import ActorList, DirectorList, MusicianList
+from .views import ActorList, DirectorList, MusicianList, UserDetail
 from .views import TagFormView, TagUpdate, TagDetailView
 from .views import SongFormView, SongUpdate, SongDetailView
 from .views import MovieFormView, MovieUpdate, MovieDetailView
@@ -14,6 +14,10 @@ from .views import CollectionFormView, CollectionUpdate, CollectionDetailView
 
 urlpatterns = [
 #    url(r'^$',HomePage.as_view(),name='homepage'),
+
+    url(r'^user/$',
+      UserDetail.as_view(),
+      name='user_page'),    
 
 #lists
     url(r'^tag/$',

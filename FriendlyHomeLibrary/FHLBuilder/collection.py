@@ -10,29 +10,27 @@ from .models import Collection, CommonFile, Musician, Artist, Song, Tag, Movie
 from .models import Actor, Director
 from django.utils.text import slugify
 from django.db import models
+from . import choices
 
-############
-MOVIE = 'MV'
-MINI_MOVIE = 'MM'
-CONCERT = 'CC'
-DOCUMENTARY = 'DD'
-GAME = "GG"
-TV = "TV"
-MINISERIES = "MS"
-AUDIO_BOOK = "AB"
-EBOOK = "EB"
-SONG = "SG"
-PICTURE = "PT"
-UNKNOWN = "UN"
-############
 
-def add_collection(cAlbum, cSlug, cPath):
+def setFileKind(obj,kind):
+    fKind = kind[0]
+    print("FileKind to %s %s" % (kind,fKind))
+    if fKind == choices.UNKNOWN:
+        print("unknown")
+    else:
+        obj.fileKind = fKind
+        obj.save()
+
+
+def add_collection(cAlbum, cSlug, cPath,saveIt=True):
     print ("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
     try:
         dbobj = Collection.objects.get(slug=cSlug)
     except Collection.DoesNotExist:
         dbobj = Collection(filePath=cPath,title=cAlbum,slug=cSlug)
-        dbobj.save()
+        if saveIt:
+            dbobj.save()
     return dbobj
 
 def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
@@ -40,9 +38,10 @@ def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
     try:
         dbobj = Song.objects.get(slug=sSlug)
     except Song.DoesNotExist:
+        sCollection.save()
         dbobj = Song(track=sTrack,title=sTitle,slug=sSlug,fileName=sFileName, collection=sCollection)
         dbobj.save()
-    dbobj.fileKind = SONG
+    dbobj.fileKind = choices.SONG
     dbobj.save()
     return dbobj
 
@@ -51,9 +50,10 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
     try:
         dbobj = Movie.objects.get(slug=mSlug)
     except Movie.DoesNotExist:
+        mCollection.save()
         dbobj = Movie(title=mTitle,slug=mSlug,fileName=mFileName, collection=mCollection)
         dbobj.save()
-    dbobj.fileKind = MOVIE
+    dbobj.fileKind = choices.MOVIE
     dbobj.save()
     return dbobj
 
@@ -94,8 +94,9 @@ def add_tag(tName, tSlug):
         dbobj.save()
     return dbobj
 
-def add_file(root,myfile,path,newCollection):
-    print("ADD_FILE file %s, root %s, path %s" % (myfile,root,path))
+
+def add_file(root,myfile,path,newCollection,formKind,formTag):
+    print("ADD_FILE file %s, root %s, path %s formKind %s formTag %s" % (myfile,root,path,formKind,formTag))
     theFile = os.path.join(root,myfile)
     if mp3.isMp3File(theFile):
         tag = id3.Tag()
@@ -110,7 +111,7 @@ def add_file(root,myfile,path,newCollection):
             else:
                 addC = True
                 # handle the collection (album) which only has a path and a name
-                collectionSlug = slugify( unicode( '%s%s' % (tag.album,myArtist) ))
+                collectionSlug = slugify( unicode( '%s' % (tag.album) ))
                 collection = add_collection(cAlbum=tag.album,cSlug=collectionSlug,cPath=path)
 
             # song has track, title, filename, slug, collection
@@ -122,6 +123,11 @@ def add_file(root,myfile,path,newCollection):
             # musician has name, slug
             artistSlug = slugify( unicode('%s' % (myArtist)))
             musician = add_musician(aName=myArtist, aSlug=artistSlug)
+            setFileKind(song, formKind)
+            if len(formTag):
+                xSlug = slugify(unicode('%s' % (formTag)))
+                xTag=add_tag(formTag,xSlug)
+                song.tags.add(xTag)
             # when adding these, do I need to check if they are already there?
             if addC:
                 musician.albums.add(collection)
@@ -133,7 +139,7 @@ def add_file(root,myfile,path,newCollection):
                 genreSlug = slugify(unicode('%s%s' % (genre.id,genre.name)))
                 gen = add_tag(genre.name,genreSlug)
                 song.tags.add(gen)
-
+            song.save()
     else:
         # This section is for the info on mkv files, not being used
         #print("******* BOGUS NOT MP3"+theFile)
@@ -148,12 +154,19 @@ def add_file(root,myfile,path,newCollection):
         ##    print("BOGUS MKV skip")
 
         # start 4 from the end and take the rest
-        extension = theFile[-4:]
+        #extension = theFile[-4:]
+        base = os.path.basename(theFile)
+        mTitle, extension = os.path.splitext(base)
+        #mTitle = os.path.splitext(base)[0]
+        mSlug = slugify( unicode('%s' % (mTitle)))
         if extension == '.mkv':
-            base = os.path.basename(theFile)
-            mTitle = os.path.splitext(base)[0]
-            mSlug = slugify( unicode('%s' % (mTitle)))
-            add_movie(mTitle,base,mSlug,newCollection)
+            movie = add_movie(mTitle,base,mSlug,newCollection)
+            setFileKind(movie,formKind)
+            if len(formTag):
+                xSlug = slugify(unicode('%s' % (formTag)))
+                xTag=add_tag(formTag,xSlug)
+                movie.tags.add(xTag)
+                movie.save()
         else:
             print("UNKNOWN FILE SKIPPING %s extension %s " % (theFile,extension))
 

@@ -26,10 +26,7 @@
 
 
 {% if user.is_authenticated %}
-<p>Tag all members of collection</p>
-{% include "FHLBuilder/tag_select.html" %}
-{% else %}
-<p>User not authenticated</p>
+<li><a href="{{collection.get_update_url}}">Update Collection (setinfo or rescan)</a></li>
 {% endif %}
 
 

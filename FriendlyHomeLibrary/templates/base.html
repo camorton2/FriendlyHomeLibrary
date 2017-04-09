@@ -19,12 +19,25 @@ Friendly Home Library
     <div>
         <header>
             <h1>Friendly Home Library</h1>
+            <div>
+            <nav>
+                <a href="{% url 'homepage' %}">Home</a>
+                <a href="{% url 'builder_song_list' %}">Songs</a>
+                <a href="{% url 'builder_movie_list' %}">Movies</a>
+                <a href="{% url 'builder_tag_list' %}">Tags</a>
+                <a href="{% url 'builder_actor_list' %}">Actors</a>
+                <a href="{% url 'builder_director_list' %}">Directors</a>
+                <a href="{% url 'builder_musician_list' %}">Musicians</a>
+                <a href="{% url 'builder_collection_list' %}">Collections</a>
+            </nav>
+            </div>
+            <div>
                 {% if user.is_authenticated %}
-                   <p>User: {{user}}</p>
+                   <p><a href="{% url 'user_page' %}">User: {{user}}</a></p>
                 {% else %}
                    <p>Anonymous user</p>
                 {% endif %}
-            
+            </div>
         </header>
         <main>
             {% block content %}

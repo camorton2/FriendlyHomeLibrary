@@ -8,6 +8,7 @@
 
 <h2>{{tag.name}}</h2>
 
+{% if tag.songs.count %}
 <section>
 <h3>Songs associated with {{tag.name}}</h3>
 <ul>
@@ -16,6 +17,8 @@
 {% endfor %}
 </ul>
 </section>
+{% endif %}
+{% if tag.movie_tags.count %}
 <section>
 <h3>Movies associated with {{tag.name}}</h3>
 <ul>
@@ -24,10 +27,6 @@
 {% endfor %}
 </ul>
 </section>
+{% endif %}
 
-
-<ul>
-    <li><a href="{{tag.get_update_url}}">Edit Tag</a></li>
-    <li><a href="{{tag.get_delete_url}}">Delete Tag</a></li>
-</ul>
 {% endblock %}

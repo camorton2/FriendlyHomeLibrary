@@ -13,12 +13,9 @@ from .collection import add_collection
 import os
 
 from FriendlyHomeLibrary import settings
+from . import choices
 
 # Create your models here.
-
-class DetailForm(forms.Form):
-    year = forms.IntegerField(max_value=3000,min_value=1800)
-
 
 class CommonFileForm(ModelForm):
     class Meta:
@@ -71,20 +68,33 @@ class SongForm(CommonFileForm):
     class Meta:
         model=Song
         fields=['title','year','fileKind']
-        widgets={
-            'tags': forms.RadioSelect,
-        }
 
 class MovieForm(CommonFileForm):
     class Meta:
         model=Movie
         fields=['title','year','fileKind']
 
+class BasicCollectionForm(ModelForm):
+    class Meta:
+        model=Collection
+        fields=[]
+    # Used to select fileKind to apply to everything in the collection
+    kind = forms.MultipleChoiceField(choices = choices.KIND_CHOICES,initial=choices.UNKNOWN)
+    # Used to add a tag to everything in the collection
+    tag = forms.CharField(max_length=CHAR_LENGTH,required=False)
+
+
 class CollectionForm(ModelForm):
     #hardCodeHead = '/home/catherine/Media/'
     class Meta:
         model=Collection
         fields=['filePath']
+
+    # Used to select fileKind to apply to everything in the collection
+    kind = forms.MultipleChoiceField(choices = choices.KIND_CHOICES,initial=choices.UNKNOWN)
+    # Used to add a tag to everything in the collection
+    tag = forms.CharField(max_length=CHAR_LENGTH,required=False)
+
     def clean_filePath(self):
         new_path=self.cleaned_data['filePath']
         if os.path.exists(os.path.join(settings.MY_MEDIA_FILES_ROOT,new_path)):
