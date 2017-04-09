@@ -1,10 +1,14 @@
 <section>
 {% if user.is_authenticated %}
-<p>Set Year</p>
-<form action="" method="get">
-   <input type="text" name="yr">
-   <input type="submit" value="Set Year">
-</form>
+   {% if form.errors %}
+      <p style="colour: red">Please correct the error {{form.errors|pluralize}}</p>
+   {% endif %}
+   <form action="" method="post">
+       <table>
+           {{form.as_table }}
+       </table>
+       {% csrf_token %}
+   </form>
 {% else %}
    <p>Error - action not permitted</p>
 {% endif %}

@@ -1,7 +1,7 @@
 {% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
 
 {% block title %}
-{{ block.super }} - Songs
+{{ block.super }} - Songs in Library {{Song.objects.count}}
 {% endblock %}
 
 {% block content %}

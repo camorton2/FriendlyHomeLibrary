@@ -12,10 +12,6 @@
 <ul>
     {% if movie.year > 0 %}
         <li>Year: {{movie.year}}</li>
-    {% else %}
-        {% if user.is_authenticated %}
-        {% include "FHLBuilder/year_select.html" %}
-        {% endif %}
     {% endif %}
 </ul>
 </section>
@@ -24,16 +20,10 @@
 {% if movie.tags.count %}
 <h3>Tags</h3>
 <ul>
-<!--list of objects related to tag -->
 {% for tag in movie.tags.all %}
 <li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
 {% endfor %}
 </ul>
-{% endif %}
-</section>
-<section>
-{% if user.is_authenticated %}
-{% include "FHLBuilder/tag_select.html" %}
 {% endif %}
 </section>
 
@@ -41,16 +31,10 @@
 {% if movie.movie_directors.count %}
 <h3>Directors</h3>
 <ul>
-<!--list of objects related to tag -->
 {% for director in movie.movie_directors.all %}
 <li><a href="{{director.get_absolute_url}}">{{director.fullName}}</a></li>
 {% endfor %}
 </ul>
-{% endif %}
-</section>
-<section>
-{% if user.is_authenticated %}
-{% include "FHLBuilder/director_select.html" %}
 {% endif %}
 </section>
 
@@ -65,50 +49,26 @@
 </ul>
 {% endif %}
 </section>
-<section>
+
 {% if user.is_authenticated %}
+<section>
+{% include "FHLBuilder/tag_select.html" %}
+</section>
+<section>
+{% include "FHLBuilder/director_select.html" %}
+</section>
+<section>
 {% include "FHLBuilder/actor_select.html" %}
+</section>
+<section>
+{% include "FHLBuilder/likesandloves.html" %}        
+</section>
+<section>
+{% include "FHLBuilder/object_update.html" %}        
+</section>
+
 {% endif %}
-</section>
 
-
-<section>
-
-<h4>Command line to vlc player</h4>
-<form action="" method = "post">
-{% csrf_token %}
-<button type="submit">Start Streaming Movie</button>
-</form>
-</section>
-
-<h3>Using the html video</h3>
-
-<section>
-    {% load static %}
-    <video width="320" height="240" controls>
-    <source src="{% static playit %}"  type="video/mp4">
-    </video>
-</section>
-
-
-<h3>Using the vlc plugin</h3>
-{% load static %}
-<embed type="application/x-vlc-plugin"
-         name="video1"
-                  autoplay="yes" loop="yes" width="400" height="300"
-                           target="{% static playit %}" />
-                           <br />
-                             <a href="javascript:;"
-                             onclick='document.video1.play()'>Play
-                             video1</a>
-                               <a href="javascript:;"
-                               onclick='document.video1.pause()'>Pause
-                               video1</a>
-                                 <a href="javascript:;"
-                                 onclick='document.video1.stop()'>Stop
-                                 video1</a>
-                                   <a href="javascript:;"
-
-onclick='document.video1.fullscreen()'>Fullscreen</a>
+{% include "FHLBuilder/play_movie_options.html" %}
 
 {% endblock %}

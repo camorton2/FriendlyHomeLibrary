@@ -1,14 +1,6 @@
-{% extends parent_template|default:"base.html" %}
-
-{% block title %}
-{{ block.super }} - Update Movie
-{% endblock %}
-
-{% block content %}
-<form action="{{movie.get_update_url}}" method = "post">
+<form action="" method = "post">
 {% csrf_token %}
-{{form.as_p}}
-<button type="submit">Update Movie</button>
+{{movieForm.as_p}}
+<button type="submit">Update</button>
 </form>
-{% endblock %}
 

@@ -1,18 +1,23 @@
 {% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
 
 {% block title %}
-{{ block.super }} - Collections
+{{ block.super }} - Library Collections {{Collection.objects.count}}
 {% endblock %}
 
 {% block content %}
+
+{% if perms.FHLBuilder.collection_builder %}
+<a href="{% url 'builder_collection_create' %}">Create Collection</a>
+{% endif %}
+
 {% for collection in tl %}
+{% if collection.slug %}
 <li>
-<a href="{{collection.get_absolute_url}}"> {{collection.title|title}}
-</a>
+<a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a>
 </li>
+{% else %}
+<p>Something is not quite right, collection with no slug path {{collection.filePath}}</p>
+{% endif %}
 {% endfor %}
-<ul>
-    <li><a href="{% url 'builder_collection_create' %}">Create Collection</a></li>
-</ul>
 
 {% endblock %}

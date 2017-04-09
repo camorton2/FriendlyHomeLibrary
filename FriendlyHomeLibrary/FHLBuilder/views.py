@@ -4,18 +4,21 @@ from __future__ import unicode_literals
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.utils.text import slugify
+from django.contrib.auth.models import User
 
 from FHLBuilder.models import Tag, Song, CommonFile, Collection, Movie
 from FHLBuilder.models import Director,Actor,Musician
 from FHLBuilder.forms import TagForm, SongForm, CollectionForm, MovieForm
 from FHLBuilder.forms import ActorForm, DirectorForm, MusicianForm
+from FHLBuilder.forms import DetailForm
 
 from django.template import RequestContext,loader
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import View
 
 from FHLUser.decorators import require_authenticated_permission
-from FHLBuilder.collection import add_tag, add_actor, add_director
+from FHLBuilder.collection import add_tag, add_actor, add_director, add_collection
+from FriendlyHomeLibrary import settings
 
 import os
 
@@ -88,20 +91,6 @@ class TagUpdate(View):
             }
             return render(request,self.template_name,context)
 
-@require_authenticated_permission('FHLBuilder.tag_builder')
-class TagDelete(View):
-    form_class=TagForm
-    model = Tag
-    template_name='FHLBuilder/tag_confirm_delete.html'
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-    def get(self,request,slug):
-        tag = self.get_object(slug)
-        return render(request,self.template_name,{'tag': tag})
-    def post(self,request,slug):
-        tag = self.get_object(slug)
-        tag.delete()
-        return redirect('builder_tag_list')
 
 # songs
 class SongList(View):
@@ -117,34 +106,60 @@ class SongList(View):
 
 class SongDetailView(View):
     template_name = 'FHLBuilder/song_detail.html'
+    form_class=SongForm
     def get(self,request,slug):
         song=get_object_or_404(Song,slug__iexact=slug)
+        playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
+        print("HERE HERE HERE HERE %s user %s" % (playit,request.user))
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
             new_tag = add_tag(tq,tqSlug)
             song.tags.add(new_tag)
 
-        if 'yr' in request.GET and request.GET['yr']:
-            year = request.GET['yr']
-            print("want to set year to %s" % year)
-            if year.isdigit():
-                year_num = int(year)
-                if year_num > 1800 and year_num < 3000:
-                    # have some rules for the year
-                    song.year = year_num
-                    song.save()
-
-        playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
-        print("HERE HERE HERE HERE %s user %s" % (playit,request.user))
-        return render(request, self.template_name, {'song':song, 'playit':playit})
+        return render(request,
+            self.template_name, {'song':song,
+                                 'playit':playit,
+                                 'objectForm':self.form_class(instance=song)})
     def post(self,request,slug):
-        print ("SONG POST ----- does nothing, added for experiment")
-        print (slug)
-        movie=get_object_or_404(Movie,slug__iexact=slug)
-        #playit = "/home/catherine/Media/" + movie.collection.filePath + '/' + movie.fileName
+        print ("SONG POST slug %s" % (slug))
+
+        song=get_object_or_404(Song,slug__iexact=slug)
+        bound_form = self.form_class(request.POST,instance=song)
+        playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
         #os.system("vlc %s" % playit)
-        return render(request,self.template_name)
+
+        if 'UpdateObject' in request.POST:
+            if bound_form.is_valid():
+                print("form is valid")
+                new_song = bound_form.save()
+                song.title=new_song.title
+                song.year=new_song.year
+                song.save()
+                formContext = {'song':song,'playit':playit,'objectForm':bound_form}
+                return render(request,self.template_name, formContext)
+
+            else:
+                print("form is NOT valid")
+
+        # Still to do, should remove from the other lists so its not in more than 1
+        if 'liked' in request.POST:
+            print("LIKED by %s" % request.user)
+            song.likes.add(request.user)
+            song.save()
+        if 'loved' in request.POST:
+            print("LOVED")
+            song.loves.add(request.user)
+            song.save()
+        if 'disliked' in request.POST:
+            song.dislikes.add(request.user)
+            song.save();
+            print("DISLIKED")
+
+
+        return render(request, self.template_name, {'song':song,
+                                 'playit':playit,
+                                 'objectForm':bound_form} )
 
 
 @require_authenticated_permission('FHLBuilder.song_builder')
@@ -191,25 +206,12 @@ class SongUpdate(View):
             }
             return render(request,self.template_name,context)
 
-@require_authenticated_permission('FHLBuilder.song_builder')
-class SongDelete(View):
-    form_class=SongForm
-    model = Song
-    template_name='FHLBuilder/song_confirm_delete.html'
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-    def get(self,request,slug):
-        song = self.get_object(slug)
-        return render(request,self.template_name,{'song': song})
-    def post(self,request,slug):
-        song = self.get_object(slug)
-        song.delete()
-        return redirect('builder_song_list')
 
 #Collections
 class CollectionList(View):
     template_name='FHLBuilder/collection_list.html'
     def get(self,request):
+        print("CollectionList GET")
         tl = Collection.objects.all()
         test1 = {'tl': tl}
         return render(
@@ -217,22 +219,51 @@ class CollectionList(View):
           self.template_name,
           test1)
 
+#Utility function
+def to_str(unicode_or_string):
+    if isinstance(unicode_or_string,unicode):
+        value = unicode_or_string.encode('utf-8')
+        print("Value %s " % (value))
+    else:
+        value = unicode_or_string
+    return value
+    
+
 class CollectionMixins:
-    hardCodeHead = '/home/catherine/Media/'
+    #hardCodeHead = '/home/catherine/Media/'
     def add_members(self, path, newCollection):
-        for root, dirs, files in os.walk(os.path.join(self.hardCodeHead,path)):
+        print("ADD_MEMBERS path %s" % (path))
+        
+        for root, dirs, files in os.walk(os.path.join(settings.MY_MEDIA_FILES_ROOT,path)):
             for obj in files:
-                print("root %s obj %s" % (root,obj))
-                add_file(root,obj,path,newCollection)
+                try:
+                    print("ADD_MEMBERS root %s obj %s" % (root,to_str(obj)))
+                    add_file(root,to_str(obj),path,newCollection)
+                except UnicodeDecodeError:
+                    print("ERROR unable to deal with filename- skipping in collection %s" % (newCollection.title))
             for dobj in dirs:
-                newPath = path+'/'+dobj
+                newPath = path + '/' + dobj
+                print("ADD_MEMBERS subdir %s " % (to_str(dobj)))
                 self.add_members(newPath, newCollection)
 
 
 class CollectionDetailView(View, CollectionMixins):
     template_name = 'FHLBuilder/collection_detail.html'
     def get(self,request,slug):
+        print("CollectionDetail GET %s" % slug)
         collection=get_object_or_404(Collection,slug__iexact=slug)
+        if not collection.song_set.count():
+            print("No songs in collection")
+            if not collection.movie_set.count():
+                print("No movies in collection")
+                # No songs or movies, try to match musician instead
+                # not well functioning since artist name and directory name not matching
+                try:
+                   musician = Musician.objects.get(slug=slug)
+                   MusicianPage = 'FHLBuilder/musician_detail.html'
+                   return render(request, MusicianPage, {'musician':musician})
+                except Musician.DoesNotExist:
+                   print("UNEXPECTED empty collection does not match musician slug %s " % (slug))
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
@@ -240,24 +271,31 @@ class CollectionDetailView(View, CollectionMixins):
             clist=collection.song_set.all()
             for obj in clist:
                 print("obj %s" % (obj.title))
-                obj.tags.add(new_tag)        
+                obj.tags.add(new_tag)
         return render(request, self.template_name, {'collection':collection})
 
 @require_authenticated_permission('FHLBuilder.collection_builder')
 class CollectionFormView(View,CollectionMixins):
-
     form_class=CollectionForm
     template_name = 'FHLBuilder/collection_form.html'
     def get(self, request):
+        print("CollectionFormView GET")
         return render(request,self.template_name,
                       {'form':self.form_class()})
     def post(self,request):
+        print("CollectionFormView POST")
         bound_form=self.form_class(request.POST)
         if bound_form.is_valid():
-            new_collection=bound_form.save()
-            self.add_members(new_collection.filePath, new_collection)
-            new_collection.save()
-            return redirect(new_collection)
+            cPath = bound_form.cleaned_data['filePath']
+            # (first,second) where second is the rightmost name in path
+            cTitle = cPath.rpartition('/')[2]
+            cSlug = slugify(unicode(cTitle))
+            print("collection with title %s and slug %s and filePath %s " % (cTitle,cSlug,cPath))
+            collection = add_collection(cTitle,cSlug,cPath)
+            print("collection with title %s and slug %s and filePath %s " % (collection.title,collection.slug,collection.filePath))
+            self.add_members(cPath, collection)
+            collection.save()
+            return redirect(collection)
         else:
             return render(request,self.template_name,
                           {'form':bound_form})
@@ -295,21 +333,6 @@ class CollectionUpdate(View,CollectionMixins):
             }
             return render(request,self.template_name,context)
 
-@require_authenticated_permission('FHLBuilder.collection_builder')
-class CollectionDelete(View,CollectionMixins):
-    form_class=CollectionForm
-    model = Collection
-    template_name='FHLBuilder/collection_confirm_delete.html'
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-    def get(self,request,slug):
-        collection = self.get_object(slug)
-        return render(request,self.template_name,{'collection': collection})
-    def post(self,request,slug):
-        collection = self.get_object(slug)
-        collection.delete()
-        return redirect('builder_collection_list')
-
 
 # movies
 class MovieList(View):
@@ -324,17 +347,11 @@ class MovieList(View):
 
 class MovieDetailView(View):
     template_name = 'FHLBuilder/movie_detail.html'
+    form_class=MovieForm
+
     def get(self,request,slug):
+        print ("MovieDetail GET for %s" % slug)
         movie=get_object_or_404(Movie,slug__iexact=slug)
-        if 'yr' in request.GET and request.GET['yr']:
-            year = request.GET['yr']
-            print("want to set year to %s" % year)
-            if year.isdigit():
-                year_num = int(year)
-                if year_num > 1800 and year_num < 3000:
-                    # have some rules for the year
-                    movie.year = year_num
-                    movie.save()
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
@@ -350,27 +367,65 @@ class MovieDetailView(View):
             dtorSlug = slugify(unicode(dtor))
             new_dtor = add_director(dtor,dtorSlug)
             new_dtor.movies.add(movie)
-
-
         playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
-        print("HERE HERE HERE HERE %s" % (playit))
+        return render(request, self.template_name, {'movie':movie,
+                                                    'playit':playit,
+                                                    'objectForm':self.form_class(instance=movie)})
 
-        return render(request, self.template_name, {'movie':movie, 'playit':playit})
     def post(self,request,slug):
-        print ("MOVIE POST ----- does nothing, added for experiment")
-        print (slug)
         movie=get_object_or_404(Movie,slug__iexact=slug)
-        playit = "/home/catherine/Media/" + movie.collection.filePath + '/' + movie.fileName
+        playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
+        bound_form = self.form_class(request.POST,instance=movie)
+        print("POST playit %s" % (playit))
+        print ("MovieDetail POST for slug %s movie %s " % (slug,movie.title))
 
-        clientip = request.META['REMOTE_ADDR']
-        hostip = request.get_host()
-        ##
-        # vlc -vvv /home/catherine/Media/Movie/walkHard.mkv --sout #rtp{dst=192.168.0.100,port=1234,sdp=rtsp://192.168.0.121:8080/test.sdp}
-        ##
-        sstr = ("vlc -vvv %s --sout \'#rtp{dst=%s,port=1234,sdp=rtsp://%s:8080/test.sdp}\'" % (playit,clientip,hostip[:-5]))
-        print(sstr)
-        os.system(sstr)
-        return render(request,self.template_name)
+        if 'UpdateObject' in request.POST:
+            #bound_form = self.form_class(request.POST,instance=movie)
+            print("User pressed UpdateObject")
+            if bound_form.is_valid():
+                print("UPDATe with valid form")
+                new_movie = bound_form.save()
+                movie.title=new_movie.title
+                movie.year=new_movie.year
+                movie.save()
+                formContext = {'movie':movie,'playit':playit,'objectForm':bound_form}
+                return render(request,self.template_name, formContext)
+            else:
+                print("form is NOT valid")
+                # no change in context
+
+        # Still to do, should remove from the other lists so its not in more than 1
+        if 'liked' in request.POST:
+            print("LIKED by %s" % request.user)
+            movie.likes.add(request.user)
+            movie.save()
+        if 'loved' in request.POST:
+            print("LOVED")
+            movie.loves.add(request.user)
+            movie.save()
+        if 'disliked' in request.POST:
+            movie.dislikes.add(request.user)
+            movie.save();
+            print("DISLIKED")
+
+        if 'StreamMovie' in request.POST:
+            print("User pressed StreamMovie")
+            try:
+                clientip = request.META['REMOTE_ADDR']
+            except KeyError:
+                clientip = 'unknown'
+            hostip = request.get_host()
+
+            playit = "/home/catherine/FHL/FriendlyHomeLibrary/static/mediafiles/" + movie.collection.filePath + '/' + movie.fileName
+            sstr = ("vlc -vvv %s --sout \'#rtp{dst=%s,port=1234,sdp=rtsp://%s:8080/test.sdp}\'" % (playit,clientip,hostip[:-5]))
+            print(sstr)
+            os.system(sstr)
+        else:
+            print("No StreamMovie")
+
+        #formContext = {'movie':movie,'playit':playit,'objectForm':bound_form}
+        movieContext = {'movie':movie,'playit':playit,'objectForm': self.form_class(instance=movie)}
+        return render(request,self.template_name, movieContext)
 
 
 @require_authenticated_permission('FHLBuilder.movie_builder')
@@ -416,21 +471,6 @@ class MovieUpdate(View):
                 'movie': movie,
             }
             return render(request,self.template_name,context)
-
-@require_authenticated_permission('FHLBuilder.movie_builder')
-class MovieDelete(View):
-    form_class=MovieForm
-    model = Movie
-    template_name='FHLBuilder/movie_confirm_delete.html'
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-    def get(self,request,slug):
-        movie = self.get_object(slug)
-        return render(request,self.template_name,{'movie': movie})
-    def post(self,request,slug):
-        movie = self.get_object(slug)
-        movie.delete()
-        return redirect('builder_movie_list')
 
 # Actors
 class ActorList(View):
@@ -493,20 +533,6 @@ class ActorUpdate(View):
             }
             return render(request,self.template_name,context)
 
-@require_authenticated_permission('FHLBuilder.actor_builder')
-class ActorDelete(View):
-    form_class=ActorForm
-    model = Actor
-    template_name='FHLBuilder/actor_confirm_delete.html'
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-    def get(self,request,slug):
-        actor = self.get_object(slug)
-        return render(request,self.template_name,{'actor': actor})
-    def post(self,request,slug):
-        actor = self.get_object(slug)
-        actor.delete()
-        return redirect('builder_actor_list')
 
 # Directors
 class DirectorList(View):
@@ -570,20 +596,6 @@ class DirectorUpdate(View):
             }
             return render(request,self.template_name,context)
 
-@require_authenticated_permission('FHLBuilder.director_builder')
-class DirectorDelete(View):
-    form_class=DirectorForm
-    model = Director
-    template_name='FHLBuilder/director_confirm_delete.html'
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-    def get(self,request,slug):
-        director = self.get_object(slug)
-        return render(request,self.template_name,{'director': director})
-    def post(self,request,slug):
-        director = self.get_object(slug)
-        director.delete()
-        return redirect('builder_director_list')
 
 # Musicians
 class MusicianList(View):
@@ -647,17 +659,3 @@ class MusicianUpdate(View):
             }
             return render(request,self.template_name,context)
 
-@require_authenticated_permission('FHLBuilder.musician_builder')
-class MusicianDelete(View):
-    form_class=MusicianForm
-    model = Musician
-    template_name='FHLBuilder/musician_confirm_delete.html'
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-    def get(self,request,slug):
-        musician = self.get_object(slug)
-        return render(request,self.template_name,{'musician': musician})
-    def post(self,request,slug):
-        musician = self.get_object(slug)
-        musician.delete()
-        return redirect('builder_musician_list')

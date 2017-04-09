@@ -18,10 +18,6 @@
     <li><a href="{{song.collection.get_absolute_url}}">{{song.collection.title}}</a></li>
     {% if song.year > 0 %}
         <li>Year: {{song.year}}</li>
-    {% else %}
-        {% if user.is_authenticated %}
-        {% include "FHLBuilder/year_select.html" %}
-        {% endif %}
     {% endif %}
     <li>Track: {{song.track}}</li>
 </ul>
@@ -40,18 +36,10 @@
 
 <section>
 {% if user.is_authenticated %}
-<p>Authenticated user - {{currentUser}}</p>
-{% include "FHLBuilder/tag_select.html" %}
+    {% include "FHLBuilder/tag_select.html" %}
+    {% include 'FHLBuilder/object_update.html' %}
+    {% include 'FHLBuilder/likesandloves.html' %}
 {% endif %}
-</section>
-
-
-<section>
-<h3>Command line to vlc player</h3>
-<form action="" method = "post">
-{% csrf_token %}
-<button type="submit">Play Song</button>
-</form>
 </section>
 
 

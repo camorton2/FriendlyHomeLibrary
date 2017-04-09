@@ -11,8 +11,23 @@ from .models import Actor, Director
 from django.utils.text import slugify
 from django.db import models
 
+############
+MOVIE = 'MV'
+MINI_MOVIE = 'MM'
+CONCERT = 'CC'
+DOCUMENTARY = 'DD'
+GAME = "GG"
+TV = "TV"
+MINISERIES = "MS"
+AUDIO_BOOK = "AB"
+EBOOK = "EB"
+SONG = "SG"
+PICTURE = "PT"
+UNKNOWN = "UN"
+############
+
 def add_collection(cAlbum, cSlug, cPath):
-    print ("---> ADD Album %s slug %s path %s" % (cAlbum,cSlug,cPath))
+    print ("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
     try:
         dbobj = Collection.objects.get(slug=cSlug)
     except Collection.DoesNotExist:
@@ -27,6 +42,8 @@ def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
     except Song.DoesNotExist:
         dbobj = Song(track=sTrack,title=sTitle,slug=sSlug,fileName=sFileName, collection=sCollection)
         dbobj.save()
+    dbobj.fileKind = SONG
+    dbobj.save()
     return dbobj
 
 def add_movie(mTitle, mFileName, mSlug, mCollection):
@@ -36,6 +53,8 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
     except Movie.DoesNotExist:
         dbobj = Movie(title=mTitle,slug=mSlug,fileName=mFileName, collection=mCollection)
         dbobj.save()
+    dbobj.fileKind = MOVIE
+    dbobj.save()
     return dbobj
 
 def add_musician(aName, aSlug):
@@ -76,7 +95,7 @@ def add_tag(tName, tSlug):
     return dbobj
 
 def add_file(root,myfile,path,newCollection):
-    print("file %s, root %s, path %s" % (myfile,root,path))
+    print("ADD_FILE file %s, root %s, path %s" % (myfile,root,path))
     theFile = os.path.join(root,myfile)
     if mp3.isMp3File(theFile):
         tag = id3.Tag()
@@ -84,7 +103,7 @@ def add_file(root,myfile,path,newCollection):
         myArtist = tag.artist
         addC = False
         if myArtist is None :
-            print("*******************  BOGUS - skipping")
+            print("******************* mp3 file with no artist, skipping %s" % theFile)
         else:
             if tag.album is None:
                 collection = newCollection
@@ -97,6 +116,8 @@ def add_file(root,myfile,path,newCollection):
             # song has track, title, filename, slug, collection
             songSlug = slugify( unicode('%s%s' % (tag.title,myArtist)))
             t1, t2 = tag.track_num
+            if t1 is None:
+                t1=0
             song = add_song(sTrack=t1,sTitle=tag.title, sFileName=myfile, sSlug=songSlug, sCollection=collection)
             # musician has name, slug
             artistSlug = slugify( unicode('%s' % (myArtist)))
@@ -106,28 +127,34 @@ def add_file(root,myfile,path,newCollection):
                 musician.albums.add(collection)
             musician.songs.add(song)
             musician.save()
-            
+
             genre = tag.genre
             if genre is not None:
                 genreSlug = slugify(unicode('%s%s' % (genre.id,genre.name)))
                 gen = add_tag(genre.name,genreSlug)
-                song.tags.add(gen)           
-            
+                song.tags.add(gen)
+
     else:
-        print("******* BOGUS NOT MP3"+theFile)
+        # This section is for the info on mkv files, not being used
+        #print("******* BOGUS NOT MP3"+theFile)
         # in this section new movies will be added to the passed collection
-        try:
-            with open(theFile,'rb') as f:
-                mkv = enzyme.MKV(f)
-                print (mkv)
-                print (type(mkv))
-                base = os.path.basename(theFile)
-                mTitle = os.path.splitext(base)[0]
-                mSlug = slugify( unicode('%s' % (mTitle)))
-                add_movie(mTitle,base,mSlug,newCollection)
-                
-            f.close()    
-                
-        except MalformedMKVError:
-            print("BOGUS MKV skip")
-            
+        ## try:
+        ##    with open(theFile,'rb') as f:
+        ##        mkv = enzyme.MKV(f)
+        ##        print (mkv)
+        ##        print (type(mkv))
+        ##    f.close()
+        ##except MalformedMKVError:
+        ##    print("BOGUS MKV skip")
+
+        # start 4 from the end and take the rest
+        extension = theFile[-4:]
+        if extension == '.mkv':
+            base = os.path.basename(theFile)
+            mTitle = os.path.splitext(base)[0]
+            mSlug = slugify( unicode('%s' % (mTitle)))
+            add_movie(mTitle,base,mSlug,newCollection)
+        else:
+            print("UNKNOWN FILE SKIPPING %s extension %s " % (theFile,extension))
+
+

@@ -4,11 +4,21 @@ from __future__ import unicode_literals
 from django import forms
 from django.forms import ModelForm
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
+from django.utils.text import slugify
+
 from .models import Tag, CommonFile, Song, Collection, Movie
-from .models import Actor, Director, Musician
+from .models import Actor, Director, Musician, CHAR_LENGTH
+from .collection import add_collection
 import os
 
+from FriendlyHomeLibrary import settings
+
 # Create your models here.
+
+class DetailForm(forms.Form):
+    year = forms.IntegerField(max_value=3000,min_value=1800)
+
 
 class CommonFileForm(ModelForm):
     class Meta:
@@ -18,7 +28,7 @@ class CommonFileForm(ModelForm):
 class TagForm(ModelForm):
     class Meta:
         model=Tag
-        fields='__all__'
+        fields=['name']
     def clean_name(self):
         return self.cleaned_data['name'].lower()
     def clean_slug(self):
@@ -60,20 +70,28 @@ class MusicianForm(ModelForm):
 class SongForm(CommonFileForm):
     class Meta:
         model=Song
-        fields='__all__'
+        fields=['title','year','fileKind']
+        widgets={
+            'tags': forms.RadioSelect,
+        }
 
 class MovieForm(CommonFileForm):
     class Meta:
         model=Movie
-        fields='__all__'
+        fields=['title','year','fileKind']
 
 class CollectionForm(ModelForm):
-    hardCodeHead = '/home/catherine/Media/'
+    #hardCodeHead = '/home/catherine/Media/'
     class Meta:
         model=Collection
-        fields='__all__'
+        fields=['filePath']
     def clean_filePath(self):
         new_path=self.cleaned_data['filePath']
-        if os.path.exists(os.path.join(self.hardCodeHead,new_path)):
-            return new_path
-        raise ValidationError('Path does not exist'+self.hardCodeHead+new_path)
+        if os.path.exists(os.path.join(settings.MY_MEDIA_FILES_ROOT,new_path)):
+            last = new_path.rpartition('/')[2]
+            if len(last):
+                return new_path
+            # remove final /
+            return new_path[:-1]
+        raise ValidationError('Path does not exist'+settings.MY_MEDIA_FILES_ROOT+new_path)
+

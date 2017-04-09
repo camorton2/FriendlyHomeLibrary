@@ -12,12 +12,18 @@
 <section>
 <ul>
 {% for obj in collection.song_set.all %}
-<li><a href="{{obj.get_absolute_url}}">
-{{obj.title}}
-</a></li>
+<li><a href="{{obj.get_absolute_url}}">{{obj.title}}</a></li>
 {% endfor %}
 </ul>
 </section>
+
+<ul>
+{% for mv in collection.movie_set.all %}
+<li><a href="{{mv.get_absolute_url}}">{{mv.title}}</a></li>
+{% endfor %}
+</ul>
+</section>
+
 
 {% if user.is_authenticated %}
 <p>Tag all members of collection</p>

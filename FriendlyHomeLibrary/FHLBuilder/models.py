@@ -4,11 +4,11 @@ from __future__ import unicode_literals
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-
+from FriendlyHomeLibrary import settings
 
 # Create your models here.
 
-CHAR_LENGTH=100
+CHAR_LENGTH=1000
 
 class Tag(models.Model):
     name = models.CharField(
@@ -41,9 +41,14 @@ class Tag(models.Model):
 # holds the path, represents an Album/audioBook (audio) or Series (video)
 class Collection(models.Model):
     filePath = models.CharField(max_length=CHAR_LENGTH)
+    #filePath = models.FilePathField(
+    #    path=settings.MY_MEDIA_FILES_ROOT,
+    #    recursive=True,
+    #    allow_files=False,
+    #    allow_folders=True
+    #    )
     title = models.CharField(
-       max_length=CHAR_LENGTH,
-       unique=True)
+       max_length=CHAR_LENGTH)
     slug = models.SlugField(
        max_length=CHAR_LENGTH,
        unique=True)

@@ -1,0 +1,39 @@
+
+<section>
+{% load static %}
+<h3>Command line to vlc player</h3>
+<form action="" method = "post">
+{% csrf_token %}
+<button type="submit" name="StreamMovie">Stream Movie</button>
+</form>
+</section>
+
+<h3>Using the html video</h3>
+
+<section>
+    {% load static %}
+    <video width="320" height="240" controls>
+    <source src="{% static playit %}"  type="video/mp4">
+    </video>
+</section>
+
+
+<h3>Using the vlc plugin</h3>
+{% load static %}
+<embed type="application/x-vlc-plugin"
+         name="video1"
+                  autoplay="yes" loop="yes" width="400" height="300"
+                           target="{% static playit %}" />
+                           <br />
+                             <a href="javascript:;"
+                             onclick='document.video1.play()'>Play
+                             video1</a>
+                               <a href="javascript:;"
+                               onclick='document.video1.pause()'>Pause
+                               video1</a>
+                                 <a href="javascript:;"
+                                 onclick='document.video1.stop()'>Stop
+                                 video1</a>
+                                   <a href="javascript:;"
+
+onclick='document.video1.fullscreen()'>Fullscreen</a>

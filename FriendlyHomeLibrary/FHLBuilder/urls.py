@@ -4,13 +4,13 @@ from django.contrib.auth.decorators import login_required
 
 from .views import HomePage, TagList, SongList, CollectionList,MovieList
 from .views import ActorList, DirectorList, MusicianList
-from .views import TagFormView, TagUpdate, TagDelete, TagDetailView
-from .views import SongFormView, SongUpdate, SongDelete, SongDetailView
-from .views import MovieFormView, MovieUpdate, MovieDelete, MovieDetailView
-from .views import ActorFormView, ActorUpdate, ActorDelete, ActorDetailView
-from .views import DirectorFormView, DirectorUpdate, DirectorDelete, DirectorDetailView
-from .views import MusicianFormView, MusicianUpdate, MusicianDelete, MusicianDetailView
-from .views import CollectionFormView, CollectionUpdate, CollectionDelete, CollectionDetailView
+from .views import TagFormView, TagUpdate, TagDetailView
+from .views import SongFormView, SongUpdate, SongDetailView
+from .views import MovieFormView, MovieUpdate, MovieDetailView
+from .views import ActorFormView, ActorUpdate, ActorDetailView
+from .views import DirectorFormView, DirectorUpdate, DirectorDetailView
+from .views import MusicianFormView, MusicianUpdate, MusicianDetailView
+from .views import CollectionFormView, CollectionUpdate, CollectionDetailView
 
 urlpatterns = [
 #    url(r'^$',HomePage.as_view(),name='homepage'),
@@ -49,9 +49,6 @@ urlpatterns = [
     url(r'^tag/(?P<slug>[\w\-]+)/update/$',
       login_required(TagUpdate.as_view()),
       name='builder_tag_update'),
-    url(r'^tag/(?P<slug>[\w\-]+)/delete/$',
-      login_required(TagDelete.as_view()),
-      name='builder_tag_delete'),
 
 # Actors
     url(r'^actor/create/$',
@@ -63,9 +60,6 @@ urlpatterns = [
     url(r'^actor/(?P<slug>[\w\-]+)/update/$',
       login_required(ActorUpdate.as_view()),
       name='builder_actor_update'),
-    url(r'^actor/(?P<slug>[\w\-]+)/delete/$',
-      login_required(ActorDelete.as_view()),
-      name='builder_actor_delete'),
 
 # Directors
     url(r'^director/create/$',
@@ -77,9 +71,6 @@ urlpatterns = [
     url(r'^director/(?P<slug>[\w\-]+)/update/$',
       login_required(DirectorUpdate.as_view()),
       name='builder_director_update'),
-    url(r'^director/(?P<slug>[\w\-]+)/delete/$',
-      login_required(DirectorDelete.as_view()),
-      name='builder_director_delete'),
 
 # Musicians
     url(r'^musician/create/$',
@@ -91,9 +82,6 @@ urlpatterns = [
     url(r'^musician/(?P<slug>[\w\-]+)/update/$',
       login_required(MusicianUpdate.as_view()),
       name='builder_musician_update'),
-    url(r'^musician/(?P<slug>[\w\-]+)/delete/$',
-      login_required(MusicianDelete.as_view()),
-      name='builder_musician_delete'),
 
 # Songs
     url(r'^song/create/$',
@@ -105,9 +93,6 @@ urlpatterns = [
     url(r'^song/(?P<slug>[\w\-]+)/update/$',
       login_required(SongUpdate.as_view()),
       name='builder_song_update'),
-    url(r'^song/(?P<slug>[\w\-]+)/delete/$',
-      login_required(SongDelete.as_view()),
-      name='builder_song_delete'),
 
 # Collections
     url(r'^collection/create/$',
@@ -119,9 +104,6 @@ urlpatterns = [
     url(r'^collection/(?P<slug>[\w\-]+)/update/$',
       login_required(CollectionUpdate.as_view()),
       name='builder_collection_update'),
-    url(r'^collection/(?P<slug>[\w\-]+)/delete/$',
-      login_required(CollectionDelete.as_view()),
-      name='builder_collection_delete'),
 
 # Movies
     url(r'^movie/create/$',
@@ -133,9 +115,6 @@ urlpatterns = [
     url(r'^movie/(?P<slug>[\w\-]+)/update/$',
       login_required(MovieUpdate.as_view()),
       name='builder_movie_update'),
-    url(r'^movie/(?P<slug>[\w\-]+)/delete/$',
-      login_required(MovieDelete.as_view()),
-      name='builder_movie_delete'),
 
 
 ]
