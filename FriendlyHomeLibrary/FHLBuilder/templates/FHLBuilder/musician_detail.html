@@ -17,8 +17,6 @@
 {% endfor %}
 </ul>
 </section>
-{% else %}
-<p>This musician is not related to any albums</p>
 {% endif %}
 
 
@@ -26,14 +24,10 @@
 <section>
 <h3>Songs associated with {{musician.fullName}}</h3>
 <ul>
-{% for song in musician.songs.all %}
-<li><a href="{{song.get_absolute_url}}">{{song.title}}</a></li>
-{% endfor %}
-</ul>
+{% include "FHLBuilder/song_playlist.html" %}</ul>
 </section>
-{% else %}
-<p>This musician is not related to any songs</p>
 {% endif %}
+
 
 {% if musician.concerts.count %}
 <section>
@@ -44,8 +38,6 @@
 {% endfor %}
 </ul>
 </section>
-{% else %}
-<p>This musician is not related to any concerts or videos</p>
 {% endif %}
 
 {% endblock %}

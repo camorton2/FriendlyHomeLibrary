@@ -1,6 +1,4 @@
 
-<script>
-
 var audio;
 var playlist;
 var tracks;
@@ -41,34 +39,3 @@ function run(link, player){
 }
 
 
-
-</script>
-
-<h2>MP3 Files</h2>
-{% load static %}
-{% for song,path in songlist %}    
-    {% if forloop.first %}
-        <audio id="audio" preload="auto" tabindex="0" controls="" type="audio/mpeg">
-            <source type="audio/mp3" src="{% static path %}">
-            Sorry, your browser does not support HTML5 audio.
-        </audio>
-        <ul id="playlist">
-        <li class="active"><a href="{% static path %}"> {{song.title|title}} </li>
-    {% else %}
-        <li><a href="{% static path %}">{{song.title|title}}</li>
-    {% endif %}
-    {% if forloop.last %}
-        </ul>
-    {% endif %}
-{% endfor %}    
-
-
-<h2>Links</h2>
-
-
-
-<ul>
-{% for song,path in songlist %}    
-<li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</li>
-{% endfor %}
-</ul>

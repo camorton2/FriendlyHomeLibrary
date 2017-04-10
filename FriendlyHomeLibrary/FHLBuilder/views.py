@@ -27,37 +27,8 @@ import string
 from collection import add_file
 from . import choices
 
-from .utility import to_str, slugCompare
-
-def findSongs(me):
-    #print("FindLikedSongs %s" % user)
-    likedlist = []
-    lovedlist = []
-    for song in Song.objects.all():
-        if song.likes.count():
-            list = song.likes.filter(username=me)
-            if list.count():
-                likedlist.append(song)
-            list1 = song.loves.filter(username=me)
-            if list1.count():
-                lovedlist.append(song)
-    return likedlist,lovedlist
-
-def findMovies(me):
-    #print("FindLikedSongs %s" % user)
-    likedlist = []
-    lovedlist = []
-    for movie in Movie.objects.all():
-        if movie.likes.count():
-            list = movie.likes.filter(username=me)
-            if list.count():
-                likedlist.append(movie)
-            list1 = movie.loves.filter(username=me)
-            if list1.count():
-                print("love movie: %s" % movie.title)
-                lovedlist.append(movie)
-    return likedlist,lovedlist
-
+from .utility import to_str, slugCompare, objectPath, songList
+from .query import findSongs, findMovies
 
 # Views
 
@@ -66,14 +37,58 @@ class UserDetail(View):
     def get(self, request):
         me = User.objects.get(username=request.user)
         print(me)
-        likedSongs,lovedSongs = findSongs(me)
-        likedMovies,lovedMovies = findMovies(me)
-        context = {'likedSongs':likedSongs,
-                   'lovedSongs':lovedSongs,
-                   'likedMovies':likedMovies,
-                   'lovedMovies':lovedMovies
-                  }
-        return render(request,self.template_name,context)
+        #lovedSongList = songList(lovedSongs)
+        #likedMovies,lovedMovies = findMovies(me)
+
+        likedSongs = []
+        lovedSongs = []
+        likedMovies = []
+        lovedMovies = []
+        needSongQuery = True
+        needMovieQuery = True
+        if 'likedSongs' in request.GET:
+            if needSongQuery:
+                likedSongs,lovedSongs = findSongs(me)
+                needSongQuery = False
+            mySongList = songList(likedSongs) 
+            if mySongList:
+                context = {'songlist':mySongList}
+            else:
+                context = {'message': "No songs found"}
+            return render(request,self.template_name,context)
+        if 'lovedSongs' in request.GET:
+            if needSongQuery:
+                likedSongs,lovedSongs = findSongs(me)
+                needSongQuery = False
+            mySongList = songList(lovedSongs) 
+            if mySongList:
+                context = {'songlist':mySongList}
+            else:
+                context = {'message': "No songs found"}
+            return render(request,self.template_name,context)
+            
+        if 'likedMovies' in request.GET:
+            if needMovieQuery:
+                likedMovies,lovedMovies = findMovies(me)
+                needMovieQuery=False
+            if likedMovies:
+                context = {'movielist':likedMovies}
+            else:
+                context = {'message': "No movies found"}
+            return render(request,self.template_name,context)
+
+        if 'lovedMovies' in request.GET:
+            if needMovieQuery:
+                likedMovies,lovedMovies = findMovies(me)
+                needMovieQuery=False
+            if lovedMovies:
+                context = {'movielist':lovedMovies}
+            else:
+                context = {'message': "No movies found"}
+            return render(request,self.template_name,context)
+
+        return render(request,self.template_name)
+
 
 class HomePage(View):
     template_name = 'FHLBuilder/base_fhlbuilder.html'
@@ -92,8 +107,12 @@ class TagDetailView(View):
     template_name = 'FHLBuilder/tag_detail.html'
     def get(self,request,slug):
         tag=get_object_or_404(Tag,slug__iexact=slug)
-        songlist = tag.song_tags.all()
-        return render(request, self.template_name, {'tag':tag,'songlist':songlist})
+        #songlist = tag.song_tags.all()
+        slist = songList(tag.song_tags.all())
+        mlist = tag.movie_tags.all()
+        return render(request, self.template_name,
+            {'tag':tag,'songlist':slist, 'movielist':mlist}
+            )
 
 @require_authenticated_permission('FHLBuilder.tag_reader')
 class TagFormView(View):
@@ -144,20 +163,21 @@ class TagUpdate(View):
 class SongList(View):
     template_name='FHLBuilder/song_list.html'
     def get(self,request):
-        tl = Song.objects.all()
-        test1 = {'songlist': tl}
-
-        return render(
-          request,
-          self.template_name,
-          test1)
+        #tl = Song.objects.all()
+        slist = songList(Song.objects.all())
+        test1 = {'songlist': slist}
+        return render(request,self.template_name,test1)
 
 class SongDetailView(View):
     template_name = 'FHLBuilder/song_detail.html'
     form_class=SongForm
     def get(self,request,slug):
         song=get_object_or_404(Song,slug__iexact=slug)
-        playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
+        # linked to static
+        #playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
+        # real path
+        #playit = settings.MY_MEDIA_FILES_ROOT + song.collection.filePath + '/' + song.fileName
+        playit = objectPath(song)
         print("HERE HERE HERE HERE %s user %s" % (playit,request.user))
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
@@ -172,7 +192,11 @@ class SongDetailView(View):
     def post(self,request,slug):
         print ("SONG POST slug %s" % (slug))
         song=get_object_or_404(Song,slug__iexact=slug)
-        playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
+        # linked to static
+        #playit = "mediafiles/" + song.collection.filePath + '/' + song.fileName
+        # real path
+        #playit = settings.MY_MEDIA_FILES_ROOT + song.collection.filePath + '/' + song.fileName
+        playit = objectPath(song)
         bound_form = self.form_class(request.POST,instance=song)
         print("POST playit %s" % (playit))
 
@@ -199,7 +223,7 @@ class SongDetailView(View):
         if 'loved' in request.POST:
             print("LOVED")
             song.loves.add(request.user)
-            movie.save()
+            song.save()
         if 'disliked' in request.POST:
             song.dislikes.add(request.user)
             song.save();
@@ -299,8 +323,9 @@ class CollectionDetailView(View, CollectionMixins):
             for obj in clist:
                 print("obj %s" % (obj.title))
                 obj.tags.add(new_tag)
-        songlist = collection.song_set.all()
-        return render(request, self.template_name, {'collection':collection,'songlist':songlist})
+        songObjects = collection.song_set.all()
+        mySongList = songList(songObjects)
+        return render(request, self.template_name, {'collection':collection,'songlist':mySongList})
 
 
 @require_authenticated_permission('FHLBuilder.collection_builder')
@@ -412,14 +437,16 @@ class MovieDetailView(View):
             dtorSlug = slugify(unicode(dtor))
             new_dtor = add_director(dtor,dtorSlug)
             new_dtor.movies.add(movie)
-        playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
+        #playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
+        playit = objectPath(movie)
         return render(request, self.template_name, {'movie':movie,
                                                     'playit':playit,
                                                     'objectForm':self.form_class(instance=movie)})
 
     def post(self,request,slug):
         movie=get_object_or_404(Movie,slug__iexact=slug)
-        playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
+        #playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
+        playit = objectPath(movie)
         bound_form = self.form_class(request.POST,instance=movie)
         print("POST playit %s" % (playit))
         print ("MovieDetail POST for slug %s movie %s " % (slug,movie.title))
@@ -658,7 +685,9 @@ class MusicianDetailView(View):
     template_name = 'FHLBuilder/musician_detail.html'
     def get(self,request,slug):
         musician=get_object_or_404(Musician,slug__iexact=slug)
-        return render(request, self.template_name, {'musician':musician})
+        slist = songList(musician.songs.all())
+        return render(request, self.template_name,
+            {'musician':musician,'songlist':slist})
 
 @require_authenticated_permission('FHLBuilder.musician_reader')
 class MusicianFormView(View):

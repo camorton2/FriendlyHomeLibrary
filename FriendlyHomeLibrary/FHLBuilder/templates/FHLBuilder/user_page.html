@@ -6,34 +6,59 @@
 
 {% block content %}
 
-<section>
-<h3>Songs I Love</h3>
-{% for song in lovedSongs %}
-<li><a href="{{song.get_absolute_url}}">{{song.title|title}}</a></li>
-{% endfor %}
-</section>
+<br>
+<div>
+<form action="" method = "get">
+{% csrf_token %}
+<button type="submit" name="lovedSongs">Find Songs I Love</button>
+</form>
+</div>
+<br>
+
+<br>
+<div>
+<form action="" method = "get">
+{% csrf_token %}
+<button type="submit" name="likedSongs">Find Songs I Like</button>
+</form>
+</div>
+<br>
+
+
+<br>
+<div>
+<form action="" method = "get">
+{% csrf_token %}
+<button type="submit" name="lovedMovies">Find Movies I Love</button>
+</form>
+</div>
+<br>
+
+<br>
+<div>
+<form action="" method = "get">
+{% csrf_token %}
+<button type="submit" name="likedMovies">Find Movies I Like</button>
+</form>
+</div>
+<br>
+
 
 <section>
-<h3>Movies I Love</h3>
-{% for movie in lovedMovies %}
+{% if songlist %}
+<h3>My Songs</h3>
+{% include "FHLBuilder/song_playlist.html" %}</ul>
+</section>
+{% endif %}
+{% if movielist %}
+<section>
+<h3>My Movies</h3>
+{% for movie in movielist %}
 <li><a href="{{movie.get_absolute_url}}">{{movie.title|title}}</a></li>
 {% endfor %}
 </section>
-
-<section>
-<h3>Songs I Like</h3>
-{% for song in likedSongs %}
-<li><a href="{{song.get_absolute_url}}">{{song.title|title}}</a></li>
-{% endfor %}
-</section>
-
-<section>
-<h3>Movies I Like</h3>
-{% for movie in likedMovies %}
-<li><a href="{{movie.get_absolute_url}}">{{movie.title|title}}</a></li>
-{% endfor %}
-</section>
-
+{% endif %}
+<p>{{message}}</p>
 
 
 {% endblock %}

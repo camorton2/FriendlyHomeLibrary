@@ -134,12 +134,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/home/catherine/FHL/FriendlyHomeLibrary/FriendlyHomeLibrary/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"), '/home/catherin/Media/',
+    os.path.join(BASE_DIR, "static"), 
+    '/home/catherin/Media/',
     ("mediafiles", "/home/catherin/Media"),
+    
 ]
 MY_MEDIA_FILES_ROOT='/run/user/1000/gvfs/smb-share:server=192.168.2.21,share=x8h,user=root/storage/external_storage/'
+MY_CSS_FILES_ROOT='/home/catherine/FHL/FriendlyHomeLibrary/FriendlyHomeLibrary/static/css'
 
 SITE_ID=1
 

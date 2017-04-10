@@ -16,11 +16,11 @@
 </ul>
 </section>
 {% endif %}
-{% if tag.movie_tags.count %}
+{% if movielist.count %}
 <section>
 <h3>Movies associated with {{tag.name}}</h3>
 <ul>
-{% for mv in tag.movie_tags.all %}
+{% for mv in movielist %}
 <li><a href="{{mv.get_absolute_url}}">{{mv.title}}</a></li>
 {% endfor %}
 </ul>
