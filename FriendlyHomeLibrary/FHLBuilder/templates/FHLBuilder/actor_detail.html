@@ -10,20 +10,12 @@
 
 {% if actor.movies.count %}
 <section>
-<h3>Objects associated with {{actor.fullName}}</h3>
-<ul>
-{% for obj in actor.movies.all %}
-<li><a href="{{obj.get_absolute_url}}">
-{{obj.title}}
-</a></li>
+<h3>Movies associated with {{actor.fullName}}</h3>
+<ul id='playlist'>
+{% for movie in actor.movies.all %}
+<li><a href="{{movie.get_absolute_url}}">{{movie.title}}</a></li>
 {% endfor %}
 </ul>
 </section>
-{% else %}
-<p>This actor is not related to any movies</p>
 {% endif %}
-<ul>
-    <li><a href="{{actor.get_update_url}}">Edit Actor</a></li>
-    <li><a href="{{actor.get_delete_url}}">Delete Actor</a></li>
-</ul>
 {% endblock %}

@@ -5,14 +5,9 @@
 {% endblock %}
 
 {% block content %}
+<ul id='playlist'>
 {% for director in tl %}
-<li>
-<a href="{{ director.get_absolute_url}}"> {{director.fullName|title}}
-</a>
-</li>
+<li><a href="{{ director.get_absolute_url}}"> {{director.fullName|title}}</a></li>
 {% endfor %}
-<ul>
-    <li><a href="{% url 'builder_director_create' %}">Create Director</a></li>
 </ul>
-
 {% endblock %}

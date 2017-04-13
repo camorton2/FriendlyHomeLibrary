@@ -36,6 +36,7 @@ class Tag(models.Model):
 # holds the path, represents an Album/audioBook (audio) or Series (video)
 class Collection(models.Model):
     filePath = models.CharField(max_length=CHAR_LENGTH)
+    drive = models.IntegerField()
     title = models.CharField(
        max_length=CHAR_LENGTH)
     slug = models.SlugField(

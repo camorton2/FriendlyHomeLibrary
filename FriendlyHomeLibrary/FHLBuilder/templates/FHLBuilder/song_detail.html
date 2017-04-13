@@ -9,7 +9,7 @@
 <h2>{{song.title}}</h2>
 
 <section>
-<ul>
+<ul id='playlist'>
     {% if song.musician_set.count %}
     {% for musician in song.musician_set.all %}
     <li><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a></li>
@@ -20,14 +20,13 @@
         <li>Year: {{song.year}}</li>
     {% endif %}
     <li>Track: {{song.track}}</li>
-    
 </ul>
 </section>
 
 <section>
 {% if song.tags.count %}
 <h3>Tags</h3>
-<ul>
+<ul='playlist'>
 {% for tag in song.tags.all %}
 <li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
 {% endfor %}

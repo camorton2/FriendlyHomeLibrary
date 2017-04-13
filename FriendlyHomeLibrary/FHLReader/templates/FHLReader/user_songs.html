@@ -1,0 +1,93 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} - Songs in Library {{Song.objects.count}}
+{% endblock %}
+
+{% block content %}
+
+{% if asPlayList %}
+    <form action="" method = "get">
+        {% csrf_token %}
+        <button type="submit" name="filelist">As FileList</button>
+    </form>
+{% else %}
+    <form action="" method = "get">
+        {% csrf_token %}
+        <button type="submit" name="playlist">As PlayList</button>
+    </form>
+
+{% endif %}
+
+{% if songlist %}
+<h4>{{listTitle}}</h4>
+
+{% if asPlayList %}
+
+    {% load static %}
+    {% for song,path in songlist %}
+        {% if forloop.first %}
+            <audio id="audio" preload="auto" tabindex="0" controls="" type="audio/mpeg">
+                <source type="audio/mp3" src="{% static path %}">
+                Sorry, your browser does not support HTML5 audio.
+            </audio>
+            <ul id="playlist">
+            <li class="active"><a href="{% static path %}">{{song.title|title}}</a></li>
+        {% else %}
+            <li><a href="{% static path %}">{{song.title|title}}</a></li>
+        {% endif %}
+        {% if forloop.last %}
+            </ul>
+        {% endif %}
+    {% endfor %}
+
+{% else %}
+
+    <br>
+    <ul id="filelist">
+    {% for song,path in songlist %}
+        <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
+    {% endfor %}
+    </ul>
+
+{% endif %}
+{% endif %}
+
+
+{% if songlist2 %}
+
+<h4>{{listTitle2}}</h4>
+
+{% if asPlayList %}
+    {% load static %}
+    {% for song,path in songlist2 %}
+        {% if forloop.first %}
+            <audio id="audio" preload="auto" tabindex="0" controls="" type="audio/mpeg">
+                <source type="audio/mp3" src="{% static path %}">
+                Sorry, your browser does not support HTML5 audio.
+            </audio>
+            <ul id="playlist">
+            <li class="active"><a href="{% static path %}">{{song.title|title}}</a></li>
+        {% else %}
+            <li><a href="{% static path %}">{{song.title|title}}</a></li>
+        {% endif %}
+        {% if forloop.last %}
+            </ul>
+        {% endif %}
+    {% endfor %}
+
+{% else %}
+
+    
+    <br>
+    <ul id="filelist">
+    {% for song,path in songlist2 %}
+        <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
+    {% endfor %}
+    </ul>
+
+{% endif %}
+
+{% endif %}
+
+{% endblock %}

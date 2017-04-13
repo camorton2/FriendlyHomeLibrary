@@ -5,14 +5,9 @@
 {% endblock %}
 
 {% block content %}
+<ul id='filelist'>
 {% for actor in tl %}
-<li>
-<a href="{{ actor.get_absolute_url}}"> {{actor.fullName|title}}
-</a>
-</li>
+<li><a href="{{ actor.get_absolute_url}}"> {{actor.fullName|title}}</a></li>
 {% endfor %}
-<ul>
-    <li><a href="{% url 'builder_actor_create' %}">Create Actor</a></li>
 </ul>
-
 {% endblock %}

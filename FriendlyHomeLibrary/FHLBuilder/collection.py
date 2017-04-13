@@ -12,7 +12,7 @@ from django.utils.text import slugify
 from django.db import models
 from . import choices
 
-from utility import to_str
+from utility import to_str, get_drive
 
 def setFileKind(obj,kind):
     fKind = kind[0]
@@ -24,14 +24,14 @@ def setFileKind(obj,kind):
         obj.save()
 
 
-def add_collection(cAlbum, cSlug, cPath,saveIt=True):
+def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
     print ("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
     try:
         dbobj = Collection.objects.get(slug=cSlug)
     except Collection.DoesNotExist:
         path = to_str(cPath)
         album = to_str(cAlbum)
-        dbobj = Collection(filePath=path,title=album,slug=cSlug)
+        dbobj = Collection(filePath=path,title=album,slug=cSlug,drive=cDrive)
         if saveIt:
             dbobj.save()
     return dbobj
@@ -109,6 +109,7 @@ def add_tag(tName, tSlug):
 
 def add_file(root,myfile,path,newCollection,formKind,formTag):
     print("ADD_FILE file %s, root %s, path %s formKind %s formTag %s" % (myfile,root,path,formKind,formTag))
+    #drive = get_drive(newCollection.drive)
     theFile = os.path.join(root,myfile)
     if mp3.isMp3File(theFile):
         tag = id3.Tag()
@@ -124,7 +125,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 addC = True
                 # handle the collection (album) which only has a path and a name
                 collectionSlug = slugify( unicode( '%s' % (tag.album) ))
-                collection = add_collection(cAlbum=tag.album,cSlug=collectionSlug,cPath=path)
+                collection = add_collection(cAlbum=tag.album,cSlug=collectionSlug,cPath=path,cDrive=newCollection.drive)
 
             # song has track, title, filename, slug, collection
             songSlug = slugify( unicode('%s%s' % (tag.title,myArtist)))

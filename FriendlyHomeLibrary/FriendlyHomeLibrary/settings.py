@@ -26,7 +26,7 @@ SECRET_KEY = 'px-_16848*l8gkea540yzcoa(ic%zt30m&%)ha79ev27i#qa3o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.0.121',
+ALLOWED_HOSTS = ['192.168.2.30',
                  'localhost',
                  '127.0.0.1'
 ]
@@ -134,14 +134,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
-STATIC_URL = '/home/catherine/FHL/FriendlyHomeLibrary/FriendlyHomeLibrary/static/'
+STATIC_URL = '/home/catherine/FHL/FriendlyHomeLibrary/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"), 
     '/home/catherin/Media/',
     ("mediafiles", "/home/catherin/Media"),
     
 ]
-MY_MEDIA_FILES_ROOT='/run/user/1000/gvfs/smb-share:server=192.168.2.21,share=x8h,user=root/storage/external_storage/'
+#MY_MEDIA_FILES_ROOT='/run/user/1000/gvfs/smb-share:server=192.168.2.21,share=x8h,user=root/storage/external_storage/'
+MY_MEDIA_FILES_ROOT='/run/user/1000/gvfs/'
+DRIVES=['smb-share:server=shield,share=4tbmovies/',
+        'smb-share:server=shield,share=seagate%20backup%20plus%20drive/']
+                
 MY_CSS_FILES_ROOT='/home/catherine/FHL/FriendlyHomeLibrary/FriendlyHomeLibrary/static/css'
 
 SITE_ID=1

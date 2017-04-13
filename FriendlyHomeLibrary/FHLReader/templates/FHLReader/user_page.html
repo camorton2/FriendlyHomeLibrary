@@ -1,0 +1,15 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} User {{user}}
+{% endblock %}
+
+{% block content %}
+
+<h3>{{me}}'s Page</h3>
+<ul id="playlist">
+<li><a href="{% url 'user_songs' %}">My Songs</a></li>
+<li><a href="{% url 'user_movies' %}">My Movies</a></li>
+</ul>
+
+{% endblock %}

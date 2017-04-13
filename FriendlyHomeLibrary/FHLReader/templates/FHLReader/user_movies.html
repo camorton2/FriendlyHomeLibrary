@@ -7,10 +7,24 @@
 {% block content %}
 {% if movielist %}
     <h4>{{listTitle}}</h4>
-    <ul id='filelist'>
+    <ul id="playlist">
     {% for movie in movielist %}
         <li><a href="{{ movie.get_absolute_url }}">{{movie.title|title}}</a></li>
     {% endfor %}
     </ul>
+
+{% endif %}
+
+
+{% if movielist2 %}
+
+    <h4>{{listTitle2}}</h4>
+
+    <ul id="playlist">
+    {% for movie in movielist2 %}
+        <li><a href="{{ movie.get_absolute_url }}">{{movie.title|title}}</a></li>
+    {% endfor %}
+    </ul>
+
 {% endif %}
 {% endblock %}

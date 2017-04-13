@@ -14,6 +14,7 @@ def findSongs(me):
             if list:
                 print("like song: %s" % song.title)
                 likedlist.append(song)
+        if song.loves:
             list1 = song.loves.filter(username=me)
             if list1:
                 print("love song: %s" % song.title)
@@ -28,11 +29,12 @@ def findMovies(me):
     lovedlist = []
     for movie in Movie.objects.all():
         #print("checking movie %s" % (movie.title))
-        if movie.likes.count():
+        if movie.likes:
             list = movie.likes.filter(username=me)
             if list:
                 print("like movie: %s" % movie.title)
                 likedlist.append(movie)
+        if movie.loves:
             list1 = movie.loves.filter(username=me)
             if list1:
                 print("love movie: %s" % movie.title)

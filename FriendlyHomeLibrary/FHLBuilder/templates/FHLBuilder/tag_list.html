@@ -5,14 +5,9 @@
 {% endblock %}
 
 {% block content %}
+<ul id="playlist">
 {% for x in tl %}
-<li>
-<a href="{{ x.get_absolute_url}}"> {{x.name|title}}
-</a>
-</li>
+<li><a href="{{ x.get_absolute_url}}"> {{x.name|title}}</a></li>
 {% endfor %}
-<ul>
-    <li><a href="{% url 'builder_tag_create' %}">Create Tag</a></li>
 </ul>
-
 {% endblock %}

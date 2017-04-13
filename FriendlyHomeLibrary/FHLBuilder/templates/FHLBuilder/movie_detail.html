@@ -22,7 +22,7 @@
 <section>    
 {% if movie.tags.count %}
 <h3>Tags</h3>
-<ul>
+<ul id='playlist'>
 {% for tag in movie.tags.all %}
 <li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
 {% endfor %}
@@ -33,7 +33,7 @@
 <section>    
 {% if movie.movie_directors.count %}
 <h3>Directors</h3>
-<ul>
+<ul id='playlist'>
 {% for director in movie.movie_directors.all %}
 <li><a href="{{director.get_absolute_url}}">{{director.fullName}}</a></li>
 {% endfor %}
@@ -44,7 +44,7 @@
 <section>    
 {% if movie.movie_actors.count %}
 <h3>Actors</h3>
-<ul>
+<ul id='playlist'>
 <!--list of objects related to tag -->
 {% for actor in movie.movie_actors.all %}
 <li><a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a></li>

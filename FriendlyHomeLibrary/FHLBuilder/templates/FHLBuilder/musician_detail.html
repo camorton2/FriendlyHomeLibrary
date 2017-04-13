@@ -11,7 +11,7 @@
 {% if musician.albums.count %}
 <section>
 <h3>Albums associated with {{musician.fullName}}</h3>
-<ul>
+<ul id='playlist'>
 {% for album in musician.albums.all %}
 <li><a href="{{album.get_absolute_url}}">{{album.title}}</a></li>
 {% endfor %}
@@ -23,7 +23,6 @@
 {% if musician.songs.count %}
 <section>
 <h3>Songs associated with {{musician.fullName}}</h3>
-<ul>
 {% include "FHLBuilder/song_playlist.html" %}</ul>
 </section>
 {% endif %}
@@ -32,7 +31,7 @@
 {% if musician.concerts.count %}
 <section>
 <h3>Concerts and videos associated with {{musician.fullName}}</h3>
-<ul>
+<ul id='playlist'>
 {% for video in musician.concerts.all %}
 <li><a href="{{video.get_absolute_url}}">{{video.title}}</a></li>
 {% endfor %}

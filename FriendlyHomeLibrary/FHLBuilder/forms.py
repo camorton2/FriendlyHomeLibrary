@@ -9,11 +9,12 @@ from django.utils.text import slugify
 
 from .models import Tag, CommonFile, Song, Collection, Movie
 from .models import Actor, Director, Musician, CHAR_LENGTH
-from .collection import add_collection
+
 import os
 
 from FriendlyHomeLibrary import settings
 from . import choices
+from utility import to_str
 
 # Create your models here.
 
@@ -94,14 +95,20 @@ class CollectionForm(ModelForm):
     kind = forms.MultipleChoiceField(choices = choices.KIND_CHOICES,initial=choices.UNKNOWN)
     # Used to add a tag to everything in the collection
     tag = forms.CharField(max_length=CHAR_LENGTH,required=False)
-
+    drive = -1
     def clean_filePath(self):
         new_path=self.cleaned_data['filePath']
-        if os.path.exists(os.path.join(settings.MY_MEDIA_FILES_ROOT,new_path)):
+        for i,drive in enumerate(settings.DRIVES,1):
+            toCheck = os.path.join(settings.MY_MEDIA_FILES_ROOT,drive,new_path)
+            print("checking drive %d name %s path %s" % (i,drive,new_path))
+            print(toCheck)
+            if os.path.exists(toCheck):
+                self.drive=i
+        if self.drive > 0:
             last = new_path.rpartition('/')[2]
             if len(last):
-                return new_path
+                return to_str(new_path)
             # remove final /
-            return new_path[:-1]
-        raise ValidationError('Path does not exist'+settings.MY_MEDIA_FILES_ROOT+new_path)
+            return to_str(new_path[:-1])
+        raise ValidationError('Path does not exist '+new_path)
 
