@@ -41,6 +41,7 @@ class ActorForm(ModelForm):
         fields='__all__'
     def clean_slug(self):
         new_slug=(self.cleaned_data['slug'].lower())
+        new_slug = new_slug + to_str(-act)
         if(new_slug=='create'):
             raise ValidationError('Slug may not be "create".')
         return new_slug
@@ -51,6 +52,7 @@ class DirectorForm(ModelForm):
         fields='__all__'
     def clean_slug(self):
         new_slug=(self.cleaned_data['slug'].lower())
+        new_slug = new_slug + to_str(-dtr)
         if(new_slug=='create'):
             raise ValidationError('Slug may not be "create".')
         return new_slug
@@ -61,6 +63,7 @@ class MusicianForm(ModelForm):
         fields='__all__'
     def clean_slug(self):
         new_slug=(self.cleaned_data['slug'].lower())
+        new_slug = new_slug + to_str(-mus)
         if(new_slug=='create'):
             raise ValidationError('Slug may not be "create".')
         return new_slug

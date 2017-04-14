@@ -135,6 +135,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/home/catherine/FHL/FriendlyHomeLibrary/static/'
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"), 
     '/home/catherin/Media/',
@@ -149,4 +150,8 @@ DRIVES=['smb-share:server=shield,share=4tbmovies/',
 MY_CSS_FILES_ROOT='/home/catherine/FHL/FriendlyHomeLibrary/FriendlyHomeLibrary/static/css'
 
 SITE_ID=1
+
+XBMC_HOST='http://192.168.2.30:8080'
+XBMC_USER=kodi
+XBMC_PASSWD=kodi
 

@@ -11,19 +11,11 @@
 {% if director.movies.count %}
 <section>
 <h3>Movies associated with {{director.fullName}}</h3>
-<ul>
+<ul id='filelist'>
 {% for obj in director.movies.all %}
-<li><a href="{{obj.get_absolute_url}}">
-{{obj.title}}
-</a></li>
+<li><a href="{{obj.get_absolute_url}}">{{obj.title}}</a></li>
 {% endfor %}
 </ul>
 </section>
-{% else %}
-<p>This director is not related to any movies</p>
 {% endif %}
-<ul>
-    <li><a href="{{movie.get_update_url}}">Edit Director</a></li>
-    <li><a href="{{movie.get_delete_url}}">Delete Director</a></li>
-</ul>
 {% endblock %}

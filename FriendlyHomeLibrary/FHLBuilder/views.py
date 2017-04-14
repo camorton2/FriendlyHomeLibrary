@@ -21,6 +21,8 @@ from FHLUser.decorators import require_authenticated_permission
 from FHLBuilder.collection import add_tag, add_actor, add_director, add_collection
 from FriendlyHomeLibrary import settings
 
+from FHLReader import kodi
+
 import os
 import string
 
@@ -134,6 +136,7 @@ class SongDetailView(View):
         song=get_object_or_404(Song,slug__iexact=slug)
         playit = object_path(song)
         print("HERE HERE HERE HERE %s user %s" % (playit,request.user))
+        kodi.send_to_kodi(song)
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
@@ -380,11 +383,13 @@ class MovieDetailView(View):
         if 'actor' in request.GET and request.GET['actor']:
             act = request.GET['actor']
             actSlug = slugify(unicode(act))
+            actSlug = actSlug + to_str('-act')
             new_actor = add_actor(act,actSlug)
             new_actor.movies.add(movie)
         if 'director' in request.GET and request.GET['director']:
             dtor = request.GET['director']
             dtorSlug = slugify(unicode(dtor))
+            dtorSlug = dtorSlug + to_str('-dtr')
             new_dtor = add_director(dtor,dtorSlug)
             new_dtor.movies.add(movie)
         #playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
@@ -438,10 +443,11 @@ class MovieDetailView(View):
                 clientip = 'unknown'
             hostip = request.get_host()
 
-            playit = "/home/catherine/FHL/FriendlyHomeLibrary/static/mediafiles/" + movie.collection.filePath + '/' + movie.fileName
-            sstr = ("vlc -vvv %s --sout \'#rtp{dst=%s,port=1234,sdp=rtsp://%s:8080/test.sdp}\'" % (playit,clientip,hostip[:-5]))
-            print(sstr)
-            os.system(sstr)
+            #playit = "/home/catherine/FHL/FriendlyHomeLibrary/static/mediafiles/" + movie.collection.filePath + '/' + movie.fileName
+            #sstr = ("vlc -vvv %s --sout \'#rtp{dst=%s,port=1234,sdp=rtsp://%s:8080/test.sdp}\'" % (playit,clientip,hostip[:-5]))
+            #print(sstr)
+            #os.system(sstr)
+            kodi.send_to_kodi(movie)
         else:
             print("No StreamMovie")
 
@@ -551,7 +557,7 @@ class DirectorList(View):
     template_name = 'FHLBuilder/director_list.html'
     def get(self, request):
         context = {'tl': Director.objects.all()}
-        return render(request,self.template_name,test1)
+        return render(request,self.template_name,context)
 
 class DirectorDetailView(View):
     template_name = 'FHLBuilder/director_detail.html'

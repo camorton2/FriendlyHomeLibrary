@@ -134,7 +134,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 t1=0
             song = add_song(sTrack=t1,sTitle=tag.title, sFileName=myfile, sSlug=songSlug, sCollection=collection)
             # musician has name, slug
-            artistSlug = slugify( unicode('%s' % (myArtist)))
+            artistSlug = slugify( unicode('%s%s' % (myArtist,'-mus')))
             musician = add_musician(aName=myArtist, aSlug=artistSlug)
             setFileKind(song, formKind)
             if len(formTag):
