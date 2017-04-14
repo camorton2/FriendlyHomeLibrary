@@ -211,6 +211,7 @@ class Artist(models.Model):
     def get_delete_url(self):
         return reverse('builder_artist_delete',kwargs={'slug': self.slug})
     class Meta:
+        ordering = ['fullName']
         permissions=(("artist_builder", "artist builder"),
                      ("artist_reader", "artist reader"))
 
@@ -244,7 +245,7 @@ class Director(Artist):
 
 class Musician(Artist):
     albums = models.ManyToManyField(Collection, blank=True)
-    concerts = models.ManyToManyField(Movie, blank=True)
+    concerts = models.ManyToManyField(Movie, blank=True, related_name='concert_musicians')
     songs = models.ManyToManyField(Song, blank=True)
     def get_absolute_url(self):
         return reverse('builder_musician_detail',kwargs={'slug': self.slug})

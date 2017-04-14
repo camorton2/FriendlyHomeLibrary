@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block content %}
-<ul id='playlist'>
+<ul id='filelist'>
 {% for musician in tl %}
 <li><a href="{{ musician.get_absolute_url}}"> {{musician.fullName|title}}</a></li>
 {% endfor %}

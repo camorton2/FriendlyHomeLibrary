@@ -26,11 +26,10 @@ class UserSongList(View):
 
     def get(self,request):
         me = User.objects.get(username=request.user)
-        playlist = False
+        playlist = True
         print("UserSongList GET")
-        if 'playlist' in request.GET:
-            print(" playlist request passed back to user page ")
-            playlist=True
+        if 'filelist' in request.GET:
+            playlist=False
         self.likedSongs,self.lovedSongs = findSongs(me)
         likedSongList = songList(self.likedSongs)
         lovedSongList = songList(self.lovedSongs)

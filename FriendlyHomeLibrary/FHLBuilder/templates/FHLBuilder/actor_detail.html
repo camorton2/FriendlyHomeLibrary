@@ -10,7 +10,7 @@
 
 {% if actor.movies.count %}
 <section>
-<h3>Movies associated with {{actor.fullName}}</h3>
+<h3>Movies {{actor.fullName}}</h3>
 <ul id='playlist'>
 {% for movie in actor.movies.all %}
 <li><a href="{{movie.get_absolute_url}}">{{movie.title}}</a></li>

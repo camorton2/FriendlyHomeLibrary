@@ -19,10 +19,15 @@
 {% endif %}
 </section>
 
+<section></section>
+<!--{% include "FHLBuilder/play_movie_options.html" %} -->
+{% include "FHLBuilder/kodi_buttons.html" %}
+</section>
+
 <section>    
 {% if movie.tags.count %}
 <h3>Tags</h3>
-<ul id='playlist'>
+<ul id='filelist'>
 {% for tag in movie.tags.all %}
 <li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
 {% endfor %}
@@ -33,7 +38,7 @@
 <section>    
 {% if movie.movie_directors.count %}
 <h3>Directors</h3>
-<ul id='playlist'>
+<ul id='filelist'>
 {% for director in movie.movie_directors.all %}
 <li><a href="{{director.get_absolute_url}}">{{director.fullName}}</a></li>
 {% endfor %}
@@ -44,7 +49,7 @@
 <section>    
 {% if movie.movie_actors.count %}
 <h3>Actors</h3>
-<ul id='playlist'>
+<ul id='filelist'>
 <!--list of objects related to tag -->
 {% for actor in movie.movie_actors.all %}
 <li><a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a></li>
@@ -53,6 +58,19 @@
 {% endif %}
 </section>
 
+<section>    
+{% if movie.concert_musicians.count %}
+<h3>Musicians</h3>
+<ul id='filelist'>
+<!--list of objects related to tag -->
+{% for musician in movie.concert_musicians.all %}
+<li><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a></li>
+{% endfor %}
+</ul>
+{% endif %}
+</section>
+
+
 {% if user.is_authenticated %}
 <section>
 {% include "FHLBuilder/tag_select.html" %}
@@ -60,9 +78,16 @@
 <section>
 {% include "FHLBuilder/director_select.html" %}
 </section>
+
+{% if movie.fileKind == 'CC' %}
+<section>
+{% include "FHLBuilder/musician_select.html" %}
+</section>
+{% else %}
 <section>
 {% include "FHLBuilder/actor_select.html" %}
 </section>
+{% endif %}
 <section>
 {% include "FHLBuilder/likesandloves.html" %}        
 </section>
@@ -72,6 +97,5 @@
 
 {% endif %}
 
-{% include "FHLBuilder/play_movie_options.html" %}
 
 {% endblock %}

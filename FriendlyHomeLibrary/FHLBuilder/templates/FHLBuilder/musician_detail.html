@@ -7,11 +7,21 @@
 {% block content %}
 
 <h2>{{musician.fullName}}</h2>
+{% if musician.concerts.count %}
+<section>
+<h3>Concerts and videos: {{musician.fullName}}</h3>
+<ul id='filelist'>
+{% for video in musician.concerts.all %}
+<li><a href="{{video.get_absolute_url}}">{{video.title}}</a></li>
+{% endfor %}
+</ul>
+</section>
+{% endif %}
 
 {% if musician.albums.count %}
 <section>
-<h3>Albums associated with {{musician.fullName}}</h3>
-<ul id='playlist'>
+<h3>Albums: {{musician.fullName}}</h3>
+<ul id='filelist'>
 {% for album in musician.albums.all %}
 <li><a href="{{album.get_absolute_url}}">{{album.title}}</a></li>
 {% endfor %}
@@ -22,21 +32,11 @@
 
 {% if musician.songs.count %}
 <section>
-<h3>Songs associated with {{musician.fullName}}</h3>
+<h3>Songs: {{musician.fullName}}</h3>
 {% include "FHLBuilder/song_playlist.html" %}</ul>
 </section>
 {% endif %}
 
 
-{% if musician.concerts.count %}
-<section>
-<h3>Concerts and videos associated with {{musician.fullName}}</h3>
-<ul id='playlist'>
-{% for video in musician.concerts.all %}
-<li><a href="{{video.get_absolute_url}}">{{video.title}}</a></li>
-{% endfor %}
-</ul>
-</section>
-{% endif %}
 
 {% endblock %}

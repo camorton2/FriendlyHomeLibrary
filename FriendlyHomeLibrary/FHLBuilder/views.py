@@ -18,7 +18,8 @@ from django.template import RequestContext,loader
 from django.views.generic import View
 
 from FHLUser.decorators import require_authenticated_permission
-from FHLBuilder.collection import add_tag, add_actor, add_director, add_collection
+
+import FHLBuilder.collection as collection
 from FriendlyHomeLibrary import settings
 
 from FHLReader import kodi
@@ -26,7 +27,6 @@ from FHLReader import kodi
 import os
 import string
 
-from collection import add_file
 from . import choices
 
 from .utility import to_str, slugCompare, object_path, songList, get_drive
@@ -111,21 +111,29 @@ class SongList(View):
     def get(self,request):
         print("SongList GET")
         slist = songList(Song.objects.all())
-        
+        title = ('All Songs %d' % Song.objects.count())
         if 'playlist' in request.GET:
             print("As PlayList")
-            context = {'listTitle': 'All Songs', 'songlist': slist, 'asPlayList':True}
+            context = {'listTitle': title, 'songlist': slist, 'asPlayList':True}
             return render(request,self.template_name,context)
-        context = {'listTitle': 'All Songs', 'songlist': slist, 'asPlayList':False }
+        context = {'listTitle': title, 'songlist': slist, 'asPlayList':False }
         return render(request,self.template_name,context)
     def post(self,request):
         print("SongList POST")
         slist = songList(Song.objects.all())
+        title = ('All Songs %d' % Song.objects.count())
         if 'playlist' in request.GET:
             print("As PlayList")
-            context = {'listTitle': 'All Songs', 'songlist': slist, 'asPlayList':True}
+            context = {'listTitle': title, 'songlist': slist, 'asPlayList':True}
             return render(request,self.template_name,context)
-        context = {'listTitle': 'All Songs', 'songlist': slist, 'asPlayList':False }
+        if 'kodi_lf' in request.POST:
+            print("User pressed kodi_lf -- off we go")
+            kodi.songs_to_kodi_lf(slist)
+        elif 'kodi-bf' in request.POST:
+            print("User pressed kodi bf -- to be setup")
+            kodi.songs_to__bf_kodi_bf(slist)
+            
+        context = {'listTitle': title, 'songlist': slist, 'asPlayList':False }
         return render(request,self.template_name,context)
 
 
@@ -136,11 +144,11 @@ class SongDetailView(View):
         song=get_object_or_404(Song,slug__iexact=slug)
         playit = object_path(song)
         print("HERE HERE HERE HERE %s user %s" % (playit,request.user))
-        kodi.send_to_kodi(song)
+        
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
-            new_tag = add_tag(tq,tqSlug)
+            new_tag = collection.add_tag(tq,tqSlug)
             song.tags.add(new_tag)
         return render(request,
             self.template_name, {'song':song,
@@ -167,18 +175,25 @@ class SongDetailView(View):
                 # no change in context
 
         # Still to do, should remove from the other lists so its not in more than 1
-        if 'liked' in request.POST:
+        elif 'liked' in request.POST:
             print("LIKED by %s" % request.user)
             song.likes.add(request.user)
             song.save()
-        if 'loved' in request.POST:
+        elif 'loved' in request.POST:
             print("LOVED")
             song.loves.add(request.user)
             song.save()
-        if 'disliked' in request.POST:
+        elif 'disliked' in request.POST:
             song.dislikes.add(request.user)
             song.save();
             print("DISLIKED")
+        elif 'kodi_lf' in request.POST:
+            print("User pressed kodi_lf -- off we go")
+            kodi.send_to_kodi_lf(song)
+        elif 'kodi-bf' in request.POST:
+            print("User pressed kodi bf -- to be setup")
+            kodi.send_to_kodi_bf(song)
+
 
         songContext = {'song':song,'playit':playit,'objectForm': self.form_class(instance=song)}
         return render(request,self.template_name, songContext)
@@ -217,7 +232,8 @@ class SongUpdate(View):
         return render(request,self.template_name,context)
 
     def post(self,request,slug):
-        song = self.get_object(slug)
+        song = self.get_1
+        (slug)
         bound_form = self.form_class(request.POST,instance=song)
         if bound_form.is_valid():
             new_song = bound_form.save()
@@ -251,9 +267,11 @@ class CollectionMixins:
             for obj in files:
                 try:
                     print("ADD_MEMBERS root %s obj %s" % (root,to_str(obj)))
-                    add_file(root,to_str(obj),path,newCollection,formKind,formTag)
+                    collection.add_file(root,to_str(obj),path,newCollection,formKind,formTag)
                 except UnicodeDecodeError:
                     print("ERROR unable to deal with filename- skipping in collection %s" % (newCollection.title))
+                except IOError:
+                    print("ERROR IOError with filename- skipping in collection %s" % (newCollection.title))
             for dobj in dirs:
                 newPath = path + '/' + dobj
                 print("ADD_MEMBERS subdir %s " % (to_str(dobj)))
@@ -268,7 +286,7 @@ class CollectionDetailView(View, CollectionMixins):
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
-            new_tag = add_tag(tq,tqSlug)
+            new_tag = collection.add_tag(tq,tqSlug)
             clist=collection.song_set.all()
             for obj in clist:
                 print("obj %s" % (obj.title))
@@ -298,7 +316,7 @@ class CollectionFormView(View,CollectionMixins):
             cSlug = slugify(unicode(cTitle))
             cDrive = bound_form.drive
             print("collection with title %s and slug %s and filePath %s drive %d" % (cTitle,cSlug,cPath,cDrive))
-            collection = add_collection(cTitle,cSlug,cPath,cDrive,False)
+            collection = collection.add_collection(cTitle,cSlug,cPath,cDrive,False)
             
             print("collection with title %s and slug %s and filePath %s " % (collection.title,collection.slug,collection.filePath))
             self.add_members(cPath, collection, bound_form.cleaned_data['kind'],bound_form.cleaned_data['tag'])
@@ -311,8 +329,9 @@ class CollectionFormView(View,CollectionMixins):
                 print("In Special Case in progress slug %s" % cSlug)
                 musician_detail = 'FHLBuilder/musician_detail.html'
                 for b in Musician.objects.all():
-                    print("musician found %s" % b.slug)
-                    if slugCompare(cSlug,b.slug):
+                    bSlug=b.slug[:-4]
+                    print("musician found %s" % bSlug)
+                    if slugCompare(cSlug,bSlug):
                         return render(request, musician_detail, {'musician':b})
         return render(request,self.template_name,{'form':bound_form})
 
@@ -362,7 +381,8 @@ class CollectionUpdate(View,CollectionMixins):
 class MovieList(View):
     template_name='FHLBuilder/movie_list.html'
     def get(self,request):
-        test1 = {'listTitle': 'All Movies', 'movielist': Movie.objects.all()}
+        title = ('All Movies %d' % Movie.objects.count())
+        test1 = {'listTitle': title, 'movielist': Movie.objects.all()}
         return render(
           request,
           self.template_name,
@@ -378,20 +398,27 @@ class MovieDetailView(View):
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
-            new_tag = add_tag(tq,tqSlug)
+            new_tag = collection.add_tag(tq,tqSlug)
             movie.tags.add(new_tag)
         if 'actor' in request.GET and request.GET['actor']:
             act = request.GET['actor']
             actSlug = slugify(unicode(act))
             actSlug = actSlug + to_str('-act')
-            new_actor = add_actor(act,actSlug)
+            new_actor = collection.add_actor(act,actSlug)
             new_actor.movies.add(movie)
         if 'director' in request.GET and request.GET['director']:
             dtor = request.GET['director']
             dtorSlug = slugify(unicode(dtor))
             dtorSlug = dtorSlug + to_str('-dtr')
-            new_dtor = add_director(dtor,dtorSlug)
+            new_dtor = collection.add_director(dtor,dtorSlug)
             new_dtor.movies.add(movie)
+        if 'musician' in request.GET and request.GET['musician']:
+            mus = request.GET['musician']
+            musSluga = slugify(unicode(mus))
+            musSlug = musSluga + to_str('-mus')
+            new_mus = collection.add_musician(mus,musSlug)
+            new_mus.concerts.add(movie)
+            
         #playit = "mediafiles/" + movie.collection.filePath + '/' + movie.fileName
         playit = object_path(movie)
         return render(request, self.template_name, {'movie':movie,
@@ -437,19 +464,17 @@ class MovieDetailView(View):
 
         if 'StreamMovie' in request.POST:
             print("User pressed StreamMovie")
-            try:
-                clientip = request.META['REMOTE_ADDR']
-            except KeyError:
-                clientip = 'unknown'
-            hostip = request.get_host()
-
-            #playit = "/home/catherine/FHL/FriendlyHomeLibrary/static/mediafiles/" + movie.collection.filePath + '/' + movie.fileName
-            #sstr = ("vlc -vvv %s --sout \'#rtp{dst=%s,port=1234,sdp=rtsp://%s:8080/test.sdp}\'" % (playit,clientip,hostip[:-5]))
-            #print(sstr)
-            #os.system(sstr)
-            kodi.send_to_kodi(movie)
+            kodi.stream_to_vlc(movie,request)
+        elif 'kodi_lf' in request.POST:
+            print("User pressed kodi_lf -- off we go")
+            kodi.send_to_kodi_lf(movie)
+        elif 'kodi-bf' in request.POST:
+            print("User pressed kodi bf -- to be setup")
+            kodi.send_to_kodi_bf(movie)
+        elif 'vlc_plugin' in request.POST:
+            movieContext = {'movie':movie,'playit':playit,'objectForm': self.form_class(instance=movie),'vlcPlugin':True}
         else:
-            print("No StreamMovie")
+            print("Nothing selected")
 
         #formContext = {'movie':movie,'playit':playit,'objectForm':bound_form}
         movieContext = {'movie':movie,'playit':playit,'objectForm': self.form_class(instance=movie)}

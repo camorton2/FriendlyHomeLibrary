@@ -128,7 +128,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 collection = add_collection(cAlbum=tag.album,cSlug=collectionSlug,cPath=path,cDrive=newCollection.drive)
 
             # song has track, title, filename, slug, collection
-            songSlug = slugify( unicode('%s%s' % (tag.title,myArtist)))
+            songSlug = slugify( unicode('%s%s' % (tag.title,collection.slug)))
             t1, t2 = tag.track_num
             if t1 is None:
                 t1=0

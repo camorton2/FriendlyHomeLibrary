@@ -9,13 +9,24 @@
 <h2>{{song.title}}</h2>
 
 <section>
-<ul id='playlist'>
+{% include 'FHLBuilder/kodi_buttons.html' %}
+</section>
+
+<section>
+    {% load static %}
+    <audio controls>
+        <source src="{% static playit %}"  type="audio/mpeg">
+    </audio>
+</section>
+
+<section>
+<ul id='filelist'>
     {% if song.musician_set.count %}
     {% for musician in song.musician_set.all %}
-    <li><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a></li>
+    <li>by: <a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a></li>
     {% endfor %}
     {% endif %}
-    <li><a href="{{song.collection.get_absolute_url}}">{{song.collection.title}}</a></li>
+    <li>album: <a href="{{song.collection.get_absolute_url}}">{{song.collection.title}}</a></li>
     {% if song.year > 0 %}
         <li>Year: {{song.year}}</li>
     {% endif %}
@@ -26,7 +37,7 @@
 <section>
 {% if song.tags.count %}
 <h3>Tags</h3>
-<ul='playlist'>
+<ul id='filelist'>
 {% for tag in song.tags.all %}
 <li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
 {% endfor %}
@@ -46,11 +57,5 @@
 </section>
 {% endif %}
 
-<section>
-    {% load static %}
-    <audio controls>
-        <source src="{% static playit %}"  type="audio/mpeg">
-    </audio>
-</section>
 
 {% endblock %}

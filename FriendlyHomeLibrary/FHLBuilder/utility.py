@@ -26,11 +26,20 @@ def get_drive(driveNo):
 
 # return the constructed path of an object (CommonFile)
 # this is from the symbolic link in static for web links
+# used when path is needed inside html
 def object_path(obj):
     drive=to_str('drive') + str(obj.collection.drive)
     thePath = os.path.join("links/", drive)
     thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName) 
     return to_str(thePath)
+
+#used when path is needed outside html
+def object_path_with_static(obj):
+    drive=to_str('drive') + str(obj.collection.drive)
+    thePath = os.path.join("static/links/", drive)
+    thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName) 
+    return to_str(thePath)
+
 
 # Given a list of songs, create a list containing pairs of path,song
 # which can be passed to playlist

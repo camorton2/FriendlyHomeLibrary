@@ -1,14 +1,24 @@
 
+
+<section>
+{% include 'FHLBuilder/kodi_buttons.html' %}
+</section>
+
 <section>
 {% load static %}
-<h3>Command line to vlc player</h3>
 <form action="" method = "post">
 {% csrf_token %}
-<button type="submit" name="StreamMovie">Stream Movie</button>
+<button type="submit" name="vlc_plugin">VLC Plugin</button>
 </form>
 </section>
 
-<h3>Using the html video</h3>
+<section>
+{% load static %}
+<form action="" method = "post">
+{% csrf_token %}
+<button type="submit" name="StreamMovie">Stream to VLC</button>
+</form>
+</section>
 
 <section>
     {% load static %}
@@ -17,23 +27,15 @@
     </video>
 </section>
 
+{% if vlcPlugin %}
 
-<h3>Using the vlc plugin</h3>
 {% load static %}
-<embed type="application/x-vlc-plugin"
-         name="video1"
-                  autoplay="yes" loop="yes" width="400" height="300"
-                           target="{% static playit %}" />
-                           <br />
-                             <a href="javascript:;"
-                             onclick='document.video1.play()'>Play
-                             video1</a>
-                               <a href="javascript:;"
-                               onclick='document.video1.pause()'>Pause
-                               video1</a>
-                                 <a href="javascript:;"
-                                 onclick='document.video1.stop()'>Stop
-                                 video1</a>
-                                   <a href="javascript:;"
+<embed type="application/x-vlc-plugin" name="video1" autoplay="yes" 
+     loop="yes" width="400" height="300"target="{% static playit %}" />
+     <br />
+     <a href="javascript:;"  onclick='document.video1.play()'>Play video1</a>
+     <a href="javascript:;"  onclick='document.video1.pause()'>Pause video1</a>
+     <a href="javascript:;"  onclick='document.video1.stop()'>Stop video1</a>
+     <a href="javascript:;"  onclick='document.video1.fullscreen()'>Fullscreen</a>
 
-onclick='document.video1.fullscreen()'>Fullscreen</a>
+{% endif %}
