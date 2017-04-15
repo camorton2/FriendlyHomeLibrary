@@ -210,6 +210,11 @@ class Artist(models.Model):
         return reverse('builder_artist_update',kwargs={'slug': self.slug})
     def get_delete_url(self):
         return reverse('builder_artist_delete',kwargs={'slug': self.slug})
+        
+    def __str__(self):
+        return self.fullName
+        
+        
     class Meta:
         ordering = ['fullName']
         permissions=(("artist_builder", "artist builder"),

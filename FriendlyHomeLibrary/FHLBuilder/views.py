@@ -24,10 +24,6 @@ from FHLBuilder import query
 
 from FHLReader import kodi
 
-
-#from .utility import to_str, slugCompare, object_path, songList, get_drive
-#from .query import findSongs, findMovies
-
 # Views
 
 class HomePage(View):
@@ -47,7 +43,7 @@ class TagDetailView(View):
     template_name = 'FHLBuilder/tag_detail.html'
     def get(self,request,slug):
         tag=get_object_or_404(models.Tag,slug__iexact=slug)
-        slist = songList(tag.song_tags.all())
+        slist = utility.songList(tag.song_tags.all())
         mlist = tag.movie_tags.all()
         context = {'tag':tag,'songlist':slist, 'movielist':mlist}
         if 'playlist' in request.GET:
@@ -101,7 +97,7 @@ class SongList(View):
     template_name='FHLBuilder/song_list.html'
     def get(self,request):
         print("SongList GET")
-        slist = songList(models.Song.objects.all())
+        slist = utility.songList(models.Song.objects.all())
         title = ('All Songs %d' % models.Song.objects.count())
         if 'playlist' in request.GET:
             context = {'listTitle': title, 'songlist': slist, 
@@ -113,7 +109,7 @@ class SongList(View):
         
     def post(self,request):
         print("SongList POST")
-        slist = songList(Song.objects.all())
+        slist = utility.songList(Song.objects.all())
         title = ('All Songs %d' % Song.objects.count())
         if 'kodi_lf' in request.POST:
             kodi.songs_to_kodi_lf(slist)
@@ -128,9 +124,10 @@ class SongList(View):
 class SongDetailView(View):
     template_name = 'FHLBuilder/song_detail.html'
     form_class=forms.SongForm
+    
     def get(self,request,slug):
-        song=get_object_or_404(Song,slug__iexact=slug)
-        playit = object_path(song)        
+        song=get_object_or_404(models.Song,slug__iexact=slug)
+        playit = utility.object_path(song)        
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
@@ -138,12 +135,12 @@ class SongDetailView(View):
             song.tags.add(new_tag)
         context = {'song':song,'playit':playit,
             'objectForm':self.form_class(instance=song)}
-        return render(request, self.template_name, coontext)
+        return render(request, self.template_name, context)
         
     def post(self,request,slug):
         print ("SONG POST slug %s" % (slug))
         song=get_object_or_404(models.Song,slug__iexact=slug)
-        playit = object_path(song)
+        playit = utility.object_path(song)
         bound_form = self.form_class(request.POST,instance=song)
         if 'UpdateObject' in request.POST:
             if bound_form.is_valid():
@@ -236,19 +233,19 @@ class CollectionMixins:
     def add_members(self,path,newCollection,formKind,formTag):
         # Still to do, log errors
         print("ADD_MEMBERS path %s" % (path))
-        drive = get_drive(newCollection.drive)
+        drive = utility.get_drive(newCollection.drive)
         for root, dirs, files in os.walk(os.path.join(settings.MY_MEDIA_FILES_ROOT,drive,path)):
             for obj in files:
                 try:
-                    print("ADD_MEMBERS root %s obj %s" % (root,to_str(obj)))
-                    collection.add_file(root,to_str(obj),path,newCollection,formKind,formTag)
+                    print("ADD_MEMBERS root %s obj %s" % (root,utility.to_str(obj)))
+                    collection.add_file(root,utility.to_str(obj),path,newCollection,formKind,formTag)
                 except UnicodeDecodeError:
                     print("ERROR unable to deal with filename- skipping in collection %s" % (newCollection.title))
                 except IOError:
                     print("ERROR IOError with filename- skipping in collection %s" % (newCollection.title))
             for dobj in dirs:
                 newPath = path + '/' + dobj
-                print("ADD_MEMBERS subdir %s " % (to_str(dobj)))
+                print("ADD_MEMBERS subdir %s " % (utility.to_str(dobj)))
                 self.add_members(newPath, newCollection,formKind,formTag)
 
 
@@ -257,7 +254,7 @@ class CollectionDetailView(View, CollectionMixins):
     
     def get(self,request,slug):
         print("CollectionDetail GET %s" % slug)
-        collection=get_object_or_404(Collection,slug__iexact=slug)
+        collection=get_object_or_404(models.Collection,slug__iexact=slug)
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
@@ -266,7 +263,7 @@ class CollectionDetailView(View, CollectionMixins):
             for obj in clist:
                 obj.tags.add(new_tag)
         songObjects = collection.song_set.all()
-        mySongList = songList(songObjects)
+        mySongList = utility.songList(songObjects)
         if 'playlist' in request.GET:
             context = {'collection':collection,'songlist':mySongList, 
                'asPlayList':True}
@@ -293,21 +290,21 @@ class CollectionFormView(View,CollectionMixins):
             cTitle = cPath.rpartition('/')[2]
             cSlug = slugify(unicode(cTitle))
             cDrive = bound_form.drive
-            collection = collection.add_collection(cTitle,cSlug,cPath,cDrive,False)
+            nc = collection.add_collection(cTitle,cSlug,cPath,cDrive,False)
             
-            self.add_members(cPath, collection, 
+            self.add_members(cPath, nc, 
                 bound_form.cleaned_data['kind'],
                 bound_form.cleaned_data['tag'])
-            if collection.song_set.count() or collection.movie_set.count():
+            if nc.song_set.count() or nc.movie_set.count():
                 # mp3 files create their own collection leaving this one empty
                 # so it is not saved unless it has been populated
-                collection.save()
-                return redirect(collection)
+                nc.save()
+                return redirect(nc)
             else:
                 musician_detail = 'FHLBuilder/musician_detail.html'
-                for b in Musician.objects.all():
+                for b in models.Musician.objects.all():
                     bSlug=b.slug[:-4]
-                    if slugCompare(cSlug,bSlug):
+                    if utility.slugCompare(cSlug,bSlug):
                         return render(request, musician_detail, {'musician':b})
         return render(request,self.template_name,{'form':bound_form})
 
@@ -408,36 +405,40 @@ class MovieDetailView(View):
 
     def get(self,request,slug):
         print ("MovieDetail GET for %s" % slug)
-        movie=get_object_or_404(Movie,slug__iexact=slug)
+        movie=get_object_or_404(models.Movie,slug__iexact=slug)
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
             new_tag = collection.add_tag(tq,tqSlug)
             movie.tags.add(new_tag)
+            movie.save()
         if 'actor' in request.GET and request.GET['actor']:
             act = request.GET['actor']
             actSlug = slugify(unicode(act+'-act'))
             new_actor = collection.add_actor(act,actSlug)
             new_actor.movies.add(movie)
+            new_actor.save()
         if 'director' in request.GET and request.GET['director']:
             dtr = request.GET['director']
-            dtrSlug = slugify(unicode(dtor+'-dtr'))
-            new_dtr = collection.add_director(dtor,dtrSlug)
+            dtrSlug = slugify(unicode(dtr+'-dtr'))
+            new_dtr = collection.add_director(dtr,dtrSlug)
             new_dtr.movies.add(movie)
+            new_dtr.save()
         if 'musician' in request.GET and request.GET['musician']:
             mus = request.GET['musician']
             mSlug = slugify(unicode(mus+'-mus'))
             new_mus = collection.add_musician(mus,mSlug)
-            new_mus.concerts.add(movie)            
-        playit = object_path(movie)
+            new_mus.concerts.add(movie)
+            new_mus.save()            
+        playit = utility.object_path(movie)
         context = {'movie':movie,'playit':playit,
             'objectForm':self.form_class(instance=movie)}
         return render(request, self.template_name,context)
 
     def post(self,request,slug):
+        movie=get_object_or_404(models.Movie,slug__iexact=slug)
         print ("MovieDetail POST for slug %s movie %s " % (slug,movie.title))
-        movie=get_object_or_404(Movie,slug__iexact=slug)
-        playit = object_path(movie)
+        playit = utility.object_path(movie)
         bound_form = self.form_class(request.POST,instance=movie)
         if 'UpdateObject' in request.POST:
             if bound_form.is_valid():
@@ -529,51 +530,8 @@ class ActorDetailView(View):
     template_name = 'FHLBuilder/actor_detail.html'
     
     def get(self,request,slug):
-        actor=get_object_or_404(Actor,slug__iexact=slug)
+        actor=get_object_or_404(models.Actor,slug__iexact=slug)
         return render(request, self.template_name, {'actor':actor})
-
-@require_authenticated_permission('FHLBuilder.actor_reader')
-class ActorFormView(View):
-    form_class=forms.ActorForm
-    template_name = 'FHLBuilder/actor_form.html'
-    
-    def get(self, request):
-        return render(request,self.template_name,
-                      {'form':self.form_class()})
-                      
-    def post(self,request):
-        bound_form=self.form_class(request.POST)
-        if bound_form.is_valid():
-            new_actor=bound_form.save()
-            return redirect(new_actor)
-        else:
-            return render(request,self.template_name,
-                          {'form':bound_form})
-
-
-@require_authenticated_permission('FHLBuilder.actor_reader')
-class ActorUpdate(View):
-    form_class=forms.ActorForm
-    model=models.Actor
-    template_name='FHLBuilder/actor_update.html'
-    
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-        
-    def get(self,request,slug):
-        actor = self.get_object(slug)
-        context={'form': self.form_class(instance=tag), 'actor': actor}
-        return render(request,self.template_name,context)
-
-    def post(self,request,slug):
-        actor = self.get_object(slug)
-        bound_form = self.form_class(request.POST,instance=actor)
-        if bound_form.is_valid():
-            new_actor = bound_form.save()
-            return redirect(new_actor)
-        else:
-            context={'form': bound_form,'actor': actor}
-            return render(request,self.template_name,context)
 
 
 # Directors
@@ -588,53 +546,8 @@ class DirectorList(View):
 class DirectorDetailView(View):
     template_name = 'FHLBuilder/director_detail.html'
     def get(self,request,slug):
-        director=get_object_or_404(Director,slug__iexact=slug)
+        director=get_object_or_404(models.Director,slug__iexact=slug)
         return render(request, self.template_name, {'director':director})
-
-
-@require_authenticated_permission('FHLBuilder.director_reader')
-class DirectorFormView(View):
-    form_class=forms.DirectorForm
-    template_name = 'FHLBuilder/director_form.html'
-    
-    def get(self, request):
-        return render(request,self.template_name,
-                      {'form':self.form_class()})
-                      
-    def post(self,request):
-        bound_form=self.form_class(request.POST)
-        if bound_form.is_valid():
-            new_director=bound_form.save()
-            return redirect(new_director)
-        else:
-            return render(request,self.template_name,
-                          {'form':bound_form})
-
-
-@require_authenticated_permission('FHLBuilder.director_reader')
-class DirectorUpdate(View):
-    form_class=forms.DirectorForm
-    model=models.Director
-    template_name='FHLBuilder/director_update.html'
-    
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-        
-    def get(self,request,slug):
-        director = self.get_object(slug)
-        context={'form': self.form_class(instance=tag),
-           'director': director}
-        return render(request,self.template_name,context)
-
-    def post(self,request,slug):
-        director = self.get_object(slug)
-        bound_form = self.form_class(request.POST,instance=director)
-        if bound_form.is_valid():
-            new_director = bound_form.save()
-            return redirect(new_director)
-        else:
-            context={'form': bound_form,'director': director}
-            return render(request,self.template_name,context)
 
 
 # Musicians
@@ -650,58 +563,12 @@ class MusicianDetailView(View):
     template_name = 'FHLBuilder/musician_detail.html'
     
     def get(self,request,slug):
-        musician=get_object_or_404(Musician,slug__iexact=slug)
-        slist = songList(musician.songs.all())
+        musician=get_object_or_404(models.Musician,slug__iexact=slug)
+        slist = utility.songList(musician.songs.all())
         if 'playlist' in request.GET:
             context = {'musician':musician,'songlist':slist, 'asPlayList':True}
             return render(request,self.template_name,context)
         return render(request, self.template_name,
             {'musician':musician,'songlist':slist})
 
-
-@require_authenticated_permission('FHLBuilder.musician_reader')
-class MusicianFormView(View):
-    form_class=forms.MusicianForm
-    template_name = 'FHLBuilder/musician_form.html'
-    
-    def get(self, request):
-        return render(request,self.template_name,
-                      {'form':self.form_class()})
-                      
-    def post(self,request):
-        bound_form=self.form_class(request.POST)
-        if bound_form.is_valid():
-            new_musician=bound_form.save()
-            return redirect(new_musician)
-        else:
-            return render(request,self.template_name,
-                          {'form':bound_form})
-
-
-@require_authenticated_permission('FHLBuilder.musician_reader')
-class MusicianUpdate(View):
-    form_class=forms.MusicianForm
-    model=models.Musician
-    template_name='FHLBuilder/musician_update.html'
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-        
-    def get(self,request,slug):
-        musician = self.get_object(slug)
-        context={'form': self.form_class(instance=tag),
-            'musician': musician}
-        return render(request,self.template_name,context)
-
-    def post(self,request,slug):
-        musician = self.get_object(slug)
-        bound_form = self.form_class(request.POST,instance=musician)
-        if bound_form.is_valid():
-            new_musician = bound_form.save()
-            return redirect(new_musician)
-        else:
-            context={
-                'form': bound_form,
-                'musician': musician,
-            }
-            return render(request,self.template_name,context)
 

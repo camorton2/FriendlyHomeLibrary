@@ -52,37 +52,19 @@ urlpatterns = [
       name='builder_tag_update'),
 
 # Actors
-    url(r'^actor/create/$',
-      login_required(bv.ActorFormView.as_view()),
-      name='builder_actor_create'),
     url(r'^actor/(?P<slug>[\w\-]+)/$',
       bv.ActorDetailView.as_view(),
       name='builder_actor_detail'),
-    url(r'^actor/(?P<slug>[\w\-]+)/update/$',
-      login_required(bv.ActorUpdate.as_view()),
-      name='builder_actor_update'),
 
 # Directors
-    url(r'^director/create/$',
-      login_required(bv.DirectorFormView.as_view()),
-      name='builder_director_create'),
     url(r'^director/(?P<slug>[\w\-]+)/$',
       bv.DirectorDetailView.as_view(),
       name='builder_director_detail'),
-    url(r'^director/(?P<slug>[\w\-]+)/update/$',
-      login_required(bv.DirectorUpdate.as_view()),
-      name='builder_director_update'),
 
 # Musicians
-    url(r'^musician/create/$',
-      login_required(bv.MusicianFormView.as_view()),
-      name='builder_musician_create'),
     url(r'^musician/(?P<slug>[\w\-]+)/$',
       bv.MusicianDetailView.as_view(),
       name='builder_musician_detail'),
-    url(r'^musician/(?P<slug>[\w\-]+)/update/$',
-      login_required(bv.MusicianUpdate.as_view()),
-      name='builder_musician_update'),
 
 # Songs
     url(r'^song/create/$',

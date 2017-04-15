@@ -70,6 +70,7 @@ def send_to_kodi_lf(ob):
     look_at_res(ping_result)
     if ping_result:
         thefile = settings.STATIC_URL+sstr
+        print("File to kodi %s" % thefile)
         context = {"item":{"file":thefile}}
         result = xbmc_i.Player.Open(context)
         look_at_res(result)
