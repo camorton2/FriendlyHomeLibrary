@@ -51,10 +51,12 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
     print ("---> ADD Movie %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
     try:
         dbobj = bmodels.Movie.objects.get(slug=mSlug)
+        print ("SKIPPING - duplicate %s" % mSlug)
     except bmodels.Movie.DoesNotExist:
         mCollection.save()
         title = utility.to_str(mTitle)
         fileName = utility.to_str(mFileName)
+        print("CATH add movie %s to collection %s" % (mSlug,mCollection.slug))
         dbobj = bmodels.Movie(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
         dbobj.save()
     dbobj.fileKind = choices.MOVIE
@@ -62,13 +64,13 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
     return dbobj
 
 def add_musician(aName, aSlug):
-    print("---> ADD Musician %s, slug %s" % (aName, aSlug))    
+    print("---> ADD Musician %s, slug %s" % (aName, aSlug))
     try:
         dbobj = bmodels.Musician.objects.get(slug=aSlug)
     except bmodels.Musician.DoesNotExist:
         for b in bmodels.Musician.objects.all():
             if utility.slugCompare(aSlug,b.slug):
-                return b    
+                return b
         name = utility.to_str(aName)
         dbobj = bmodels.Musician(fullName=name,slug=aSlug)
         dbobj.save()
@@ -104,6 +106,20 @@ def add_tag(tName, tSlug):
         dbobj.save()
     return dbobj
 
+def as_movie(ext):
+    if ext == '.mkv':
+        return True
+    if ext == '.mov':
+        return True
+    if ext == '.MOV':
+        return True
+    if ext == '.mp4':
+        return True
+    if ext == '.avi':
+        return True
+    print ("SKIPPING - extension %s" % ext)
+    return False
+
 def add_file(root,myfile,path,newCollection,formKind,formTag):
     # Still to do: log messages
     print("ADD_FILE file %s, root %s, path %s formKind %s formTag %s" % (myfile,root,path,formKind,formTag))
@@ -131,18 +147,18 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
             t1, t2 = tag.track_num
             if t1 is None:
                 t1=0
-            song = add_song(sTrack=t1,sTitle=tag.title, sFileName=myfile, 
+            song = add_song(sTrack=t1,sTitle=tag.title, sFileName=myfile,
                 sSlug=songSlug, sCollection=collection)
             # musician has name, slug
             artistSlug = slugify( unicode('%s%s' % (myArtist,'-mus')))
-            
+
             musician = add_musician(aName=myArtist, aSlug=artistSlug)
             setFileKind(song, formKind)
             if len(formTag):
                 xSlug = slugify(unicode('%s' % (formTag)))
                 xTag=add_tag(formTag,xSlug)
                 song.tags.add(xTag)
-            
+
             if addC:
                 musician.albums.add(collection)
             musician.songs.add(song)
@@ -169,16 +185,10 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
 
         base = os.path.basename(theFile)
         mTitle, extension = os.path.splitext(base)
-        mSlug = slugify( unicode('%s' % (mTitle)))
-        if extension == '.mkv':
-            if newCollection.filePath == path:
-                nc = newCollection
-            else:
-                ncSlug = slugify( unicode( '%s' % (path) ))
-                ncTitle = newCollection.title + path.rpartition('/')[2]
-                nc = add_collection(cAlbum=ncTitle,
-                    cSlug=ncSlug,cPath=path,
-                    cDrive=newCollection.drive)
+
+        if as_movie(extension):
+            nc = newCollection
+            mSlug = slugify( unicode('%s%s' % (nc.slug,mTitle)))
             movie = add_movie(mTitle,base,mSlug,nc)
             setFileKind(movie,formKind)
             if len(formTag):

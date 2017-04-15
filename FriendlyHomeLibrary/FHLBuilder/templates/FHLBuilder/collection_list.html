@@ -14,14 +14,24 @@
 {% endif %}
 
 <section>
-<ul id='playlist'>    
+<h4>Video Collections</h4>
+<ul id='filelist'>    
 {% for collection in tl %}
-{% if collection.slug %}
+{% if collection.movie_set.count %}
 <li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
-{% else %}
-<p>Something is not quite right, collection with no slug path {{collection.filePath}}</p>
 {% endif %}
 {% endfor %}
 </ul>
 </section>
+<section>
+<h4>Audio Collections</h4>
+<ul id='filelist'>    
+{% for collection in tl %}
+{% if collection.song_set.count %}
+<li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
+{% endif %}
+{% endfor %}
+</ul>
+</section>
+
 {% endblock %}
