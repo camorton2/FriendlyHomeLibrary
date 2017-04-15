@@ -11,8 +11,6 @@ from xbmcjson import XBMC
 # https://github.com/jcsaaddupuy/xbmc-client/blob/master/src/xbmc_client/xbmc_client.py
 ##
 
-
-
 def get_json_rpc(host):
     jsonrpc = "jsonrpc"
     if not host.endswith("/"):

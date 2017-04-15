@@ -97,7 +97,7 @@ class TagUpdate(View):
 class SongList(View):
     template_name='FHLBuilder/song_list.html'
     def get(self,request):
-        print("SongList GET")
+        #print("SongList GET")
         slist = utility.songList(models.Song.objects.all())
         title = ('All Songs %d' % models.Song.objects.count())
         if 'playlist' in request.GET:
@@ -109,13 +109,13 @@ class SongList(View):
         return render(request,self.template_name,context)
 
     def post(self,request):
-        print("SongList POST")
+        #print("SongList POST")
         slist = utility.songList(Song.objects.all())
         title = ('All Songs %d' % Song.objects.count())
         if 'kodi_lf' in request.POST:
             kodi.songs_to_kodi_lf(slist)
         elif 'kodi-bf' in request.POST:
-            print("User pressed kodi bf -- to be setup")
+            #print("User pressed kodi bf -- to be setup")
             kodi.songs_to__bf_kodi_bf(slist)
         context = {'listTitle': title, 'songlist': slist,
             'asPlayList':False }
@@ -155,21 +155,21 @@ class SongDetailView(View):
 
         # Still to do, should remove from the other lists so its not in more than 1
         elif 'liked' in request.POST:
-            print("LIKED by %s" % request.user)
+            #print("LIKED by %s" % request.user)
             song.likes.add(request.user)
             song.save()
         elif 'loved' in request.POST:
-            print("LOVED")
+            #print("LOVED")
             song.loves.add(request.user)
             song.save()
         elif 'disliked' in request.POST:
             song.dislikes.add(request.user)
             song.save();
-            print("DISLIKED")
+            #print("DISLIKED")
         elif 'kodi_lf' in request.POST:
             kodi.send_to_kodi_lf(song)
         elif 'kodi-bf' in request.POST:
-            print("User pressed kodi bf -- to be setup")
+            #print("User pressed kodi bf -- to be setup")
             kodi.send_to_kodi_bf(song)
         songContext = {'song':song,'playit':playit,
             'objectForm': self.form_class(instance=song)}
@@ -225,7 +225,7 @@ class SongUpdate(View):
 class CollectionList(View):
     template_name='FHLBuilder/collection_list.html'
     def get(self,request):
-        print("CollectionList GET")
+        #print("CollectionList GET")
         context = {'tl': models.Collection.objects.all()}
         return render(request,self.template_name,context)
 
@@ -240,17 +240,17 @@ class CollectionMixins:
 
     def add_members(self,path,drive,kind,tag):
         # Still to do, log errors
-        print("ADD_MEMBERS path %s" % (path))
+        #print("ADD_MEMBERS path %s" % (path))
         sDrive = utility.get_drive(drive)
 
         setPath = os.path.join(settings.MY_MEDIA_FILES_ROOT,sDrive)
         for root, dirs, files in os.walk(os.path.join(setPath,path)):
             myroot = utility.to_str(root[len(setPath):])
-            print("LOOP myroot %s dirs %s files %s\n" % (myroot,dirs,files))
+            #print("LOOP myroot %s dirs %s files %s\n" % (myroot,dirs,files))
             nc = self.handle_collection(myroot,drive,kind,tag)
             for obj in files:
                 try:
-                    print("ADD_MEMBERS myroot %s obj %s" % (myroot,utility.to_str(obj)))
+                    #print("ADD_MEMBERS myroot %s obj %s" % (myroot,utility.to_str(obj)))
                     collection.add_file(root,utility.to_str(obj),myroot,nc,kind,tag)
                 except UnicodeDecodeError:
                     print("ERROR unable to deal with filename- skipping in collection %s" % (nc.title))
@@ -262,7 +262,7 @@ class CollectionDetailView(View, CollectionMixins):
     template_name = 'FHLBuilder/collection_detail.html'
 
     def get(self,request,slug):
-        print("CollectionDetail GET %s" % slug)
+        #print("CollectionDetail GET %s" % slug)
         collection=get_object_or_404(models.Collection,slug__iexact=slug)
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
@@ -287,11 +287,11 @@ class CollectionFormView(View,CollectionMixins):
     template_name = 'FHLBuilder/collection_form.html'
 
     def get(self, request):
-        print("CollectionFormView GET")
+        #print("CollectionFormView GET")
         return render(request,self.template_name,{'form':self.form_class()})
 
     def post(self,request):
-        print("CollectionFormView POST")
+        #print("CollectionFormView POST")
         bound_form=self.form_class(request.POST)
         if bound_form.is_valid():
             nc = self.add_members(
@@ -326,7 +326,7 @@ class CollectionUpdate(View,CollectionMixins):
         return get_object_or_404(self.model,slug=slug)
 
     def get(self,request,slug):
-        print("CollectionUpdate POST")
+        #print("CollectionUpdate POST")
         collection = self.get_object(slug)
         context={'form': self.form_class(instance=collection),
            'collection': collection}
@@ -342,7 +342,7 @@ class CollectionUpdate(View,CollectionMixins):
         return render(request,self.template_name,context)
 
     def post(self,request,slug):
-        print("Collection update POST")
+        #print("Collection update POST")
         collection = self.get_object(slug)
         bound_form = self.form_class(request.POST,instance=collection)
         formKind = choices.UNKNOWN

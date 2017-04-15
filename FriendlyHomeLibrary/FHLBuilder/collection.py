@@ -13,15 +13,16 @@ from FHLBuilder import models as bmodels
 
 def setFileKind(obj,kind):
     fKind = kind[0]
-    print("FileKind to %s %s" % (kind,fKind))
+    #print("FileKind to %s %s" % (kind,fKind))
     if fKind == choices.UNKNOWN:
-        print("unknown")
+        # print("unknown")
+        pass
     else:
         obj.fileKind = fKind
         obj.save()
 
 def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
-    print ("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
+    #print ("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
     try:
         dbobj = bmodels.Collection.objects.get(slug=cSlug)
     except bmodels.Collection.DoesNotExist:
@@ -33,7 +34,7 @@ def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
     return dbobj
 
 def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
-    print ("---> ADD Song %s, track %s, filename %s, slug %s: " % (sTitle,sTrack,sFileName,sSlug))
+    #print ("---> ADD Song %s, track %s, filename %s, slug %s: " % (sTitle,sTrack,sFileName,sSlug))
     try:
         dbobj = bmodels.Song.objects.get(slug=sSlug)
     except bmodels.Song.DoesNotExist:
@@ -48,15 +49,15 @@ def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
     return dbobj
 
 def add_movie(mTitle, mFileName, mSlug, mCollection):
-    print ("---> ADD Movie %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
+    #print ("---> ADD Movie %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
     try:
         dbobj = bmodels.Movie.objects.get(slug=mSlug)
-        print ("SKIPPING - duplicate %s" % mSlug)
+        #print ("SKIPPING - duplicate %s" % mSlug)
     except bmodels.Movie.DoesNotExist:
         mCollection.save()
         title = utility.to_str(mTitle)
         fileName = utility.to_str(mFileName)
-        print("CATH add movie %s to collection %s" % (mSlug,mCollection.slug))
+        #print("CATH add movie %s to collection %s" % (mSlug,mCollection.slug))
         dbobj = bmodels.Movie(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
         dbobj.save()
     dbobj.fileKind = choices.MOVIE
@@ -64,7 +65,7 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
     return dbobj
 
 def add_musician(aName, aSlug):
-    print("---> ADD Musician %s, slug %s" % (aName, aSlug))
+    #print("---> ADD Musician %s, slug %s" % (aName, aSlug))
     try:
         dbobj = bmodels.Musician.objects.get(slug=aSlug)
     except bmodels.Musician.DoesNotExist:
@@ -77,7 +78,7 @@ def add_musician(aName, aSlug):
     return dbobj
 
 def add_actor(aName, aSlug):
-    print("---> ADD Actor %s, slug %s" % (aName, aSlug))
+    #print("---> ADD Actor %s, slug %s" % (aName, aSlug))
     try:
         dbobj = bmodels.Actor.objects.get(slug=aSlug)
     except Actor.DoesNotExist:
@@ -87,7 +88,7 @@ def add_actor(aName, aSlug):
     return dbobj
 
 def add_director(aName, aSlug):
-    print("---> ADD Director %s, slug %s" % (aName, aSlug))
+    #print("---> ADD Director %s, slug %s" % (aName, aSlug))
     try:
         dbobj = bmodels.Director.objects.get(slug=aSlug)
     except bmodels.Director.DoesNotExist:
@@ -97,7 +98,7 @@ def add_director(aName, aSlug):
     return dbobj
 
 def add_tag(tName, tSlug):
-    print("---> ADD Tag %s, slug %s" % (tName, tSlug))
+    #print("---> ADD Tag %s, slug %s" % (tName, tSlug))
     try:
         dbobj = bmodels.Tag.objects.get(slug=tSlug)
     except bmodels.Tag.DoesNotExist:
@@ -117,12 +118,11 @@ def as_movie(ext):
         return True
     if ext == '.avi':
         return True
-    print ("SKIPPING - extension %s" % ext)
+    print ("SKIPPING - unhandled extension %s" % ext)
     return False
 
 def add_file(root,myfile,path,newCollection,formKind,formTag):
     # Still to do: log messages
-    print("ADD_FILE file %s, root %s, path %s formKind %s formTag %s" % (myfile,root,path,formKind,formTag))
     theFile = os.path.join(root,myfile)
     if mp3.isMp3File(theFile):
         tag = id3.Tag()
@@ -130,7 +130,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
         myArtist = tag.artist
         addC = False
         if myArtist is None :
-            print("******************* mp3 file with no artist, skipping %s" % theFile)
+            print("SKIP mp3 no artist %s" % theFile)
         else:
             if tag.album is None:
                 collection = newCollection
@@ -196,6 +196,4 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 xTag=add_tag(formTag,xSlug)
                 movie.tags.add(xTag)
                 movie.save()
-        else:
-            print("UNKNOWN FILE SKIPPING %s extension %s " % (theFile,extension))
 

@@ -9,7 +9,6 @@ from FriendlyHomeLibrary import settings
 def to_str(unicode_or_string):
     if isinstance(unicode_or_string,unicode):
         value = unicode_or_string.encode('utf-8')
-    #    print("Value %s " % (value))
     else:
         value = unicode_or_string
     return value
@@ -18,7 +17,6 @@ def slugCompare(s1,s2):
     remove = to_str('-_')
     c1 = to_str(s1).translate(None,remove)
     c2 = to_str(s2).translate(None,remove)
-    #print("comparing %s with %s" % (c1,c2))
     return c1==c2
 
 def get_drive(driveNo):
@@ -39,7 +37,6 @@ def object_path_with_static(obj):
     thePath = os.path.join("static/links/", drive)
     thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName) 
     return to_str(thePath)
-
 
 # Given a list of songs, create a list containing pairs of path,song
 # which can be passed to playlist
