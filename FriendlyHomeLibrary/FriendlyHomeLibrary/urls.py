@@ -14,17 +14,19 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+
 from FHLBuilder import urls as builder_urls
+from FHLBuilder import views as bv
+
 from FHLReader import urls as reader_urls
+
 from FHLUser import urls as user_urls
-#from django.contrib.auth import urls as auth_urls
 
 urlpatterns = [
-    url(r'^$',builder_urls.HomePage.as_view(),name='homepage'),
+    url(r'^$',bv.HomePage.as_view(),name='homepage'),
     url(r'^admin/', admin.site.urls),
     url(r'^builder/',include(builder_urls)),
     url(r'^reader/',include(reader_urls)),
-    #url(r'^user/',include(auth_urls)),    
     url(r'^user/',include(user_urls)),    
     
 ]
