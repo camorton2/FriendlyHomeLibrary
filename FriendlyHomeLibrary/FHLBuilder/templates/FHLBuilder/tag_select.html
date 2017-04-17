@@ -1,11 +1,6 @@
 <section>
 {% if user.is_authenticated %}
-<form action="" method="get">
    <input type="text" name="tq">
    <input type="submit" value="Tag">
-</form>
-
-{% else %}
-   <p>Error - action not permitted</p>
 {% endif %}
 </section>

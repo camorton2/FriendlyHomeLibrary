@@ -47,12 +47,17 @@
 
 {% if user.is_authenticated %}
 <section>
-{% include "FHLBuilder/tag_select.html" %}
+<form method="get">
+{% csrf_token %}
+<fieldset>
+    <legend>Tags</legend>    
+    {% include "FHLBuilder/tag_select.html" %}
+    {% include "FHLBuilder/musician_select.html" %}
+</fieldset>
+</form>
 </section>
 <section>
 {% include "FHLBuilder/likesandloves.html" %}        
-</section>
-<section>
 {% include "FHLBuilder/object_update.html" %}        
 </section>
 {% endif %}

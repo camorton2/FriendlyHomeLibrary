@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import os
 from eyed3 import mp3,id3
 import enzyme
+import exifread
 
 from django.utils.text import slugify
 from django.db import models
@@ -24,7 +25,7 @@ def setFileKind(obj,kind):
 def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
     #print ("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
     try:
-        dbobj = bmodels.Collection.objects.get(slug=cSlug)
+        dbobj = bmodels.Collection.objects.get(slug__iexact=cSlug)
     except bmodels.Collection.DoesNotExist:
         path = utility.to_str(cPath)
         album = utility.to_str(cAlbum)
@@ -36,7 +37,7 @@ def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
 def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
     #print ("---> ADD Song %s, track %s, filename %s, slug %s: " % (sTitle,sTrack,sFileName,sSlug))
     try:
-        dbobj = bmodels.Song.objects.get(slug=sSlug)
+        dbobj = bmodels.Song.objects.get(slug__iexact=sSlug)
     except bmodels.Song.DoesNotExist:
         sCollection.save()
         track = utility.to_str(sTrack)
@@ -51,7 +52,7 @@ def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
 def add_movie(mTitle, mFileName, mSlug, mCollection):
     #print ("---> ADD Movie %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
     try:
-        dbobj = bmodels.Movie.objects.get(slug=mSlug)
+        dbobj = bmodels.Movie.objects.get(slug__iexact=mSlug)
         #print ("SKIPPING - duplicate %s" % mSlug)
     except bmodels.Movie.DoesNotExist:
         mCollection.save()
@@ -66,7 +67,7 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
 
 def add_picture(mTitle, mFileName, mSlug, mCollection):
     try:
-        dbobj = bmodels.Picture.objects.get(slug=mSlug)
+        dbobj = bmodels.Picture.objects.get(slug__iexact=mSlug)
     except bmodels.Picture.DoesNotExist:
         mCollection.save()
         title = utility.to_str(mTitle)
@@ -80,7 +81,7 @@ def add_picture(mTitle, mFileName, mSlug, mCollection):
 def add_musician(aName, aSlug):
     #print("---> ADD Musician %s, slug %s" % (aName, aSlug))
     try:
-        dbobj = bmodels.Musician.objects.get(slug=aSlug)
+        dbobj = bmodels.Musician.objects.get(slug__iexact=aSlug)
     except bmodels.Musician.DoesNotExist:
         for b in bmodels.Musician.objects.all():
             if utility.slugCompare(aSlug,b.slug):
@@ -93,8 +94,8 @@ def add_musician(aName, aSlug):
 def add_actor(aName, aSlug):
     #print("---> ADD Actor %s, slug %s" % (aName, aSlug))
     try:
-        dbobj = bmodels.Actor.objects.get(slug=aSlug)
-    except Actor.DoesNotExist:
+        dbobj = bmodels.Actor.objects.get(slug__iexact=aSlug)
+    except bmodels.Actor.DoesNotExist:
         name = utility.to_str(aName)
         dbobj = bmodels.Actor(fullName=name,slug=aSlug)
         dbobj.save()
@@ -103,17 +104,17 @@ def add_actor(aName, aSlug):
 def add_director(aName, aSlug):
     #print("---> ADD Director %s, slug %s" % (aName, aSlug))
     try:
-        dbobj = bmodels.Director.objects.get(slug=aSlug)
+        dbobj = bmodels.Director.objects.get(slug__iexact=aSlug)
     except bmodels.Director.DoesNotExist:
         name = utility.to_str(aName)
-        dbobj = Director(fullName=name,slug=aSlug)
+        dbobj = bmodels.Director(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
 
 def add_tag(tName, tSlug):
-    #print("---> ADD Tag %s, slug %s" % (tName, tSlug))
+    print("---> ADD Tag %s, slug %s" % (tName, tSlug))
     try:
-        dbobj = bmodels.Tag.objects.get(slug=tSlug)
+        dbobj = bmodels.Tag.objects.get(slug__iexact=tSlug)
     except bmodels.Tag.DoesNotExist:
         name = utility.to_str(tName)
         dbobj = bmodels.Tag(name=name,slug=tSlug)
@@ -136,6 +137,10 @@ def as_picture(ext):
     if ext == '.THM':
         return True
     if ext == '.thm':
+        return True
+    if ext == '.tiff':
+        return True
+    if ext == '.tif':
         return True
     return False
 
@@ -224,7 +229,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
 
         genre = tag.genre
         if genre is not None:
-            genreSlug = slugify(unicode('%s%s' % (genre.id,genre.name)))
+            genreSlug = slugify(unicode('%s' % (genre.name)))
             gen = add_tag(genre.name,genreSlug)
             song.tags.add(gen)
         song.save()
@@ -255,6 +260,9 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
             mSlug = slugify( unicode('%s%s-pict' % (nc.slug,mTitle)))
             #print("PICTURE %s album %s" % (mSlug,nc.slug))
             picture = add_picture(mTitle,base,mSlug,nc)
+            # supposed to be faster with details=False
+            #itags = exifread.process_file(theFile, details=False)
+            itags = exifread.process_file(theFile)
             if len(formTag):
                 xSlug = slugify(unicode('%s' % (formTag)))
                 xTag=add_tag(formTag,xSlug)

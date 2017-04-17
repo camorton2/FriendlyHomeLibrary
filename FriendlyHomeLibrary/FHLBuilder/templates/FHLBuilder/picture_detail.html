@@ -33,5 +33,21 @@
 </section>
 {% endif %}
 
+{% if user.is_authenticated %}
+<section>
+<form method="get">
+{% csrf_token %}    
+<fieldset>
+    <legend>Tags</legend>    
+    {% include "FHLBuilder/tag_select.html" %}
+</fieldset>
+</form>
+<section>
+    {% include "FHLBuilder/likesandloves.html" %}        
+    {% include "FHLBuilder/object_update.html" %}        
+</section>
+
+{% endif %}
+
 
 {% endblock %}

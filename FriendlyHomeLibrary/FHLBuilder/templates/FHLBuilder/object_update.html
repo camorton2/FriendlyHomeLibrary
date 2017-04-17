@@ -1,6 +1,9 @@
 <form action="" method = "post">
 {% csrf_token %}
+<fieldset>
+    <legend>Additional Details</legend>
 {{objectForm.as_p}}
 <button type="submit" name="UpdateObject">Update</button>
+</fieldset>
 </form>
 

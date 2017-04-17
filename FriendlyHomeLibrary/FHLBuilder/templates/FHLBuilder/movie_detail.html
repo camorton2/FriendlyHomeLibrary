@@ -14,9 +14,6 @@
         <li>Year: {{movie.year}}</li>
     {% endif %}
 </ul>
-{% if user.is_authenticated %}
-
-{% endif %}
 </section>
 
 <section></section>
@@ -73,26 +70,22 @@
 
 {% if user.is_authenticated %}
 <section>
-{% include "FHLBuilder/tag_select.html" %}
-</section>
+<form method="get">
+{% csrf_token %}    
+<fieldset>
+    <legend>Tags</legend>    
+    {% include "FHLBuilder/tag_select.html" %}
+    {% include "FHLBuilder/director_select.html" %}
+    {% if movie.fileKind == 'CC' %}
+    {% include "FHLBuilder/musician_select.html" %}
+    {% else %}
+    {% include "FHLBuilder/actor_select.html" %}
+    {% endif %}
+</fieldset>
+</form>
 <section>
-{% include "FHLBuilder/director_select.html" %}
-</section>
-
-{% if movie.fileKind == 'CC' %}
-<section>
-{% include "FHLBuilder/musician_select.html" %}
-</section>
-{% else %}
-<section>
-{% include "FHLBuilder/actor_select.html" %}
-</section>
-{% endif %}
-<section>
-{% include "FHLBuilder/likesandloves.html" %}        
-</section>
-<section>
-{% include "FHLBuilder/object_update.html" %}        
+    {% include "FHLBuilder/likesandloves.html" %}        
+    {% include "FHLBuilder/object_update.html" %}        
 </section>
 
 {% endif %}

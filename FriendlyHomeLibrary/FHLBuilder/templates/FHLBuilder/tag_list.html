@@ -5,9 +5,11 @@
 {% endblock %}
 
 {% block content %}
-<ul id="playlist">
-{% for x in tl %}
-<li><a href="{{ x.get_absolute_url}}"> {{x.name|title}}</a></li>
+<ul>
+{% for tag in tags %}
+<!-- TODO why doesn't absolute_url work in this case? -->
+<!--<li><a href="{{ tag.get_absolute_url }}"> {{tag.name|title}}</a></li>-->
+<li><a href="{{tag.slug}}"> {{tag.name|title}}</a></li>
 {% endfor %}
 </ul>
 {% endblock %}

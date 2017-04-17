@@ -28,14 +28,14 @@ def get_drive(driveNo):
 def object_path(obj):
     drive=to_str('drive') + str(obj.collection.drive)
     thePath = os.path.join("links/", drive)
-    thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName) 
+    thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName)
     return to_str(thePath)
 
 #used when path is needed outside html
 def object_path_with_static(obj):
     drive=to_str('drive') + str(obj.collection.drive)
     thePath = os.path.join("static/links/", drive)
-    thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName) 
+    thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName)
     return to_str(thePath)
 
 # Given a list of objects, create a list containing pairs of path,object
@@ -44,11 +44,11 @@ def link_file_list(songs):
     finalList = []
     if songs is not None:
         for song in songs:
-            print("song %s" % song.title)
+            #print("song %s" % song.title)
             item = (song, object_path(song))
             finalList.append(item)
     return finalList
-    
+
 def collection_sets(collections):
     songc = []
     moviec = []
@@ -75,6 +75,6 @@ def collection_sets(collections):
                     songc.append(current)
                 else:
                     variousc.append(current)
-    return songc,moviec,picturec,variousc        
-            
-            
+    return songc,moviec,picturec,variousc
+
+

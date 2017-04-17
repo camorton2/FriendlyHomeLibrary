@@ -47,7 +47,7 @@
 {% else %}
 
     <br>
-    <ul id="filelist">
+    <ul>
     {% for song,path in songlist %}
         <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
     {% endfor %}
@@ -79,7 +79,7 @@
 
     
     <br>
-    <ul id="filelist">
+    <ul>
     {% for song,path in songlist2 %}
         <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
     {% endfor %}

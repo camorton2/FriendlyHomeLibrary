@@ -1,6 +1,10 @@
+
 <form action="" method = "post">
+<fieldset>
+    <legend>Additional Movie Information</legend>
 {% csrf_token %}
 {{movieForm.as_p}}
 <button type="submit">Update</button>
+</fieldset>
 </form>
 

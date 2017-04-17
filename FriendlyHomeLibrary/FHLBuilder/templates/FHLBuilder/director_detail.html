@@ -10,10 +10,10 @@
 
 {% if director.movies.count %}
 <section>
-<h3>Movies associated with {{director.fullName}}</h3>
-<ul id='filelist'>
+<h3>Directed by {{director.fullName|title}}</h3>
+<ul>
 {% for obj in director.movies.all %}
-<li><a href="{{obj.get_absolute_url}}">{{obj.title}}</a></li>
+<li><a href="{{obj.get_absolute_url}}">{{obj.title|title}}</a></li>
 {% endfor %}
 </ul>
 </section>

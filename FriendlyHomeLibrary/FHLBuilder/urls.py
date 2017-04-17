@@ -47,18 +47,11 @@ urlpatterns = [
     url(r'^musician/$',
       bv.MusicianList.as_view(),
       name='builder_musician_list'),
-
       
 # Tags
-    url(r'^tag/create/$',
-      login_required(bv.TagFormView.as_view()),
-      name='builder_tag_create'),
     url(r'^tag/(?P<slug>[\w\-]+)/$',
       bv.TagDetailView.as_view(),
       name='builder_tag_detail'),
-    url(r'^tag/(?P<slug>[\w\-]+)/update/$',
-      login_required(bv.TagUpdate.as_view()),
-      name='builder_tag_update'),
 
 # Actors
     url(r'^actor/(?P<slug>[\w\-]+)/$',
@@ -76,23 +69,14 @@ urlpatterns = [
       name='builder_musician_detail'),
 
 # Songs
-    url(r'^song/create/$',
-      login_required(bv.SongFormView.as_view()),
-      name='builder_song_create'),
     url(r'^song/(?P<slug>[\w\-]+)/$',
       bv.SongDetailView.as_view(),
       name='builder_song_detail'),
-    url(r'^song/(?P<slug>[\w\-]+)/update/$',
-      login_required(bv.SongUpdate.as_view()),
-      name='builder_song_update'),
 
 # Pictures
     url(r'^picture/(?P<slug>[\w\-]+)/$',
       bv.PictureDetailView.as_view(),
       name='builder_picture_detail'),
-    url(r'^picture/(?P<slug>[\w\-]+)/update/$',
-      login_required(bv.SongUpdate.as_view()),
-      name='builder_picture_update'),
 
 # Collections
     url(r'^collection/create/$',
@@ -106,14 +90,8 @@ urlpatterns = [
       name='builder_collection_update'),
 
 # Movies
-    url(r'^movie/create/$',
-      login_required(bv.MovieFormView.as_view()),
-      name='builder_movie_create'),
     url(r'^movie/(?P<slug>[\w\-]+)/$',
       bv.MovieDetailView.as_view(),
       name='builder_movie_detail'),
-    url(r'^movie/(?P<slug>[\w\-]+)/update/$',
-      login_required(bv.MovieUpdate.as_view()),
-      name='builder_movie_update'),
 
 ]

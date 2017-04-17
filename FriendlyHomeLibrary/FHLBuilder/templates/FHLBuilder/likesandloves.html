@@ -1,22 +1,25 @@
 
-<br>
-<div>
-<form action="" method = "post">
-{% csrf_token %}
-<button type="submit" name="liked">I like this</button>
+<form method="get" action="" >
+<fieldset>
+    <legend>Preferences</legend>    
+    {% csrf_token %}
+    {% if love %}
+    <input type="radio" name="pref" value="loved" checked>Love<br>
+    {% else %}
+    <input type="radio" name="pref" value="loved">Love<br>
+    {% endif %}
+
+    {% if like %}
+    <input type="radio" name="pref" value="liked" checked>Like<br>
+    {% else %}
+    <input type="radio" name="pref" value="liked">Like<br>
+    {% endif %}
+
+    {% if dislike %}
+    <input type="radio" name="pref" value="disliked" checked>Dislike<br>
+    {% else %}
+    <input type="radio" name="pref" value="disliked">Dislike<br>
+    {% endif %}
+    <br><input type="submit" value="Apply">
+</fieldset>    
 </form>
-</div>
-<br>
-<div>
-<form action="" method = "post">
-{% csrf_token %}
-<button type="submit" name="loved">I love this</button>
-</form>
-</div>
-<br>
-<div>
-<form action="" method = "post">
-{% csrf_token %}
-<button type="submit" name="disliked">I dislike this</button>
-</form>
-</div>

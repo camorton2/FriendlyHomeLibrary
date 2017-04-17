@@ -6,8 +6,8 @@
 
 {% block content %}
 
-<h3>{{me}}'s Page</h3>
-<ul id="playlist">
+<h3>{{me|title}}'s Page</h3>
+<ul>
 <li><a href="{% url 'user_songs' %}">My Songs</a></li>
 <li><a href="{% url 'user_movies' %}">My Movies</a></li>
 </ul>

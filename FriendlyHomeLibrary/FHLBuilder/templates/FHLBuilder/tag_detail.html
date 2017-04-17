@@ -6,11 +6,11 @@
 
 {% block content %}
 
-<h2>{{tag.name}}</h2>
+<h2>{{tag.name|title}}</h2>
 
 {% if tag.song_tags.count %}
 <section>
-<h3>Songs associated with {{tag.name}}</h3>
+<h3>Songs</h3>
 <ul>
 {% include "FHLBuilder/song_playlist.html" %}
 </ul>
@@ -18,7 +18,7 @@
 {% endif %}
 {% if movielist.count %}
 <section>
-<h3>Movies associated with {{tag.name}}</h3>
+<h3>Movies</h3>
 <ul>
 {% for mv in movielist %}
 <li><a href="{{mv.get_absolute_url}}">{{mv.title}}</a></li>
@@ -27,7 +27,7 @@
 </section>
 {% if tag.picture_tags.count %}
 <section>
-<h3>Pictures associated with {{tag.name}}</h3>
+<h3>Pictures</h3>
 <ul>
 {% include "FHLBuilder/picture_list.html" %}
 </ul>

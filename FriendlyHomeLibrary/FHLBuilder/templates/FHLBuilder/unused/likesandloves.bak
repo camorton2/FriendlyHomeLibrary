@@ -1,0 +1,22 @@
+
+<br>
+<div>
+<form action="" method = "post">
+{% csrf_token %}
+<button type="radio" name="liked">I like this</button>
+</form>
+</div>
+<br>
+<div>
+<form action="" method = "post">
+{% csrf_token %}
+<button type="radio" name="loved">I love this</button>
+</form>
+</div>
+<br>
+<div>
+<form action="" method = "post">
+{% csrf_token %}
+<button type="radio" name="disliked">I dislike this</button>
+</form>
+</div>
