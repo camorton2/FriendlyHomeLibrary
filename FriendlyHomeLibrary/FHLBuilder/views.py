@@ -44,12 +44,15 @@ class TagDetailView(View):
     template_name = 'FHLBuilder/tag_detail.html'
     def get(self,request,slug):
         tag=get_object_or_404(models.Tag,slug__iexact=slug)
-        slist = utility.songList(tag.song_tags.all())
+        slist = utility.link_file_list(tag.song_tags.all())
+        plist = utility.link_file_list(tag.picture_tags.all())
         mlist = tag.movie_tags.all()
         context = {'tag':tag,'songlist':slist, 'movielist':mlist}
         if 'playlist' in request.GET:
             context = {'tag':tag,
-                'songlist':slist, 'movielist':mlist,
+                'songlist':slist, 
+                'movielist':mlist,
+                'picturelist':plist,
                 'asPlayList':True}
         return render(request, self.template_name,context)
 
@@ -98,7 +101,7 @@ class SongList(View):
     template_name='FHLBuilder/song_list.html'
     def get(self,request):
         #print("SongList GET")
-        slist = utility.songList(models.Song.objects.all())
+        slist = utility.link_file_list(models.Song.objects.all())
         title = ('All Songs %d' % models.Song.objects.count())
         if 'playlist' in request.GET:
             context = {'listTitle': title, 'songlist': slist,
@@ -110,8 +113,8 @@ class SongList(View):
 
     def post(self,request):
         #print("SongList POST")
-        slist = utility.songList(Song.objects.all())
-        title = ('All Songs %d' % Song.objects.count())
+        slist = utility.link_file_list(models.Song.objects.all())
+        title = ('All Songs %d' % models.Song.objects.count())
         if 'kodi_lf' in request.POST:
             kodi.songs_to_kodi_lf(slist)
         elif 'kodi-bf' in request.POST:
@@ -139,7 +142,7 @@ class SongDetailView(View):
         return render(request, self.template_name, context)
 
     def post(self,request,slug):
-        print ("SONG POST slug %s" % (slug))
+        #print ("SONG POST slug %s" % (slug))
         song=get_object_or_404(models.Song,slug__iexact=slug)
         playit = utility.object_path(song)
         bound_form = self.form_class(request.POST,instance=song)
@@ -226,7 +229,14 @@ class CollectionList(View):
     template_name='FHLBuilder/collection_list.html'
     def get(self,request):
         #print("CollectionList GET")
-        context = {'tl': models.Collection.objects.all()}
+        allc = models.Collection.objects.all()
+        songc,moviec,picturec,variousc = utility.collection_sets(allc)
+        context = {
+            'movies': moviec,
+            'songs': songc,
+            'pictures': picturec,
+            'various': variousc
+            }
         return render(request,self.template_name,context)
 
 
@@ -242,21 +252,22 @@ class CollectionMixins:
         # Still to do, log errors
         #print("ADD_MEMBERS path %s" % (path))
         sDrive = utility.get_drive(drive)
-
+        album = None
+        artist = None
         setPath = os.path.join(settings.MY_MEDIA_FILES_ROOT,sDrive)
         for root, dirs, files in os.walk(os.path.join(setPath,path)):
             myroot = utility.to_str(root[len(setPath):])
             #print("LOOP myroot %s dirs %s files %s\n" % (myroot,dirs,files))
-            nc = self.handle_collection(myroot,drive,kind,tag)
+            album = self.handle_collection(myroot,drive,kind,tag)
             for obj in files:
                 try:
                     #print("ADD_MEMBERS myroot %s obj %s" % (myroot,utility.to_str(obj)))
-                    collection.add_file(root,utility.to_str(obj),myroot,nc,kind,tag)
+                    album,artist = collection.add_file(root,utility.to_str(obj),myroot,album,kind,tag)
                 except UnicodeDecodeError:
-                    print("ERROR unable to deal with filename- skipping in collection %s" % (nc.title))
+                    print("ERROR unable to deal with filename- skipping in collection %s" % (album.title))
                 except IOError:
-                    print("ERROR IOError with filename- skipping in collection %s" % (nc.title))
-        return nc
+                    print("ERROR IOError with filename- skipping in collection %s" % (album.title))
+        return album,artist
 
 class CollectionDetailView(View, CollectionMixins):
     template_name = 'FHLBuilder/collection_detail.html'
@@ -272,12 +283,21 @@ class CollectionDetailView(View, CollectionMixins):
             for obj in clist:
                 obj.tags.add(new_tag)
         songObjects = collection.song_set.all()
-        mySongList = utility.songList(songObjects)
+        mySongList = utility.link_file_list(songObjects)
+        pictureObjects = collection.picture_set.all()
+        myPictureList = utility.link_file_list(pictureObjects)
+        
         if 'playlist' in request.GET:
-            context = {'collection':collection,'songlist':mySongList,
-               'asPlayList':True}
+            context = {
+                'collection':collection,
+                'songlist':mySongList,
+                'picturelist':myPictureList,
+                'asPlayList':True}
             return render(request,self.template_name,context)
-        context = {'collection':collection,'songlist':mySongList}
+        context = {
+            'collection':collection,
+            'songlist':mySongList,
+            'picturelist':myPictureList}
         return render(request, self.template_name, context)
 
 
@@ -294,25 +314,22 @@ class CollectionFormView(View,CollectionMixins):
         #print("CollectionFormView POST")
         bound_form=self.form_class(request.POST)
         if bound_form.is_valid():
-            nc = self.add_members(
+            album,artist = self.add_members(
                 bound_form.cleaned_data['filePath'],
                 bound_form.drive,
                 bound_form.cleaned_data['kind'],
                 bound_form.cleaned_data['tag'])
 
-            if nc.song_set.count() or nc.movie_set.count():
-                # mp3 files create their own collection leaving this one empty
-                # so it is not saved unless it has been populated
-                nc.save()
-                return redirect(nc)
-            #else:
-            #    musician_detail = 'FHLBuilder/musician_detail.html'
-            #    for b in models.Musician.objects.all():
-            #        bSlug=b.slug[:-4]
-            #        if utility.slugCompare(nc.slug,bSlug):
-            #            return render(request, musician_detail, {'musician':b})
-        #return render(request,self.template_name,{'form':bound_form})
-        #musician_detail = 'FHLBuilder/collection_list.html'
+            if artist is not None:
+                # display the page for the musician
+                #return render(request, musician_detail, {'musician':artist})
+                return redirect(artist)
+            elif album.song_set.count() or album.movie_set.count():
+                # new album is not empty, save and redirect
+                album.save()
+                return redirect(album)
+                
+        # otherwise display the list of all collections
         return redirect(reverse('builder_collection_list'))
 
 
@@ -592,11 +609,80 @@ class MusicianDetailView(View):
 
     def get(self,request,slug):
         musician=get_object_or_404(models.Musician,slug__iexact=slug)
-        slist = utility.songList(musician.songs.all())
+        slist = utility.link_file_list(musician.songs.all())
         if 'playlist' in request.GET:
             context = {'musician':musician,'songlist':slist, 'asPlayList':True}
             return render(request,self.template_name,context)
         return render(request, self.template_name,
             {'musician':musician,'songlist':slist})
 
+
+# pictures
+class PictureList(View):
+    template_name='FHLBuilder/picture_list.html'
+    def get(self,request):
+        #print("PictureList GET")
+        count = models.Picture.objects.count()
+        plist = utility.link_file_list(models.Picture.objects.all())
+        title = ('All Pictures %d' % count)
+        context = {'listTitle': title, 'picturelist': plist, 
+            'pictureCount':count}
+        return render(request,self.template_name,context)
+
+    def post(self,request):
+        #print("PictureList POST")
+        plist = utility.link_file_list(models.Picture.objects.all())
+        title = ('All Pictures %d' % models.Picture.objects.count())
+        context = {'listTitle': title, 'picturelist': plist,
+            'pictureCount':count }
+        return render(request,self.template_name,context)
+
+
+class PictureDetailView(View):
+    template_name = 'FHLBuilder/picture_detail.html'
+    form_class=forms.PictureForm
+
+    def get(self,request,slug):
+        picture=get_object_or_404(models.Picture,slug__iexact=slug)
+        playit = utility.object_path(picture)
+        if 'tq' in request.GET and request.GET['tq']:
+            tq = request.GET['tq']
+            tqSlug = slugify(unicode(tq))
+            new_tag = collection.add_tag(tq,tqSlug)
+            picture.tags.add(new_tag)
+        context = {'picture':picture,'playit':playit,
+            'objectForm':self.form_class(instance=picture)}
+        return render(request, self.template_name, context)
+
+    def post(self,request,slug):
+        #print ("PICTURE POST slug %s" % (slug))
+        picture=get_object_or_404(models.Picture,slug__iexact=slug)
+        playit = utility.object_path(picture)
+        bound_form = self.form_class(request.POST,instance=picture)
+        if 'UpdateObject' in request.POST:
+            if bound_form.is_valid():
+                new_picture = bound_form.save()
+                picture.title=new_picture.title
+                picture.year=new_picture.year
+                picture.save()
+                formContext = {'picture':picture,'playit':playit,
+                    'objectForm':bound_form}
+                return render(request,self.template_name, formContext)
+
+        # Still to do, should remove from the other lists so its not in more than 1
+        elif 'liked' in request.POST:
+            #print("LIKED by %s" % request.user)
+            picture.likes.add(request.user)
+            picture.save()
+        elif 'loved' in request.POST:
+            #print("LOVED")
+            picture.loves.add(request.user)
+            picture.save()
+        elif 'disliked' in request.POST:
+            picture.dislikes.add(request.user)
+            picture.save();
+            #print("DISLIKED")
+        pictureContext = {'picture':picture,'playit':playit,
+            'objectForm': self.form_class(instance=picture)}
+        return render(request,self.template_name, pictureContext)
 

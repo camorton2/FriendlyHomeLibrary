@@ -12,15 +12,27 @@
 <section>
 <ul>
 {% if songlist %}
+<h3>Songs</h3>
 {% include "FHLBuilder/song_playlist.html" %}
 {% endif %}
 </ul>
 </section>
 
 <ul>
+{% if collection.movie_set.count %}
+<h3>movies</h3>
+{% endif %}
 {% for mv in collection.movie_set.all %}
 <li><a href="{{mv.get_absolute_url}}">{{mv.title}}</a></li>
 {% endfor %}
+</ul>
+</section>
+<section>
+<ul>
+{% if picturelist %}
+<h3>Pictures</h3>
+{% include "FHLBuilder/picture_list.html" %}
+{% endif %}
 </ul>
 </section>
 

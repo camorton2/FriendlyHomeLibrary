@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.views.generic import View
 
 from FHLBuilder.models import Song, Movie
-from FHLBuilder.utility import songList
+from FHLBuilder.utility import link_file_list 
 from FHLBuilder.query import findSongs, findMovies
 
 # Create your views here.
@@ -31,8 +31,8 @@ class UserSongList(View):
         if 'filelist' in request.GET:
             playlist=False
         self.likedSongs,self.lovedSongs = findSongs(me)
-        likedSongList = songList(self.likedSongs)
-        lovedSongList = songList(self.lovedSongs)
+        likedSongList = link_file_list(self.likedSongs)
+        lovedSongList = link_file_list(self.lovedSongs)
             
         context = {
             'listTitle': "Songs I Love",

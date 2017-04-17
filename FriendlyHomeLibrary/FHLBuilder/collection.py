@@ -64,6 +64,19 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
     dbobj.save()
     return dbobj
 
+def add_picture(mTitle, mFileName, mSlug, mCollection):
+    try:
+        dbobj = bmodels.Picture.objects.get(slug=mSlug)
+    except bmodels.Picture.DoesNotExist:
+        mCollection.save()
+        title = utility.to_str(mTitle)
+        fileName = utility.to_str(mFileName)
+        dbobj = bmodels.Picture(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
+        dbobj.save()
+    dbobj.fileKind = choices.PICTURE
+    dbobj.save()
+    return dbobj
+
 def add_musician(aName, aSlug):
     #print("---> ADD Musician %s, slug %s" % (aName, aSlug))
     try:
@@ -107,6 +120,25 @@ def add_tag(tName, tSlug):
         dbobj.save()
     return dbobj
 
+def as_picture(ext):
+    if ext == '.jpg':
+        return True
+    if ext == '.JPG':
+        return True
+    if ext == '.img':
+        return True
+    if ext == '.IMG':
+        return True
+    if ext == '.png':
+        return True
+    if ext == '.PNG':
+        return True
+    if ext == '.THM':
+        return True
+    if ext == '.thm':
+        return True
+    return False
+
 def as_movie(ext):
     if ext == '.mkv':
         return True
@@ -118,58 +150,84 @@ def as_movie(ext):
         return True
     if ext == '.avi':
         return True
-    print ("SKIPPING - unhandled extension %s" % ext)
+    if ext == '.AVI':
+        return True
+    if ext == '.flv':
+        return True
+    if ext == '.wmv':
+        return True
+    if ext == '.mpg':
+        return True
+    if ext == '.VOB':
+        return True
     return False
 
 def add_file(root,myfile,path,newCollection,formKind,formTag):
+    album = newCollection
+    musician = None
     # Still to do: log messages
     theFile = os.path.join(root,myfile)
+    try:
+        statinfo = os.stat(theFile)
+    except:
+        print("SKIP error getting file stats %s" % theFile)
+        return album, musician
+    if not statinfo.st_size:
+        print("SKIP file with 0 size %s" % theFile)
+        return album, musician
+    base = os.path.basename(theFile)
+    mTitle, extension = os.path.splitext(base)
+
     if mp3.isMp3File(theFile):
         tag = id3.Tag()
         tag.parse(theFile)
         myArtist = tag.artist
         addC = False
+
         if myArtist is None :
-            print("SKIP mp3 no artist %s" % theFile)
+            myArtist = 'various'
+        title = tag.title
+        if title is None:
+            title=mTitle
+        if tag.album is None:
+            collection = newCollection
         else:
-            if tag.album is None:
-                collection = newCollection
-            else:
-                addC = True
-                # handle the collection (album) which only has a path and a name
-                collectionSlug = slugify( unicode( '%s' % (tag.album) ))
-                collection = add_collection(cAlbum=tag.album,
-                    cSlug=collectionSlug,cPath=path,
-                    cDrive=newCollection.drive)
+            addC = True
+            # handle the collection (album) which only has a path and a name
+            collectionSlug = slugify( unicode( '%s' % (tag.album) ))
+            collection = add_collection(cAlbum=tag.album,
+                cSlug=collectionSlug,cPath=path,
+                cDrive=newCollection.drive)
+            album = collection
+            newCollection = collection
+        # song has track, title, filename, slug, collection
+        songSlug = slugify( unicode('%s%s' % (title,collection.slug)))
+        t1, t2 = tag.track_num
+        if t1 is None:
+            t1=0
+        song = add_song(sTrack=t1,sTitle=title, sFileName=myfile,
+            sSlug=songSlug, sCollection=collection)
+        # musician has name, slug
+        artistSlug = slugify( unicode('%s%s' % (myArtist,'-mus')))
 
-            # song has track, title, filename, slug, collection
-            songSlug = slugify( unicode('%s%s' % (tag.title,collection.slug)))
-            t1, t2 = tag.track_num
-            if t1 is None:
-                t1=0
-            song = add_song(sTrack=t1,sTitle=tag.title, sFileName=myfile,
-                sSlug=songSlug, sCollection=collection)
-            # musician has name, slug
-            artistSlug = slugify( unicode('%s%s' % (myArtist,'-mus')))
+        musician = add_musician(aName=myArtist, aSlug=artistSlug)
+        setFileKind(song, formKind)
+        if len(formTag):
+            xSlug = slugify(unicode('%s' % (formTag)))
+            xTag=add_tag(formTag,xSlug)
+            song.tags.add(xTag)
 
-            musician = add_musician(aName=myArtist, aSlug=artistSlug)
-            setFileKind(song, formKind)
-            if len(formTag):
-                xSlug = slugify(unicode('%s' % (formTag)))
-                xTag=add_tag(formTag,xSlug)
-                song.tags.add(xTag)
+        if addC:
+            musician.albums.add(collection)
+        musician.songs.add(song)
+        musician.save()
 
-            if addC:
-                musician.albums.add(collection)
-            musician.songs.add(song)
-            musician.save()
-
-            genre = tag.genre
-            if genre is not None:
-                genreSlug = slugify(unicode('%s%s' % (genre.id,genre.name)))
-                gen = add_tag(genre.name,genreSlug)
-                song.tags.add(gen)
-            song.save()
+        genre = tag.genre
+        if genre is not None:
+            genreSlug = slugify(unicode('%s%s' % (genre.id,genre.name)))
+            gen = add_tag(genre.name,genreSlug)
+            song.tags.add(gen)
+        song.save()
     else:
         # This section is for the info on mkv files
         # currently not being used, but may be in future
@@ -183,11 +241,8 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
         ##except enzyme.MalformedMKVError:
         ##    print("BOGUS MKV skip")
 
-        base = os.path.basename(theFile)
-        mTitle, extension = os.path.splitext(base)
-
+        nc = newCollection
         if as_movie(extension):
-            nc = newCollection
             mSlug = slugify( unicode('%s%s' % (nc.slug,mTitle)))
             movie = add_movie(mTitle,base,mSlug,nc)
             setFileKind(movie,formKind)
@@ -196,4 +251,17 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 xTag=add_tag(formTag,xSlug)
                 movie.tags.add(xTag)
                 movie.save()
+        elif as_picture(extension):
+            mSlug = slugify( unicode('%s%s-pict' % (nc.slug,mTitle)))
+            #print("PICTURE %s album %s" % (mSlug,nc.slug))
+            picture = add_picture(mTitle,base,mSlug,nc)
+            if len(formTag):
+                xSlug = slugify(unicode('%s' % (formTag)))
+                xTag=add_tag(formTag,xSlug)
+                picture.tags.add(xTag)
+                picture.save()
+        else:
+            print ("SKIPPING - unhandled extension %s/%s" % (path,base))
+
+    return album,musician
 

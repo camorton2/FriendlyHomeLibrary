@@ -25,6 +25,15 @@
 {% endfor %}
 </ul>
 </section>
+{% if tag.picture_tags.count %}
+<section>
+<h3>Pictures associated with {{tag.name}}</h3>
+<ul>
+{% include "FHLBuilder/picture_list.html" %}
+</ul>
+</section>
+{% endif %}
+
 {% endif %}
 
 {% endblock %}

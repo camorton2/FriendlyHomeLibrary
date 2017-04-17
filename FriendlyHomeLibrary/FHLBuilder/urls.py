@@ -14,6 +14,9 @@ urlpatterns = [
     url(r'^song/$',
       bv.SongList.as_view(),
       name='builder_song_list'),
+    url(r'^picture/$',
+      bv.PictureList.as_view(),
+      name='builder_picture_list'),      
     url(r'^collection/$',
       bv.CollectionList.as_view(),
       name='builder_collection_list'),
@@ -82,6 +85,14 @@ urlpatterns = [
     url(r'^song/(?P<slug>[\w\-]+)/update/$',
       login_required(bv.SongUpdate.as_view()),
       name='builder_song_update'),
+
+# Pictures
+    url(r'^picture/(?P<slug>[\w\-]+)/$',
+      bv.PictureDetailView.as_view(),
+      name='builder_picture_detail'),
+    url(r'^picture/(?P<slug>[\w\-]+)/update/$',
+      login_required(bv.SongUpdate.as_view()),
+      name='builder_picture_update'),
 
 # Collections
     url(r'^collection/create/$',

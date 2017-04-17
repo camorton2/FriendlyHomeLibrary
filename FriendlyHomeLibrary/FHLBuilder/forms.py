@@ -24,6 +24,11 @@ class SongForm(CommonFileForm):
         model=models.Song
         fields=['title','year','fileKind']
 
+class PictureForm(CommonFileForm):
+    class Meta:
+        model=models.Picture
+        fields=['title','year']
+
 
 class MovieForm(CommonFileForm):
     class Meta:

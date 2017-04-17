@@ -16,22 +16,37 @@
 <section>
 <h4>Video Collections</h4>
 <ul id='filelist'>    
-{% for collection in tl %}
-{% if collection.movie_set.count %}
+{% for collection in movies %}
 <li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
-{% endif %}
 {% endfor %}
 </ul>
 </section>
 <section>
 <h4>Audio Collections</h4>
 <ul id='filelist'>    
-{% for collection in tl %}
-{% if collection.song_set.count %}
+{% for collection in songs %}
 <li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
-{% endif %}
 {% endfor %}
 </ul>
 </section>
+
+<section>
+<h4>Picture Collections</h4>
+<ul id='filelist'>    
+{% for collection in pictures %}
+<li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
+{% endfor %}
+</ul>
+</section>
+
+<section>
+<h4>Various Collections</h4>
+<ul id='filelist'>    
+{% for collection in various %}
+<li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
+{% endfor %}
+</ul>
+</section>
+
 
 {% endblock %}

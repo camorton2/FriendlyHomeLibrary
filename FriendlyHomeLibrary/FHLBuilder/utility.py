@@ -38,13 +38,43 @@ def object_path_with_static(obj):
     thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName) 
     return to_str(thePath)
 
-# Given a list of songs, create a list containing pairs of path,song
-# which can be passed to playlist
-def songList(songs):
+# Given a list of objects, create a list containing pairs of path,object
+# which can be passed to a playlist (song) or a picture list
+def link_file_list(songs):
     finalList = []
     if songs is not None:
         for song in songs:
+            print("song %s" % song.title)
             item = (song, object_path(song))
             finalList.append(item)
     return finalList
     
+def collection_sets(collections):
+    songc = []
+    moviec = []
+    picturec = []
+    variousc = []
+    if collections is not None:
+        for current in collections:
+            sc = current.song_set.count()
+            mc = current.movie_set.count()
+            pc = current.picture_set.count()
+            if sc and not mc and not pc:
+                # only songs
+                songc.append(current)
+            elif mc and not sc and not pc:
+                # only movies
+                moviec.append(current)
+            elif pc and not sc and not mc:
+                # only pictures
+                picturec.append(current)
+            else:
+                # various
+                if sc > pc:
+                    # some albums have a few pictures/movies
+                    songc.append(current)
+                else:
+                    variousc.append(current)
+    return songc,moviec,picturec,variousc        
+            
+            
