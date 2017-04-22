@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 from .models import Song, Movie
 
+from FriendlyHomeLibrary import settings
+
 def findSongs(me):
     #print("FindLikedSongs %s" % user)
     likedlist = []
@@ -70,5 +72,18 @@ def handle_pref(obj,pref,me):
     obj.save()
 
 
-
-
+def next_group(pictures):
+    """
+    My first generator will iterate through a picture list in 
+    sections according to the length in settings
+    """
+    first = 0
+    last = 0
+    limit = len(pictures)
+    for ctr in range(limit):
+        con = ctr % settings.PHOTO_LIST_LENGTH
+        if ctr and not con:
+            last = ctr
+            yield pictures[first:last]
+            first = ctr
+    yield pictures[first:limit]

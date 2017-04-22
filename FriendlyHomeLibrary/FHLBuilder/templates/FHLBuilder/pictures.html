@@ -1,0 +1,10 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - Create Collection
+{% endblock %}
+
+{% block content %}
+{% include "FHLBuilder/picture_list.html" %}
+{% endblock %}
+

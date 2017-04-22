@@ -27,8 +27,8 @@ def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
     try:
         dbobj = bmodels.Collection.objects.get(slug__iexact=cSlug)
     except bmodels.Collection.DoesNotExist:
-        path = utility.to_str(cPath)
-        album = utility.to_str(cAlbum)
+        path = unicode(cPath)
+        album = unicode(cAlbum)
         dbobj = bmodels.Collection(filePath=path,title=album,slug=cSlug,drive=cDrive)
         if saveIt:
             dbobj.save()
@@ -40,9 +40,9 @@ def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
         dbobj = bmodels.Song.objects.get(slug__iexact=sSlug)
     except bmodels.Song.DoesNotExist:
         sCollection.save()
-        track = utility.to_str(sTrack)
-        title = utility.to_str(sTitle)
-        fileName = utility.to_str(sFileName)
+        track = unicode(sTrack)
+        title = unicode(sTitle)
+        fileName = unicode(sFileName)
         dbobj = bmodels.Song(track=track,title=title,slug=sSlug,fileName=fileName, collection=sCollection)
         dbobj.save()
     dbobj.fileKind = choices.SONG
@@ -56,8 +56,8 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
         #print ("SKIPPING - duplicate %s" % mSlug)
     except bmodels.Movie.DoesNotExist:
         mCollection.save()
-        title = utility.to_str(mTitle)
-        fileName = utility.to_str(mFileName)
+        title = unicode(mTitle)
+        fileName = unicode(mFileName)
         #print("CATH add movie %s to collection %s" % (mSlug,mCollection.slug))
         dbobj = bmodels.Movie(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
         dbobj.save()
@@ -70,8 +70,8 @@ def add_picture(mTitle, mFileName, mSlug, mCollection):
         dbobj = bmodels.Picture.objects.get(slug__iexact=mSlug)
     except bmodels.Picture.DoesNotExist:
         mCollection.save()
-        title = utility.to_str(mTitle)
-        fileName = utility.to_str(mFileName)
+        title = unicode(mTitle)
+        fileName = unicode(mFileName)
         dbobj = bmodels.Picture(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
         dbobj.save()
     dbobj.fileKind = choices.PICTURE
@@ -86,7 +86,7 @@ def add_musician(aName, aSlug):
         for b in bmodels.Musician.objects.all():
             if utility.slugCompare(aSlug,b.slug):
                 return b
-        name = utility.to_str(aName)
+        name = unicode(aName)
         dbobj = bmodels.Musician(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
@@ -96,7 +96,7 @@ def add_actor(aName, aSlug):
     try:
         dbobj = bmodels.Actor.objects.get(slug__iexact=aSlug)
     except bmodels.Actor.DoesNotExist:
-        name = utility.to_str(aName)
+        name = unicode(aName)
         dbobj = bmodels.Actor(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
@@ -106,17 +106,17 @@ def add_director(aName, aSlug):
     try:
         dbobj = bmodels.Director.objects.get(slug__iexact=aSlug)
     except bmodels.Director.DoesNotExist:
-        name = utility.to_str(aName)
+        name = unicode(aName)
         dbobj = bmodels.Director(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
 
 def add_tag(tName, tSlug):
-    print("---> ADD Tag %s, slug %s" % (tName, tSlug))
+    #print("---> ADD Tag %s, slug %s" % (tName, tSlug))
     try:
         dbobj = bmodels.Tag.objects.get(slug__iexact=tSlug)
     except bmodels.Tag.DoesNotExist:
-        name = utility.to_str(tName)
+        name = unicode(tName)
         dbobj = bmodels.Tag(name=name,slug=tSlug)
         dbobj.save()
     return dbobj
@@ -141,6 +141,10 @@ def as_picture(ext):
     if ext == '.tiff':
         return True
     if ext == '.tif':
+        return True
+    if ext == '.pe4':
+        return True
+    if ext == '.PE4':
         return True
     return False
 
@@ -171,7 +175,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
     album = newCollection
     musician = None
     # Still to do: log messages
-    theFile = os.path.join(root,myfile)
+    theFile = unicode(os.path.join(root,myfile))
     try:
         statinfo = os.stat(theFile)
     except:
@@ -180,18 +184,19 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
     if not statinfo.st_size:
         print("SKIP file with 0 size %s" % theFile)
         return album, musician
-    base = os.path.basename(theFile)
+    base = unicode(os.path.basename(theFile))
     mTitle, extension = os.path.splitext(base)
-
+    mTitle = unicode(mTitle)
+    extension = unicode(extension)
     if mp3.isMp3File(theFile):
         tag = id3.Tag()
         tag.parse(theFile)
-        myArtist = tag.artist
+        myArtist = unicode(tag.artist)
         addC = False
 
         if myArtist is None :
-            myArtist = 'various'
-        title = tag.title
+            myArtist = u'various'
+        title = unicode(tag.title)
         if title is None:
             title=mTitle
         if tag.album is None:
@@ -200,7 +205,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
             addC = True
             # handle the collection (album) which only has a path and a name
             collectionSlug = slugify( unicode( '%s' % (tag.album) ))
-            collection = add_collection(cAlbum=tag.album,
+            collection = add_collection(cAlbum=unicode(tag.album),
                 cSlug=collectionSlug,cPath=path,
                 cDrive=newCollection.drive)
             album = collection
@@ -216,7 +221,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
         artistSlug = slugify( unicode('%s%s' % (myArtist,'-mus')))
 
         musician = add_musician(aName=myArtist, aSlug=artistSlug)
-        setFileKind(song, formKind)
+        #setFileKind(song, formKind)
         if len(formTag):
             xSlug = slugify(unicode('%s' % (formTag)))
             xTag=add_tag(formTag,xSlug)
@@ -230,8 +235,9 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
         genre = tag.genre
         if genre is not None:
             genreSlug = slugify(unicode('%s' % (genre.name)))
-            gen = add_tag(genre.name,genreSlug)
-            song.tags.add(gen)
+            if genreSlug is not u'Unknown':
+                gen = add_tag(unicode(genre.name),genreSlug)
+                song.tags.add(gen)
         song.save()
     else:
         # This section is for the info on mkv files
@@ -262,7 +268,37 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
             picture = add_picture(mTitle,base,mSlug,nc)
             # supposed to be faster with details=False
             #itags = exifread.process_file(theFile, details=False)
-            itags = exifread.process_file(theFile)
+            fname = unicode(theFile)
+            try:
+                #print("before open file open file %s" % fname)
+                with open(fname,'r') as f:
+                    #print("file open ok now get info")
+                    itags = exifread.process_file(f)
+                    #print("got info %s " % fname)
+                    #print (itags)
+                    #print tag['Image DateTime']
+                    for tag in itags:
+                        if tag in 'Image DateTime':
+                            value = unicode(itags[tag])
+                            picture.data1 = unicode(value)
+                            try:
+                                picture.year = int(astr[:4])
+                            except ValueError:
+                                # if its not a number just 
+                                # don't set the year
+                                pass
+                        if tag in 'EXIF DateTimeOriginal': 
+                            value = itags[tag]
+                            picture.data2 = unicode(value)
+                            #print("2 %s" % value)
+                        if tag in 'EXIF DateTimeDigitized':
+                            value = itags[tag]
+                            #print("3 %s" % value)
+                            picture.data3 = unicode(value)
+                    picture.save()
+            except:
+                print("Exception attempting to read exif")
+            
             if len(formTag):
                 xSlug = slugify(unicode('%s' % (formTag)))
                 xTag=add_tag(formTag,xSlug)

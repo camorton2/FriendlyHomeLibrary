@@ -215,10 +215,11 @@ class CollectionList(View):
 
 class CollectionMixins:
     def handle_collection(self,path,drive,kind,tag):
-        spath = utility.to_str(path.replace('/','-'))
-        slug = slugify( unicode( '%s' % (spath) ))
-        title = path.replace('/','-')
-        nc = collection.add_collection(title,slug,path,drive,False)
+        spath = path.replace('/','-')
+        upath = unicode('%s' % (spath))
+        slug = slugify(upath)
+        title = upath
+        nc = collection.add_collection(title,slug,upath,drive,False)
         return nc
 
     def add_members(self,path,drive,kind,tag):
@@ -229,17 +230,27 @@ class CollectionMixins:
         artist = None
         setPath = os.path.join(settings.MY_MEDIA_FILES_ROOT,sDrive)
         for root, dirs, files in os.walk(os.path.join(setPath,path)):
-            myroot = utility.to_str(root[len(setPath):])
-            #print("LOOP myroot %s dirs %s files %s\n" % (myroot,dirs,files))
-            album = self.handle_collection(myroot,drive,kind,tag)
-            for obj in files:
-                try:
-                    #print("ADD_MEMBERS myroot %s obj %s" % (myroot,utility.to_str(obj)))
-                    album,artist = collection.add_file(root,utility.to_str(obj),myroot,album,kind,tag)
-                except UnicodeDecodeError:
-                    print("ERROR unable to deal with filename- skipping in collection %s" % (album.title))
-                except IOError:
-                    print("ERROR IOError with filename- skipping in collection %s" % (album.title))
+            try:
+                #myroot = utility.to_str(root[len(setPath):])
+                myroot = unicode(root[len(setPath):])
+                #print("LOOP myroot %s dirs %s files %s\n" % (myroot,dirs,files))
+                album = self.handle_collection(myroot,drive,kind,tag)
+                for obj in files:
+                    try:
+                        #print("ADD_MEMBERS myroot %s obj %s" % (myroot,utility.to_str(obj)))
+                        album,artist = collection.add_file(
+                            unicode(root),
+                            unicode(obj),
+                            myroot,
+                            album,
+                            kind,
+                            tag)
+                    except UnicodeDecodeError:
+                        print("UnicodeDecodeError file in collection %s" % (album.title))
+                    except IOError:
+                        print("IOError file in collection %s file %s" % (album.title,obj))
+            except UnicodeDecodeError:
+                print("UnicodeDecodeError collection")
         return album,artist
 
 class CollectionDetailView(View, CollectionMixins):
@@ -248,6 +259,8 @@ class CollectionDetailView(View, CollectionMixins):
     def get(self,request,slug):
         #print("CollectionDetail GET %s" % slug)
         collection=get_object_or_404(models.Collection,slug__iexact=slug)
+
+        # tags
         if 'tq' in request.GET and request.GET['tq']:
             tq = request.GET['tq']
             tqSlug = slugify(unicode(tq))
@@ -255,22 +268,51 @@ class CollectionDetailView(View, CollectionMixins):
             clist=collection.song_set.all()
             for obj in clist:
                 obj.tags.add(new_tag)
+
+        # songs
         songObjects = collection.song_set.all()
         mySongList = utility.link_file_list(songObjects)
-        pictureObjects = collection.picture_set.all()
-        myPictureList = utility.link_file_list(pictureObjects)
 
+        ########################################
+        # Pictures
+        # Setup slideshow if there are pictures
+        pictureObjects = collection.picture_set.all()
+        count = len(pictureObjects)
+
+        # generator may not be the best solution here since
+        # get is called every time so I have to move
+        # iterator to the current group, then advance
+        group = query.next_group(pictureObjects)
+        cGroup = 1
+        if 'cNext' in request.GET and request.GET.get('cNext'):
+            cGroup = 1+int(request.GET.get('cNext'))
+            for i in range(cGroup-1):
+                next(group)
+        if 'cPrev' in request.GET and request.GET.get('cPrev'):
+            # this doesn't do anything fancy like go from beginning to end
+            cGroup = int(request.GET.get('cPrev'))-1
+            for i in range(cGroup-1):
+                next(group)
+        try:
+            myPictureList = utility.link_file_list(next(group))
+        except StopIteration:
+            # this will go from end to beginning
+            print("oops stop iteration")
+            rgroup = query.next_group(pictureObjects)
+            cGroup=1
+            myPictureList = utility.link_file_list(next(rgroup))
+        #######################################
+
+        asPlayList = False;
         if 'playlist' in request.GET:
-            context = {
-                'collection':collection,
-                'songlist':mySongList,
-                'picturelist':myPictureList,
-                'asPlayList':True}
-            return render(request,self.template_name,context)
+            asPlayList = True
         context = {
             'collection':collection,
             'songlist':mySongList,
-            'picturelist':myPictureList}
+            'cGroup':cGroup,
+            'picturelist':myPictureList,'pictureCount':count,
+            'asPlayList': asPlayList,
+            'MaxCount':settings.PHOTO_LIST_LENGTH}
         return render(request, self.template_name, context)
 
 
@@ -601,22 +643,43 @@ class MusicianDetailView(View):
 
 # pictures
 class PictureList(View):
-    template_name='FHLBuilder/picture_list.html'
-    def get(self,request):
-        #print("PictureList GET")
-        count = models.Picture.objects.count()
-        plist = utility.link_file_list(models.Picture.objects.all())
-        title = ('All Pictures %d' % count)
-        context = {'listTitle': title, 'picturelist': plist,
-            'pictureCount':count}
-        return render(request,self.template_name,context)
+    template_name='FHLBuilder/pictures.html'
 
-    def post(self,request):
-        #print("PictureList POST")
-        plist = utility.link_file_list(models.Picture.objects.all())
-        title = ('All Pictures %d' % models.Picture.objects.count())
-        context = {'listTitle': title, 'picturelist': plist,
-            'pictureCount':count }
+    def get(self,request):
+        print("PictureList GET")
+        count = models.Picture.objects.count()
+        group = query.next_group(models.Picture.objects.all())
+        cGroup = 1
+        #plist = utility.link_file_list(models.Picture.objects.all())
+
+        # TODO code for next group of pictures is repeated
+        # and should be made common
+        if 'cNext' in request.GET and request.GET.get('cNext'):
+            cGroup = 1+int(request.GET.get('cNext'))
+            for i in range(cGroup-1):
+                next(group)
+        if 'cPrev' in request.GET and request.GET.get('cPrev'):
+            # this doesn't do anything fancy like go from beginning to end
+            cGroup = int(request.GET.get('cPrev'))-1
+            for i in range(cGroup-1):
+                next(group)
+        if count:
+            try:
+                myPictureList = utility.link_file_list(next(group))
+            except StopIteration:
+                print("oops stop iteration")
+                rgroup = query.next_group(pictureObjects)
+                cGroup=1
+                myPictureList = utility.link_file_list(next(rgroup))
+        else:
+            myPictureList = None
+        plist = utility.link_file_list(next(group))
+        title = ('All Pictures %d' % count)
+        context = {'listTitle': title,
+            'picturelist': plist,
+            'pictureCount':count,
+            'cGroup': cGroup,
+            'MaxCount':settings.PHOTO_LIST_LENGTH}
         return render(request,self.template_name,context)
 
 

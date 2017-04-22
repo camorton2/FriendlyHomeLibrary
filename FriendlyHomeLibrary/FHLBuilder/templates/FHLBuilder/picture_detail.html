@@ -7,9 +7,24 @@
 {% block content %}
 
 <h2>{{picture.title}}</h2>
+{% if picture.data1 %}
+<li> {{ picture.data1}}</li>
+{% endif %}
+{% if picture.data2 %}
+<li> {{ picture.data2}}</li>
+{% endif %}
+{% if picture.data3 %}
+<li> {{ picture.data2}}</li>
+{% endif %}
+{% if picture.data4 %}
+<li> {{ picture.data4}}</li>
+{% endif %}
+
 {% load static %}
 <div>full file {% static playit %}</div>
 <img src="{% static playit %}" style="width:100%">
+
+
 <section>
 {% if picture.tags.count %}
 <h3>Tags</h3>
@@ -20,18 +35,6 @@
 </ul>
 {% endif %}
 </section>
-
-{% if user.is_authenticated %}
-<section>
-{% include "FHLBuilder/tag_select.html" %}
-</section>
-<section>
-{% include "FHLBuilder/likesandloves.html" %}        
-</section>
-<section>
-{% include "FHLBuilder/object_update.html" %}        
-</section>
-{% endif %}
 
 {% if user.is_authenticated %}
 <section>

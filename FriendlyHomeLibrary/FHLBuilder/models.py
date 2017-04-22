@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from FriendlyHomeLibrary import settings
@@ -12,14 +13,10 @@ from . import choices
 CHAR_LENGTH=1000
 
 class Tag(models.Model):
-    name = models.CharField(
-       max_length=CHAR_LENGTH,
-       unique=True)
-    slug = models.SlugField(
-       max_length=CHAR_LENGTH,
-       unique=True)
+    name = models.CharField(max_length=CHAR_LENGTH,unique=True)
+    slug = models.SlugField(max_length=CHAR_LENGTH, unique=True)
 
-    def __str__(self):
+    def __unicode__(self):
         return self.name
 
     class Meta:
@@ -35,17 +32,14 @@ class Tag(models.Model):
 class Collection(models.Model):
     filePath = models.CharField(max_length=CHAR_LENGTH)
     drive = models.IntegerField()
-    title = models.CharField(
-       max_length=CHAR_LENGTH)
-    slug = models.SlugField(
-       max_length=CHAR_LENGTH,
-       unique=True)
+    title = models.CharField(max_length=CHAR_LENGTH)
+    slug = models.SlugField(max_length=CHAR_LENGTH,unique=True)
 
     def get_absolute_url(self):
         return reverse('builder_collection_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
         return reverse('builder_collection_update',kwargs={'slug': self.slug})
-    def __str__(self):
+    def __unicode__(self):
         return self.title
 
     class Meta:
@@ -63,7 +57,7 @@ class CommonFile(models.Model):
     year = models.IntegerField(default=0000)
     title = models.CharField(max_length=CHAR_LENGTH)
     slug = models.SlugField(max_length=CHAR_LENGTH,unique=True)
-    def __str__(self):
+    def __unicode__(self):
         return self.title
     class Meta:
         ordering = ['title']
@@ -138,7 +132,13 @@ class Picture(CommonFile):
     likes = models.ManyToManyField(User, blank=True, related_name='picture_likes')
     loves = models.ManyToManyField(User, blank=True, related_name='picture_loves')
     dislikes = models.ManyToManyField(User, blank=True, related_name='picture_dislikes')
-
+    
+    data1 = models.CharField(max_length=CHAR_LENGTH,blank=True)
+    data2 = models.CharField(max_length=CHAR_LENGTH,blank=True)
+    data3 = models.CharField(max_length=CHAR_LENGTH,blank=True)
+    data4 = models.CharField(max_length=CHAR_LENGTH,blank=True)
+    data5 = models.CharField(max_length=CHAR_LENGTH,blank=True)
+    
     def get_absolute_url(self):
         return reverse('builder_picture_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
@@ -184,15 +184,13 @@ class Chapter(CommonFile):
 
 class Artist(models.Model):
     fullName = models.CharField(max_length=CHAR_LENGTH)
-    slug = models.SlugField(
-       max_length=CHAR_LENGTH,
-       unique=True)
+    slug = models.SlugField(max_length=CHAR_LENGTH, unique=True)
     def get_absolute_url(self):
         return reverse('builder_artist_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
         return reverse('builder_artist_update',kwargs={'slug': self.slug})
         
-    def __str__(self):
+    def __unicode__(self):
         return self.fullName
         
         
