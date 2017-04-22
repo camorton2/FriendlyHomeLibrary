@@ -219,7 +219,7 @@ class CollectionMixins:
         upath = unicode('%s' % (spath))
         slug = slugify(upath)
         title = upath
-        nc = collection.add_collection(title,slug,upath,drive,False)
+        nc = collection.add_collection(title,slug,path,drive,False)
         return nc
 
     def add_members(self,path,drive,kind,tag):

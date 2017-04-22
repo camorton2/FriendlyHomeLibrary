@@ -279,8 +279,8 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                     #print tag['Image DateTime']
                     for tag in itags:
                         if tag in 'Image DateTime':
-                            value = unicode(itags[tag])
-                            picture.data1 = unicode(value)
+                            value = itags[tag]
+                            picture.data1 = value
                             try:
                                 picture.year = int(astr[:4])
                             except ValueError:
@@ -289,15 +289,17 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                                 pass
                         if tag in 'EXIF DateTimeOriginal': 
                             value = itags[tag]
-                            picture.data2 = unicode(value)
+                            picture.data2 = value
                             #print("2 %s" % value)
                         if tag in 'EXIF DateTimeDigitized':
                             value = itags[tag]
                             #print("3 %s" % value)
-                            picture.data3 = unicode(value)
+                            picture.data3 = value
                     picture.save()
-            except:
-                print("Exception attempting to read exif")
+            except NameError:
+                print("ERROR (opening for info) NameError file %s" % fname)
+            except Exception as ex:
+                print ("ERROR (opening for info) %s unhandled exception %s" % (fname,type(ex).__name__))
             
             if len(formTag):
                 xSlug = slugify(unicode('%s' % (formTag)))
