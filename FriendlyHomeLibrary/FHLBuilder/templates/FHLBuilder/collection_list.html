@@ -13,36 +13,14 @@
 </section>
 {% endif %}
 
-<section>
-<h4>Video Collections</h4>
-<ul id='filelist'>    
-{% for collection in movies %}
-<li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
-{% endfor %}
-</ul>
-</section>
-<section>
-<h4>Audio Collections</h4>
-<ul id='filelist'>    
-{% for collection in songs %}
-<li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
-{% endfor %}
-</ul>
-</section>
+<div>
+    {% include "FHLBuilder/collection_select.html" %}
+</div>
 
 <section>
-<h4>Picture Collections</h4>
+<h4>{{listkind|title}} Collections</h4>
 <ul id='filelist'>    
-{% for collection in pictures %}
-<li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
-{% endfor %}
-</ul>
-</section>
-
-<section>
-<h4>Various Collections</h4>
-<ul id='filelist'>    
-{% for collection in various %}
+{% for collection in clist %}
 <li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>
 {% endfor %}
 </ul>

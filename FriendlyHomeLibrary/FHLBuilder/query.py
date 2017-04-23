@@ -72,9 +72,26 @@ def handle_pref(obj,pref,me):
     obj.save()
 
 
+def handle_collection_kind(collections, kind):
+    clist = []
+    videos = [u'MV',u'TV',u'MM',u'MS',u'DD',u'CC']
+    vt = kind in videos
+    st = kind == u'SG'
+    pt = kind == u'PT'
+    for current in collections:
+        if vt and current.movie_set.count():
+            if kind == current.movie_set.first().fileKind:
+                clist.append(current)
+        elif st and current.song_set.count():
+            clist.append(current)
+        elif pt and current.picture_set.count():
+            clist.append(current)
+    return clist
+
+
 def next_group(pictures):
     """
-    My first generator will iterate through a picture list in 
+    My first generator will iterate through a picture list in
     sections according to the length in settings
     """
     first = 0

@@ -60,14 +60,11 @@ def look_at_res(res):
     return success
 
 def send_to_kodi_lf(ob):
-    sstr = utils.object_path(ob)
-    #url = settings.HTTP_URL+settings.STATIC_URL+sstr
-    #print(url)
+    thefile = utils.object_path_local(ob)
     xbmc_i = init_xbmc()
     ping_result = xbmc_i.JSONRPC.Ping()
     look_at_res(ping_result)
     if ping_result:
-        thefile = settings.STATIC_URL+sstr
         print("File to kodi %s" % thefile)
         context = {"item":{"file":thefile}}
         result = xbmc_i.Player.Open(context)
@@ -76,14 +73,12 @@ def send_to_kodi_lf(ob):
         print("Ooops unable to ping kodi_lf - maybe she is sleeping")
 
 def send_to_kodi_bf(ob):
-    sstr = utils.object_path(ob)
-    #url = settings.HTTP_URL+settings.STATIC_URL+sstr
-    #print(url)
+    thefile = utils.object_path_samba(ob)
     xbmc_i = init_xbmc_BF()
     ping_result = xbmc_i.JSONRPC.Ping()
     look_at_res(ping_result)
     if ping_result:
-        thefile = settings.STATIC_URL+sstr
+        print("File to kodi %s" % thefile)
         context = {"item":{"file":thefile}}
         result = xbmc_i.Player.Open(context)
         look_at_res(result)
@@ -112,15 +107,12 @@ def songs_to_kodi_lf(songlist):
         look_at_res(result)
     else:
         print("Ooops unable to ping kodi_lf - maybe she is sleeping")
-    
-    
+        
 ##
 # 
 # //Play a single video from file
 # http://192.168.15.117/jsonrpc?request={"jsonrpc":"2.0","id":"1","method":"Player.Open","params":{"item":{"file":"Media/Big_Buck_Bunny_1080p.mov"}}}    
 # http://192.168.2.30/
-
-
 
 def stream_to_vlc(movie,request):
     print("User pressed StreamMovie")

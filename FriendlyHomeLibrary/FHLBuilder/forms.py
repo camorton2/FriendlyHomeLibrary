@@ -73,6 +73,7 @@ class CollectionForm(forms.ModelForm):
     drive = -1
     
     def clean_filePath(self):
+        self.drive = -1
         new_path=self.cleaned_data['filePath']
         for i,drive in enumerate(settings.DRIVES,1):
             toCheck = os.path.join(settings.MY_MEDIA_FILES_ROOT,drive,new_path)
@@ -80,11 +81,14 @@ class CollectionForm(forms.ModelForm):
             print(toCheck)
             if os.path.exists(toCheck):
                 self.drive=i
+                print("OK selecting drive %d" % i)
+                break
         if self.drive > 0:
             last = new_path.rpartition('/')[2]
             if len(last):
                 return utility.to_str(new_path)
             # remove final /
             return to_str(new_path[:-1])
-        raise ValidationError('Path does not exist '+new_path)
+        print ("DOES NOT EXIST")
+        raise ValidationError(u'Path does not exist '+new_path,code=u'invalid')
 

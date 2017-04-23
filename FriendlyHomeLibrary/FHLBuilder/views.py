@@ -6,7 +6,7 @@ import string
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db import models
+#from django.db import models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.text import slugify
@@ -201,14 +201,17 @@ class SongUpdate(View):
 class CollectionList(View):
     template_name='FHLBuilder/collection_list.html'
     def get(self,request):
-        #print("CollectionList GET")
-        allc = models.Collection.objects.all()
-        songc,moviec,picturec,variousc = utility.collection_sets(allc)
+        print("CollectionList GET")
+        if 'kind' in request.GET and request.GET.get('kind'):
+            print("collection kind selection")
+            kind = request.GET.get('kind')
+        else:
+            kind = 'MV'
+        clist = query.handle_collection_kind(
+            models.Collection.objects.all(), kind)
         context = {
-            'movies': moviec,
-            'songs': songc,
-            'pictures': picturec,
-            'various': variousc
+            'clist': clist,
+            'listkind':kind
             }
         return render(request,self.template_name,context)
 
@@ -222,7 +225,7 @@ class CollectionMixins:
         nc = collection.add_collection(title,slug,path,drive,False)
         return nc
 
-    def add_members(self,path,drive,kind,tag):
+    def add_members(self,path,drive,kind,tag, knownCollection = None):
         # Still to do, log errors
         #print("ADD_MEMBERS path %s" % (path))
         sDrive = utility.get_drive(drive)
@@ -234,7 +237,10 @@ class CollectionMixins:
                 #myroot = utility.to_str(root[len(setPath):])
                 myroot = unicode(root[len(setPath):])
                 #print("LOOP myroot %s dirs %s files %s\n" % (myroot,dirs,files))
-                album = self.handle_collection(myroot,drive,kind,tag)
+                if knownCollection is None:
+                    album = self.handle_collection(myroot,drive,kind,tag)
+                else:
+                    album = knownCollection
                 for obj in files:
                     try:
                         #print("ADD_MEMBERS myroot %s obj %s" % (myroot,utility.to_str(obj)))
@@ -276,32 +282,27 @@ class CollectionDetailView(View, CollectionMixins):
         ########################################
         # Pictures
         # Setup slideshow if there are pictures
-        pictureObjects = collection.picture_set.all()
-        count = len(pictureObjects)
-
-        # generator may not be the best solution here since
-        # get is called every time so I have to move
-        # iterator to the current group, then advance
-        group = query.next_group(pictureObjects)
-        cGroup = 1
+        group = collection.picture_set.all()
+        count = len(group)
+        current = 1
         if 'cNext' in request.GET and request.GET.get('cNext'):
-            cGroup = 1+int(request.GET.get('cNext'))
-            for i in range(cGroup-1):
-                next(group)
+            current = int(request.GET.get('cNext'))
+            print("next with current %d" % current)
+            current = current+1
+            if current > count:
+                current = 1
         if 'cPrev' in request.GET and request.GET.get('cPrev'):
-            # this doesn't do anything fancy like go from beginning to end
-            cGroup = int(request.GET.get('cPrev'))-1
-            for i in range(cGroup-1):
-                next(group)
-        try:
-            myPictureList = utility.link_file_list(next(group))
-        except StopIteration:
-            # this will go from end to beginning
-            print("oops stop iteration")
-            rgroup = query.next_group(pictureObjects)
-            cGroup=1
-            myPictureList = utility.link_file_list(next(rgroup))
-        #######################################
+            current = int(request.GET.get('cPrev'))
+            print("prev with current %d" % current)
+            if current == 1:
+                current = count
+            else:
+                current=current-1
+        picture = None
+        filename = None
+        if count:
+           picture = group[current-1]
+           filename = utility.object_path(picture)
 
         asPlayList = False;
         if 'playlist' in request.GET:
@@ -309,10 +310,12 @@ class CollectionDetailView(View, CollectionMixins):
         context = {
             'collection':collection,
             'songlist':mySongList,
-            'cGroup':cGroup,
-            'picturelist':myPictureList,'pictureCount':count,
-            'asPlayList': asPlayList,
-            'MaxCount':settings.PHOTO_LIST_LENGTH}
+            'picture':picture,
+            'pictureCount':count,
+            'filename': filename,
+            'index': current,
+            'asPlayList': asPlayList
+            }
         return render(request, self.template_name, context)
 
 
@@ -343,7 +346,13 @@ class CollectionFormView(View,CollectionMixins):
                 # new album is not empty, save and redirect
                 album.save()
                 return redirect(album)
-
+        else:
+            # in the case of an invalid form, redirect to the 
+            # bound form which has the ValidationError
+            context = {
+                'form':bound_form
+                }
+            return render(request,self.template_name,context)
         # otherwise display the list of all collections
         return redirect(reverse('builder_collection_list'))
 
@@ -359,24 +368,15 @@ class CollectionUpdate(View,CollectionMixins):
 
     def get(self,request,slug):
         #print("CollectionUpdate POST")
-        collection = self.get_object(slug)
-        context={'form': self.form_class(instance=collection),
+        target = self.get_object(slug)
+        context={'form': self.form_class(instance=target),
            'collection': collection}
-        formKind = choices.UNKNOWN
-        formTag = ''
-        bound_form=self.form_class(request.POST)
-        if bound_form.is_valid():
-            formKind=bound_form.cleaned_data['kind']
-            formTag=bound_form.cleaned_data['tag']
-        # rescan for additional files
-        self.add_members(collection.filePath, collection,formKind,formTag)
-        collection.save()
         return render(request,self.template_name,context)
 
     def post(self,request,slug):
         #print("Collection update POST")
-        collection = self.get_object(slug)
-        bound_form = self.form_class(request.POST,instance=collection)
+        target = self.get_object(slug)
+        bound_form = self.form_class(request.POST,instance=target)
         formKind = choices.UNKNOWN
         formTag = ''
         bound_form=self.form_class(request.POST)
@@ -384,9 +384,10 @@ class CollectionUpdate(View,CollectionMixins):
             formKind=bound_form.cleaned_data['kind']
             formTag=bound_form.cleaned_data['tag']
         # rescan for additional files
-        self.add_members(collection.filePath, collection,formKind,formTag)
-        collection.save()
-        return redirect(collection)
+        self.add_members(target.filePath,target.drive,
+            formKind,formTag,target)
+        target.save()
+        return redirect(target)
 
 
 # Video Lists
@@ -494,6 +495,7 @@ class MovieDetailView(View):
             print("preference selection")
             query.handle_pref(movie, request.GET.get('pref'),request.user)
         playit = utility.object_path(movie)
+        print(playit)
         love,like,dislike = query.my_preference(movie,request.user)
         context = {'movie':movie,
             'playit':playit,
@@ -523,8 +525,9 @@ class MovieDetailView(View):
         elif 'StreamMovie' in request.POST:
             kodi.stream_to_vlc(movie,request)
         elif 'kodi_lf' in request.POST:
+            print("User selected kodi_lf")
             kodi.send_to_kodi_lf(movie)
-        elif 'kodi-bf' in request.POST:
+        elif 'kodi_bf' in request.POST:
             kodi.send_to_kodi_bf(movie)
         elif 'vlc_plugin' in request.POST:
             movieContext = {
@@ -648,38 +651,29 @@ class PictureList(View):
     def get(self,request):
         print("PictureList GET")
         count = models.Picture.objects.count()
-        group = query.next_group(models.Picture.objects.all())
-        cGroup = 1
-        #plist = utility.link_file_list(models.Picture.objects.all())
-
-        # TODO code for next group of pictures is repeated
-        # and should be made common
+        group = models.Picture.objects.all()
+        current = 1
         if 'cNext' in request.GET and request.GET.get('cNext'):
-            cGroup = 1+int(request.GET.get('cNext'))
-            for i in range(cGroup-1):
-                next(group)
+            current = int(request.GET.get('cNext'))
+            print("next with current %d" % current)
+            current = current+1
+            if current > count:
+                current = 1
         if 'cPrev' in request.GET and request.GET.get('cPrev'):
-            # this doesn't do anything fancy like go from beginning to end
-            cGroup = int(request.GET.get('cPrev'))-1
-            for i in range(cGroup-1):
-                next(group)
-        if count:
-            try:
-                myPictureList = utility.link_file_list(next(group))
-            except StopIteration:
-                print("oops stop iteration")
-                rgroup = query.next_group(pictureObjects)
-                cGroup=1
-                myPictureList = utility.link_file_list(next(rgroup))
-        else:
-            myPictureList = None
-        plist = utility.link_file_list(next(group))
+            current = int(request.GET.get('cPrev'))
+            print("prev with current %d" % current)
+            if current == 1:
+                current = count
+            else:
+                current=current-1
+        picture = group[current-1]
+        filename = utility.object_path(picture)
         title = ('All Pictures %d' % count)
         context = {'listTitle': title,
-            'picturelist': plist,
+            'picture': picture, 
+            'filename':filename,
             'pictureCount':count,
-            'cGroup': cGroup,
-            'MaxCount':settings.PHOTO_LIST_LENGTH}
+            'index': current}
         return render(request,self.template_name,context)
 
 

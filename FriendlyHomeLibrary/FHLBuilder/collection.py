@@ -121,53 +121,35 @@ def add_tag(tName, tSlug):
         dbobj.save()
     return dbobj
 
+
+
 def as_picture(ext):
-    if ext == '.jpg':
-        return True
-    if ext == '.JPG':
-        return True
-    if ext == '.img':
-        return True
-    if ext == '.IMG':
-        return True
-    if ext == '.png':
-        return True
-    if ext == '.PNG':
-        return True
-    if ext == '.THM':
-        return True
-    if ext == '.thm':
-        return True
-    if ext == '.tiff':
-        return True
-    if ext == '.tif':
-        return True
-    if ext == '.pe4':
-        return True
-    if ext == '.PE4':
+    picts = [
+        '.jpg',
+        '.img',
+        '.png',
+        '.thm',
+        '.tiff',
+        '.tif',
+        '.pe4',
+        '.gif'
+        ]
+    if any(k == ext.lower() for k in picts):
         return True
     return False
 
 def as_movie(ext):
-    if ext == '.mkv':
-        return True
-    if ext == '.mov':
-        return True
-    if ext == '.MOV':
-        return True
-    if ext == '.mp4':
-        return True
-    if ext == '.avi':
-        return True
-    if ext == '.AVI':
-        return True
-    if ext == '.flv':
-        return True
-    if ext == '.wmv':
-        return True
-    if ext == '.mpg':
-        return True
-    if ext == '.VOB':
+    movs = [
+        '.mkv',
+        '.mov',
+        '.mp4',
+        '.avi',
+        '.flv',
+        '.wmv',
+        '.mpg',
+        '.wav'
+        ]
+    if any(k == ext.lower() for k in movs):
         return True
     return False
 
@@ -178,8 +160,10 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
     theFile = unicode(os.path.join(root,myfile))
     try:
         statinfo = os.stat(theFile)
-    except:
-        print("SKIP error getting file stats %s" % theFile)
+    except Exception as ex:
+        # in this case I want to see what the exception is, but the file is ok and
+        # will not be ignored
+        print ("SKIP (os.stat) %s unhandled exception %s" % (theFile,type(ex).__name__))
         return album, musician
     if not statinfo.st_size:
         print("SKIP file with 0 size %s" % theFile)
@@ -189,27 +173,44 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
     mTitle = unicode(mTitle)
     extension = unicode(extension)
     if mp3.isMp3File(theFile):
-        tag = id3.Tag()
-        tag.parse(theFile)
-        myArtist = unicode(tag.artist)
         addC = False
 
-        if myArtist is None :
+        tag = None
+        try:
+            tag = id3.Tag()
+            tag.parse(theFile)
+        except IOError:
+            # id3 library has an issue with ? so just create without
+            # id3 information
+            pass
+        except Exception as ex:
+            # in this case I want to see what the exception is, but the file is ok and
+            # will not be ignored
+            print ("ERROR (idetag) %s unhandled exception %s" % (theFile,type(ex).__name__))
+
+        if tag is None:
+            # pick some reasonable defaults
             myArtist = u'various'
-        title = unicode(tag.title)
-        if title is None:
-            title=mTitle
-        if tag.album is None:
+            title = mTitle
             collection = newCollection
         else:
-            addC = True
-            # handle the collection (album) which only has a path and a name
-            collectionSlug = slugify( unicode( '%s' % (tag.album) ))
-            collection = add_collection(cAlbum=unicode(tag.album),
-                cSlug=collectionSlug,cPath=path,
-                cDrive=newCollection.drive)
-            album = collection
-            newCollection = collection
+            myArtist = unicode(tag.artist)
+            if myArtist is None :
+                myArtist = u'various'
+            title = unicode(tag.title)
+            if title is None:
+                title=mTitle
+            if tag.album is None:
+                collection = newCollection
+            else:
+                addC = True
+                # handle the collection (album) which only has a path and a name
+                collectionSlug = slugify( unicode( '%s' % (tag.album) ))
+                collection = add_collection(cAlbum=unicode(tag.album),
+                    cSlug=collectionSlug,cPath=path,
+                    cDrive=newCollection.drive)
+                album = collection
+                newCollection = collection
         # song has track, title, filename, slug, collection
         songSlug = slugify( unicode('%s%s' % (title,collection.slug)))
         t1, t2 = tag.track_num
@@ -235,7 +236,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
         genre = tag.genre
         if genre is not None:
             genreSlug = slugify(unicode('%s' % (genre.name)))
-            if genreSlug is not u'Unknown':
+            if genreSlug is not 'Unknown':
                 gen = add_tag(unicode(genre.name),genreSlug)
                 song.tags.add(gen)
         song.save()
@@ -273,7 +274,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 #print("before open file open file %s" % fname)
                 with open(fname,'r') as f:
                     #print("file open ok now get info")
-                    itags = exifread.process_file(f)
+                    itags = exifread.process_file(f,details=False)
                     #print("got info %s " % fname)
                     #print (itags)
                     #print tag['Image DateTime']
@@ -284,10 +285,10 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                             try:
                                 picture.year = int(astr[:4])
                             except ValueError:
-                                # if its not a number just 
+                                # if its not a number just
                                 # don't set the year
                                 pass
-                        if tag in 'EXIF DateTimeOriginal': 
+                        if tag in 'EXIF DateTimeOriginal':
                             value = itags[tag]
                             picture.data2 = value
                             #print("2 %s" % value)
@@ -297,10 +298,14 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                             picture.data3 = value
                     picture.save()
             except NameError:
-                print("ERROR (opening for info) NameError file %s" % fname)
+                #print("ERROR (opening for info) NameError file %s" % fname)
+                # this is ok, file is OK just ignore the info
+                pass
             except Exception as ex:
+                # in this case I want to see what the exception is, but the file is ok and
+                # will not be ignored
                 print ("ERROR (opening for info) %s unhandled exception %s" % (fname,type(ex).__name__))
-            
+
             if len(formTag):
                 xSlug = slugify(unicode('%s' % (formTag)))
                 xTag=add_tag(formTag,xSlug)

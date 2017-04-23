@@ -16,17 +16,16 @@
 </ul>
 </section>
 
-<section></section>
-<!--{% include "FHLBuilder/play_movie_options.html" %} -->
-{% include "FHLBuilder/kodi_buttons.html" %}
-</section>
-
 <section>    
 {% if movie.tags.count %}
 <h3>Tags</h3>
 <ul id='filelist'>
 {% for tag in movie.tags.all %}
-<li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
+{% if forloop.last %}
+<a href="{{tag.get_absolute_url}}">{{tag.name}}</a>
+{% else %}
+<a href="{{tag.get_absolute_url}}">{{tag.name}}</a>, 
+{% endif %}
 {% endfor %}
 </ul>
 {% endif %}
@@ -37,7 +36,11 @@
 <h3>Directors</h3>
 <ul id='filelist'>
 {% for director in movie.movie_directors.all %}
-<li><a href="{{director.get_absolute_url}}">{{director.fullName}}</a></li>
+{% if forloop.last %}
+<a href="{{director.get_absolute_url}}">{{director.fullName}}</a>
+{% else %}
+<a href="{{director.get_absolute_url}}">{{director.fullName}}</a>, 
+{% endif %}
 {% endfor %}
 </ul>
 {% endif %}
@@ -49,7 +52,11 @@
 <ul id='filelist'>
 <!--list of objects related to tag -->
 {% for actor in movie.movie_actors.all %}
-<li><a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a></li>
+{% if forloop.last %}
+<a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a>
+{% else %}
+<a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a>, 
+{% endif %}
 {% endfor %}
 </ul>
 {% endif %}
@@ -67,6 +74,9 @@
 {% endif %}
 </section>
 
+<section>
+{% include "FHLBuilder/kodi_buttons.html" %}
+</section>
 
 {% if user.is_authenticated %}
 <section>
@@ -89,6 +99,10 @@
 </section>
 
 {% endif %}
+
+<section>
+{% include "FHLBuilder/play_movie_options.html" %} 
+</section>
 
 
 {% endblock %}

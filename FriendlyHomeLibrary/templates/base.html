@@ -27,6 +27,12 @@
         <div>
             {% if user.is_authenticated %}
                <p><a href="{% url 'user_page' %}">User: {{user}}</a></p>
+                {% if perms.FHLBuilder.collection_builder %}
+                <section>
+                    <li><a href="{% url 'builder_collection_create' %}">Create Collection</a></li>
+                </section>
+                {% endif %}
+               
             {% else %}
                <p>Anonymous user</p>
             {% endif %}

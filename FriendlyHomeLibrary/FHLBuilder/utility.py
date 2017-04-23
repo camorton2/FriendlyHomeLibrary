@@ -28,14 +28,37 @@ def slugCompare(s1,s2):
 def get_drive(driveNo):
     return unicode(settings.DRIVES[driveNo-1])
 
+def get_drive_samba(driveNo):
+    return unicode(settings.SDRIVES[driveNo-1])
+
+def get_drive_slink(driveNo):
+    return unicode(settings.LDRIVES[driveNo-1])
+
+
 # return the constructed path of an object (CommonFile)
 # this is from the symbolic link in static for web links
 # used when path is needed inside html
 def object_path(obj):
-    drive=unicode('drive') + unicode(obj.collection.drive)
+    #drive=unicode('drive') + unicode(obj.collection.drive)
+    drive = get_drive_slink(obj.collection.drive)
     thePath = unicode(os.path.join(u'links/', drive))
     thePath = unicode(os.path.join(thePath, obj.collection.filePath,obj.fileName))
     return unicode(thePath)
+
+def object_path_local(obj):
+    #drive=unicode('drive') + unicode(obj.collection.drive)
+    thePath = get_drive(obj.collection.drive)
+    #thePath = unicode(os.path.join(u'links/', drive))
+    thePath = unicode(os.path.join(thePath, obj.collection.filePath,obj.fileName))
+    return unicode(thePath)
+
+def object_path_samba(obj):
+    #drive=unicode('drive') + unicode(obj.collection.drive)
+    thePath = get_drive_samba(obj.collection.drive)
+    #thePath = unicode(os.path.join(u'links/', drive))
+    thePath = unicode(os.path.join(thePath, obj.collection.filePath,obj.fileName))
+    return unicode(thePath)
+
 
 #used when path is needed outside html
 def object_path_with_static(obj):
