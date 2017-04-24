@@ -68,26 +68,16 @@ class SongList(View):
         slist = utility.link_file_list(models.Song.objects.all())
         title = ('All Songs %d' % models.Song.objects.count())
         if 'playlist' in request.GET:
-            context = {'listTitle': title, 'songlist': slist,
+            context = {
+                'listTitle': title, 
+                'songlist': slist,
                 'asPlayList':True}
             return render(request,self.template_name,context)
-        context = {'listTitle': title, 'songlist': slist,
+        context = {
+            'listTitle': title, 
+            'songlist': slist,
             'asPlayList':False }
         return render(request,self.template_name,context)
-
-    def post(self,request):
-        #print("SongList POST")
-        slist = utility.link_file_list(models.Song.objects.all())
-        title = ('All Songs %d' % models.Song.objects.count())
-        if 'kodi_lf' in request.POST:
-            kodi.songs_to_kodi_lf(slist)
-        elif 'kodi-bf' in request.POST:
-            #print("User pressed kodi bf -- to be setup")
-            kodi.songs_to__bf_kodi_bf(slist)
-        context = {'listTitle': title, 'songlist': slist,
-            'asPlayList':False }
-        return render(request,self.template_name,context)
-
 
 class SongDetailView(View):
     template_name = 'FHLBuilder/song_detail.html'
@@ -138,15 +128,11 @@ class SongDetailView(View):
                     'love':love,'like':like,'dislike':dislike,
                     'objectForm':bound_form}
                 return render(request,self.template_name, formContext)
-
-        # Still to do, should remove from the other lists so its not in more than 1
-        elif 'kodi_lf' in request.POST:
-            kodi.send_to_kodi_lf(song)
-        elif 'kodi-bf' in request.POST:
-            #print("User pressed kodi bf -- to be setup")
-            kodi.send_to_kodi_bf(song)
+        _ = kodi.playback_requests(song,request)
+        
         songContext = {
-            'song':song,'playit':playit,
+            'song':song,
+            'playit':playit,
             'love':love,'like':like,'dislike':dislike,
             'objectForm': self.form_class(instance=song)}
         return render(request,self.template_name, songContext)
@@ -521,27 +507,23 @@ class MovieDetailView(View):
                     'love':love,'like':like,'dislike':dislike,
                     'objectForm':bound_form}
                 return render(request,self.template_name, formContext)
-        # Still to do, should remove from the other lists so its not in more than 1
-        elif 'StreamMovie' in request.POST:
-            kodi.stream_to_vlc(movie,request)
-        elif 'kodi_lf' in request.POST:
-            print("User selected kodi_lf")
-            kodi.send_to_kodi_lf(movie)
-        elif 'kodi_bf' in request.POST:
-            kodi.send_to_kodi_bf(movie)
-        elif 'vlc_plugin' in request.POST:
-            movieContext = {
-                'movie':movie,
-                'playit':playit,
-                'love':love,'like':like,'dislike':dislike,
-                'objectForm': self.form_class(instance=movie),
-                'vlcPlugin':True}
+        message = ''
+        try:
+            message = u'success'
+            vlcPlugin = kodi.playback_requests(movie,request)
+        except kodi.MyException,ex:
+            message = ex.message
+            print('Caught %s' % ex.message)
+            vlcPlugin=False
 
         movieContext = {
             'movie':movie,
             'playit':playit,
             'love':love,'like':like,'dislike':dislike,
-            'objectForm': self.form_class(instance=movie)}
+            'objectForm': self.form_class(instance=movie),
+            'vlcPlugin':vlcPlugin,
+            'message':message}
+        print('render with message %s' % message)
         return render(request,self.template_name, movieContext)
 
 

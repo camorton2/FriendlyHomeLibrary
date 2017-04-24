@@ -1,3 +1,12 @@
+
+<section>
+{% load static %}
+<form action="" method = "post">
+{% csrf_token %}
+<button type="submit" name="kodi_local">Kodi localhost</button>
+</form>
+</section>
+
 <section>
 {% load static %}
 <form action="" method = "post">
@@ -14,3 +23,4 @@
 </form>
 </section>
 
+<p>{{message}}</p>

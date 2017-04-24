@@ -11,34 +11,24 @@ from xbmcjson import XBMC
 # https://github.com/jcsaaddupuy/xbmc-client/blob/master/src/xbmc_client/xbmc_client.py
 ##
 
+class MyException(Exception):
+    def __init__(self, msg):
+        print('CTOR MyException %s' % msg)
+        self.message = msg
+
 def get_json_rpc(host):
     jsonrpc = "jsonrpc"
     if not host.endswith("/"):
         jsonrpc = "/" + jsonrpc
     return host + jsonrpc
 
-def init_xbmc():
-    host = settings.XBMC_HOST
+def init_xbmc(ip):
+    host = unicode('http://%s' % ip)
+    print('local with host %s' % host)
     user = settings.XBMC_USER
     password = settings.XBMC_PASSWD
-    if not host:
-        raise Exception("No host found")
-    if not user:
-        raise Exception("No user found")
-    xbmc_i = XBMC(get_json_rpc(host), user, password)
+    xbmc_i = XBMC(get_json_rpc(host), user, password)        
     return xbmc_i
-
-def init_xbmc_BF():
-    host = settings.XBMC_HOST_BF
-    user = settings.XBMC_USER_BF
-    password = settings.XBMC_PASSWD_BF
-    if not host:
-        raise Exception("No host found")
-    if not user:
-        raise Exception("No user found")
-    xbmc_i = XBMC(get_json_rpc(host), user, password)
-    return xbmc_i
-
 
 def look_at_res(res):
     if res is not None:
@@ -52,61 +42,70 @@ def look_at_res(res):
             print("OK ping returned pong")
             success = True
         elif "error" in res and "message" in res["error"]:
-            print(res["error"]["message"])
+            message = (res["error"]["message"])
+            print(message)
+            raise MyException(message)
         else:
-            print("Unknown error : '%s'" % (res))
+            message = ("Kodi Unknown error : '%s'" % (res))
+            print(message)
+            raise MyException(message)
         if success:
             print("Success.")
     return success
 
-def send_to_kodi_lf(ob):
-    thefile = utils.object_path_local(ob)
-    xbmc_i = init_xbmc()
+def to_kodi(thefile,host,xbmc_i):
     ping_result = xbmc_i.JSONRPC.Ping()
     look_at_res(ping_result)
     if ping_result:
-        print("File to kodi %s" % thefile)
-        context = {"item":{"file":thefile}}
+        print('File to kodi %s' % thefile)
+        context = {'item':{'file':thefile}}
+        #guess at what a close might look like, not working
+        #cresult = xbmc_i.Player.Close()
+        #look_at_res(cresult)
         result = xbmc_i.Player.Open(context)
         look_at_res(result)
     else:
-        print("Ooops unable to ping kodi_lf - maybe she is sleeping")
+        message = unicode('Error unable to ping kodi at host %s' % host)
+        raise MyException(message)    
+
+def send_to_kodi(ob,hosta,local=False):
+    host = hosta+':8080' 
+    if local:
+        # use files from the local symbols links, no longer required
+        # only need when running from 127.0.0.1
+        thefile = utils.object_path_local(ob)
+    else:
+        print("using Samba")
+        thefile = utils.object_path_samba(ob)
+    try:
+        print("Attempt to init with host %s" % host)
+        xbmc_i = init_xbmc(host)
+        to_kodi(thefile,host,xbmc_i)
+    except Exception as ex:
+        # in this case I want to see what the exception is
+        # but there's no way to handle it, 
+        message = unicode('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
+        print (message)
+        raise MyException(message)
+
+def send_to_kodi_local(ob,request):
+    print('kodi_local')
+    try:
+        clientip = request.META['REMOTE_ADDR']
+    except KeyError:
+        message = unicode('ERROR could not get client ip from request')
+        print(message)
+        raise MyException(message)
+    send_to_kodi(ob,clientip)
+
+def send_to_kodi_lf(ob):
+    print('kodi_lf')
+    # using the local path until kodi is correctly configured for samba
+    send_to_kodi(ob,settings.HOST_LF)
 
 def send_to_kodi_bf(ob):
-    thefile = utils.object_path_samba(ob)
-    xbmc_i = init_xbmc_BF()
-    ping_result = xbmc_i.JSONRPC.Ping()
-    look_at_res(ping_result)
-    if ping_result:
-        print("File to kodi %s" % thefile)
-        context = {"item":{"file":thefile}}
-        result = xbmc_i.Player.Open(context)
-        look_at_res(result)
-    else:
-        print("Ooops unable to ping kodi_bf - maybe he is sleeping")
-
-def songs_to_kodi_bf(songlist):
-    print ("Wouldn't this be nice to have")
-
-def songs_to_kodi_lf(songlist):
-    print ("Wouldn't this be nice to have")
-    xbmc_i = init_xbmc()
-    playlist = []
-    for song,path in songlist:
-        print ("adding to playlist %s" % song.title)
-        sstr = utils.object_path(song)
-        thefile = settings.STATIC_URL+sstr
-        playlist.append(thefile)
-    # playlist.shuffle()
-    ping_result = xbmc_i.JSONRPC.Ping()
-    look_at_res(ping_result)
-    if ping_result:
-        context = {"item":{"playlistid":1}}
-        #context = {"item":{"file":playlist}}
-        result = xbmc_i.Player.Open(context)
-        look_at_res(result)
-    else:
-        print("Ooops unable to ping kodi_lf - maybe she is sleeping")
+    print('kodi_bf')
+    send_to_kodi(obj.settings.HOST_BF)
         
 ##
 # 
@@ -128,3 +127,16 @@ def stream_to_vlc(movie,request):
     print(sstr)
     os.system(sstr)
 
+def playback_requests(obj,request):
+    if 'StreamMovie' in request.POST:
+        stream_to_vlc(obj,request)
+    elif 'kodi_local' in request.POST:
+        send_to_kodi_local(obj,request)
+    elif 'kodi_lf' in request.POST:
+        send_to_kodi_lf(obj)
+    elif 'kodi_bf' in request.POST:
+        send_to_kodi_bf(obj)
+    elif 'vlc_plugin' in request.POST:
+        return True
+    return False
+    
