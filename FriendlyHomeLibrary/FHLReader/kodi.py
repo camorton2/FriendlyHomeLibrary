@@ -13,6 +13,7 @@ from xbmcjson import XBMC
 
 class MyException(Exception):
     def __init__(self, msg):
+        """ simple exception takes message """
         print('CTOR MyException %s' % msg)
         self.message = msg
 
@@ -31,6 +32,7 @@ def init_xbmc(ip):
     return xbmc_i
 
 def look_at_res(res):
+    """ takes the result from a kodi json command """
     if res is not None:
         success = False
         if "result" in res and (res["result"] == "OK" or
@@ -54,6 +56,13 @@ def look_at_res(res):
     return success
 
 def to_kodi(thefile,host,xbmc_i):
+    """ ping kodi and if successful open the player with the file 
+        thefile should be the full samba or local path, not the django
+        static file path used for html
+        Control of the playback is passed to kodi on the selected host
+        xbmc_i should be the initialized kodi connection
+        host is unused except in the message for an exception
+    """
     ping_result = xbmc_i.JSONRPC.Ping()
     look_at_res(ping_result)
     if ping_result:
@@ -68,8 +77,12 @@ def to_kodi(thefile,host,xbmc_i):
         message = unicode('Error unable to ping kodi at host %s' % host)
         raise MyException(message)    
 
-def send_to_kodi(ob,hosta,local=False):
-    host = hosta+':8080' 
+def send_to_kodi(ob,ip,local=False):
+    """ send an object (song, movie) to kodi for playback
+        where ob is the object, ip is the ip address 
+        of kodi where playback is requested
+    """
+    host = ip + settings.KODI_PORT 
     if local:
         # use files from the local symbols links, no longer required
         # only need when running from 127.0.0.1
@@ -89,6 +102,8 @@ def send_to_kodi(ob,hosta,local=False):
         raise MyException(message)
 
 def send_to_kodi_local(ob,request):
+    """ send object (song,movie) to kodi using client ip in html request 
+    """
     print('kodi_local')
     try:
         clientip = request.META['REMOTE_ADDR']
@@ -99,11 +114,13 @@ def send_to_kodi_local(ob,request):
     send_to_kodi(ob,clientip)
 
 def send_to_kodi_lf(ob):
+    """ send to kodi LF machine using hard-coded ip from settings """
     print('kodi_lf')
     # using the local path until kodi is correctly configured for samba
     send_to_kodi(ob,settings.HOST_LF)
 
 def send_to_kodi_bf(ob):
+    """ send to kodi BF machehinc using hard-coded ip from settings """
     print('kodi_bf')
     send_to_kodi(obj.settings.HOST_BF)
         
@@ -114,6 +131,10 @@ def send_to_kodi_bf(ob):
 # http://192.168.2.30/
 
 def stream_to_vlc(movie,request):
+    """ instruct vlc to stream the movie using host/client from 
+        html request
+        note, no correct interface at this time, uses command line
+    """
     print("User pressed StreamMovie")
     try:
         clientip = request.META['REMOTE_ADDR']
@@ -128,6 +149,13 @@ def stream_to_vlc(movie,request):
     os.system(sstr)
 
 def playback_requests(obj,request):
+    """ handle playback requests for object (song,movie)
+        given the html POST request
+        caller should catch MyException which is used for all
+        errors in kodi playback
+        vlc stream does not handle errors as it issues command line
+        vlc plugin simple sets a flag to add the plugin to html
+    """
     if 'StreamMovie' in request.POST:
         stream_to_vlc(obj,request)
     elif 'kodi_local' in request.POST:
