@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import os
+import time
 import FHLBuilder.utility as utils
 from FriendlyHomeLibrary import settings
 from xbmcjson import XBMC
@@ -111,6 +112,7 @@ def send_to_kodi_local(ob,request):
         message = unicode('ERROR could not get client ip from request')
         print(message)
         raise MyException(message)
+    time.sleep(5)
     send_to_kodi(ob,clientip)
 
 def send_to_kodi_lf(ob):
@@ -122,7 +124,7 @@ def send_to_kodi_lf(ob):
 def send_to_kodi_bf(ob):
     """ send to kodi BF machehinc using hard-coded ip from settings """
     print('kodi_bf')
-    send_to_kodi(obj.settings.HOST_BF)
+    send_to_kodi(ob,settings.HOST_BF)
         
 ##
 # 
