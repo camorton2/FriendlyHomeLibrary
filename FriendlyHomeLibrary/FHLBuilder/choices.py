@@ -14,17 +14,26 @@ EBOOK = 'EB'
 SONG = 'SG'
 PICTURE = 'PT'
 UNKNOWN = 'UN'
+TV_CARTOON = 'TC'
+MV_CARTOON = 'MC'
 KIND_CHOICES = (
-    (UNKNOWN, 'unknown'),
     (MOVIE, 'Movie'),
+    (MV_CARTOON, 'Movie-Cartoon'),
     (MINI_MOVIE, 'Mini-movie'),
     (CONCERT, 'Concert'),
     (DOCUMENTARY,'Documentary'),
     (TV, 'TV-show'),
+    (TV_CARTOON, 'TV-Cartoon'),
     (MINISERIES, 'Mini-series'),
+    (SONG, 'song'),
+    (PICTURE, 'picture'),    
     (AUDIO_BOOK, 'audio-book'),
     (EBOOK, 'e-book'),
-    (SONG, 'song'),
-    (PICTURE, 'picture'),
-    (GAME, 'Game')
+    (GAME, 'Game'),
+    (UNKNOWN, 'unknown')
 )
+
+# all choices that are video files
+videos = [MOVIE,MINI_MOVIE,CONCERT,DOCUMENTARY,TV,MINISERIES,
+    TV_CARTOON,MV_CARTOON]
+

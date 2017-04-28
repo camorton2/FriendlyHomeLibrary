@@ -197,7 +197,8 @@ class CollectionList(View):
             models.Collection.objects.all(), kind)
         context = {
             'clist': clist,
-            'listkind':kind
+            'listkind':kind,
+            'choices': choices.KIND_CHOICES
             }
         return render(request,self.template_name,context)
 
@@ -218,7 +219,14 @@ class CollectionMixins:
         album = None
         artist = None
         setPath = os.path.join(settings.MY_MEDIA_FILES_ROOT,sDrive)
-        for root, dirs, files in os.walk(os.path.join(setPath,path)):
+        scanPath = os.path.join(setPath,path)
+        goodPath = os.path.exists(scanPath)
+        #print('setPath %s exists %s' % (scanPath,goodPath))
+        if not goodPath:
+            message = ('ERROR path does not exist check drive setup %s' % scanPath)
+            print(message)
+            raise kodi.MyException(message)            
+        for root, dirs, files in os.walk(scanPath):
             try:
                 #myroot = utility.to_str(root[len(setPath):])
                 myroot = unicode(root[len(setPath):])
@@ -316,14 +324,14 @@ class CollectionFormView(View,CollectionMixins):
 
     def post(self,request):
         #print("CollectionFormView POST")
+        
         bound_form=self.form_class(request.POST)
         if bound_form.is_valid():
             album,artist = self.add_members(
                 bound_form.cleaned_data['filePath'],
                 bound_form.drive,
                 bound_form.cleaned_data['kind'],
-                bound_form.cleaned_data['tag'])
-
+                bound_form.cleaned_data['tag'])                
             if artist is not None:
                 # display the page for the musician
                 #return render(request, musician_detail, {'musician':artist})
@@ -353,27 +361,52 @@ class CollectionUpdate(View,CollectionMixins):
         return get_object_or_404(self.model,slug=slug)
 
     def get(self,request,slug):
-        #print("CollectionUpdate POST")
+        print("CollectionUpdate GET")
         target = self.get_object(slug)
         context={'form': self.form_class(instance=target),
            'collection': collection}
         return render(request,self.template_name,context)
 
     def post(self,request,slug):
-        #print("Collection update POST")
+        print("CollectionUpdate POST")
         target = self.get_object(slug)
         bound_form = self.form_class(request.POST,instance=target)
-        formKind = choices.UNKNOWN
-        formTag = ''
-        bound_form=self.form_class(request.POST)
         if bound_form.is_valid():
-            formKind=bound_form.cleaned_data['kind']
-            formTag=bound_form.cleaned_data['tag']
-        # rescan for additional files
-        self.add_members(target.filePath,target.drive,
-            formKind,formTag,target)
-        target.save()
+            print("form valid rescan")
+            try:
+                album,artist = self.add_members(
+                    target.filePath,
+                    target.drive,
+                    bound_form.cleaned_data['kind'],
+                    bound_form.cleaned_data['tag'],
+                    target
+                    )
+            except kodi.MyException,ex:
+                message = ex.message
+                print('caught %s' % message)
+                context = {'form':bound_form,'message':message}
+                return render(request,self.template_name,context)
+            if artist is not None:
+                print("redirect artist")
+                # display the page for the musician
+                #return render(request, musician_detail, {'musician':artist})
+                return redirect(artist)
+            elif album.song_set.count() or album.movie_set.count():
+                print("redirect album")
+                # new album is not empty, save and redirect
+                album.save()
+                return redirect(album)
+        else:
+            print("form not valid")
+            # in the case of an invalid form, redirect to the 
+            # bound form which has the ValidationError
+            context = {
+                'form':bound_form
+                }
+            return render(request,self.template_name,context)
+        # otherwise redirect to target collection
         return redirect(target)
+
 
 
 # Video Lists

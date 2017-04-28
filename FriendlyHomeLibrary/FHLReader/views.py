@@ -9,6 +9,8 @@ from FHLBuilder.models import Song, Movie
 from FHLBuilder.utility import link_file_list 
 from FHLBuilder.query import findSongs, findMovies
 
+from FHLReader import kodi
+
 # Create your views here.
 
 class UserDetail(View):
@@ -60,3 +62,9 @@ class UserMovieList(View):
             }            
         return render(request,self.template_name,context)
 
+class RandomListQuery(View):
+    template_name = 'FHLReader/random_select.html'
+    def get(self,request):
+        if 'playlist' in request.GET:
+            print("Eventually figure out how to send a playlist to kodi")
+        

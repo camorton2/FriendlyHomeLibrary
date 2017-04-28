@@ -4,22 +4,22 @@
     <legend>Preferences</legend>    
     {% csrf_token %}
     {% if love %}
-    <input type="radio" name="pref" value="loved" checked>Love<br>
+    <input type="radio" name="pref" value="loved" checked>Love 
     {% else %}
-    <input type="radio" name="pref" value="loved">Love<br>
+    <input type="radio" name="pref" value="loved">Love 
     {% endif %}
 
     {% if like %}
-    <input type="radio" name="pref" value="liked" checked>Like<br>
+    <input type="radio" name="pref" value="liked" checked>Like 
     {% else %}
-    <input type="radio" name="pref" value="liked">Like<br>
+    <input type="radio" name="pref" value="liked">Like 
     {% endif %}
 
     {% if dislike %}
-    <input type="radio" name="pref" value="disliked" checked>Dislike<br>
+    <input type="radio" name="pref" value="disliked" checked>Dislike 
     {% else %}
-    <input type="radio" name="pref" value="disliked">Dislike<br>
+    <input type="radio" name="pref" value="disliked">Dislike 
     {% endif %}
-    <br><input type="submit" value="Apply">
+    <p><input type="submit" value="Apply"></p>
 </fieldset>    
 </form>

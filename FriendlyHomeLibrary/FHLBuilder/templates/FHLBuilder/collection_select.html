@@ -2,47 +2,17 @@
 <fieldset>
     <legend>Collections</legend>    
     {% csrf_token %}
-    {% ifequal listkind 'MV' %}
-    <input type="radio" name="kind" value="MV" checked>Movies<br>
-    {% else %}
-    <input type="radio" name="kind" value="MV">Movies<br>
-    {% endifequal %}
-    {% ifequal listkind 'TV' %}
-    <input type="radio" name="kind" value="TV" checked>TV Shows<br>
-    {% else %}
-    <input type="radio" name="kind" value="TV">TV Show<br>
-    {% endifequal %}
-    {% ifequal listkind 'MS' %}
-    <input type="radio" name="kind" value="MS" checked>Mini-Series<br>
-    {% else %}
-    <input type="radio" name="kind" value="MS">Mini-Series<br>
-    {% endifequal %}    
-    {% ifequal listkind 'MM' %}
-    <input type="radio" name="kind" value="MM" checked>Mini-movies<br>
-    {% else %}
-    <input type="radio" name="kind" value="MM">Mini-movies<br>
-    {% endifequal %}
-    {% ifequal listkind 'DD' %}
-    <input type="radio" name="kind" value="DD" checked>Documentaries<br>
-    {% else %}
-    <input type="radio" name="kind" value="DD">Documentaries<br>
-    {% endifequal %}
-    {% ifequal listkind 'CC' %}
-    <input type="radio" name="kind" value="CC" checked>Concerts<br>
-    {% else %}
-    <input type="radio" name="kind" value="CC">Concerts<br>
-    {% endifequal %}
-    {% ifequal listkind 'SG' %}
-    <input type="radio" name="kind" value="SG" checked>Albums<br>
-    {% else %}
-    <input type="radio" name="kind" value="SG">Albums<br>
-    {% endifequal %}
-    {% ifequal listkind 'PT' %}
-    <input type="radio" name="kind" value="PT" checked>Pictures<br>
-    {% else %}
-    <input type="radio" name="kind" value="PT">Pictures<br>
-    {% endifequal %}
-    <br><input type="submit" value="Apply">
+    {% for x,y in choices %}
+        {% if not forloop.last %}
+        {% ifequal listkind x %}
+        <input type="radio" name="kind" value={{x}} checked>{{y}} 
+        {% else %}
+        <input type="radio" name="kind" value={{x}}>{{y}} 
+        {% endifequal %}
+        {% endif %}
+    {% endfor %}
+    <p><input type="submit" value="Apply"></p>
+
 </fieldset>    
 </form>
 

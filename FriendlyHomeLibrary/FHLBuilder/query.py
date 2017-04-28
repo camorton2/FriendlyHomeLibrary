@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from .models import Song, Movie
+from FHLBuilder.models import Song, Movie
+from FHLBuilder import choices
 
 from FriendlyHomeLibrary import settings
 
@@ -73,18 +74,20 @@ def handle_pref(obj,pref,me):
 
 
 def handle_collection_kind(collections, kind):
-    clist = []
-    videos = [u'MV',u'TV',u'MM',u'MS',u'DD',u'CC']
-    vt = kind in videos
+    """
+    In queryset collections create a list of collections 
+    containing files of kind
+    """
+    clist = []    
+    vt = kind in choices.videos
     st = kind == u'SG'
     pt = kind == u'PT'
     for current in collections:
-        if vt and current.movie_set.count():
-            if kind == current.movie_set.first().fileKind:
-                clist.append(current)
-        elif st and current.song_set.count():
+        if vt and current.movie_set.filter(fileKind=kind):
             clist.append(current)
-        elif pt and current.picture_set.count():
+        elif st and current.song_set:
+            clist.append(current)
+        elif pt and current.picture_set:
             clist.append(current)
     return clist
 
