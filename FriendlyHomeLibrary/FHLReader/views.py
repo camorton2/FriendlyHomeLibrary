@@ -23,6 +23,8 @@ class UserDetail(View):
     template_name = 'FHLReader/user_page.html'
     def get(self, request):
         print("UserDetail GET")
+        # reset the cache to reset user queries
+        cache.clear()
         me = User.objects.get(username=request.user)
         context = {'me': me}
         return render(request,self.template_name,context)    
@@ -30,8 +32,6 @@ class UserDetail(View):
 
 class UserSongList(View):
     template_name='FHLReader/user_songs.html'
-    likedSongs = []
-    lovedSongs = []
 
     def get(self,request):
         me = User.objects.get(username=request.user)
@@ -39,9 +39,18 @@ class UserSongList(View):
         # print("UserSongList GET")
         if 'filelist' in request.GET:
             playlist=False
-        self.likedSongs,self.lovedSongs = findSongs(me)
-        likedSongList = link_file_list(self.likedSongs)
-        lovedSongList = link_file_list(self.lovedSongs)
+            
+        if 'likedSongs' in cache and 'lovedSongs' in cache:
+            # use cache to avoid redoing long query
+            likedSongs = cache.get('likedSongs')
+            lovedSongs = cache.get('lovedSongs')
+        else:
+            likedSongs,lovedSongs = findSongs(me)
+            cache.set('likedSongs',likedSongs)
+            cache.set('lovedSongs',lovedSongs)
+            
+        likedSongList = link_file_list(likedSongs)
+        lovedSongList = link_file_list(lovedSongs)
             
         context = {
             'listTitle': "Songs I Love",
@@ -74,23 +83,29 @@ class UserChannels(View):
     def get(self, request):
         return render(request,self.template_name)
 
-class SpecificFileList(View):
-        
+class CachedFileList(View):
+    """
+    CachedView will display the cached QuerySet from the
+    view that requested this view
+    the cached kind will hold the kind information for the QuerySet
+    and the cached title will hold the title to describe the
+    cached list
+    """        
     def get(self,request):
-        print("SpeicifFileList GET")
+        print("CachedFileList GET")
         if 'kind' in cache and cache.get('kind'):
             kind = cache.get('kind')
         else:
-            kind = choices.MOVIE
+            kind = choices.UNKNOWN
         if 'rlist' in cache and cache.get('rlist'):
             rlist = cache.get('rlist')
         else:
-            rlist=Movie.objects.all()[:5]
+            rlist=[]
         if 'title' in cache and cache.get('title'):
             title = cache.get('title')
         else:
-            title = 'Movies 5'
-        #cache.clear()            
+            title = 'ERROR No Cached Query Results'
+        
         if kind[0] == choices.SONG:
             print("SpecificList SONG")
             return vu.collection_view(request,rlist,[],[],title,False,kind)
@@ -126,13 +141,12 @@ class RandomList(View):
                 title = ('Random Pictures %d' % count)
             elif kind[0] in choices.videos:
                 title = ('Random %s %d' % (kind[0],count))
-            
+            # For the cached view, set the kind, title and list to display
+            cache.clear()
             cache.set('kind', kind)
             cache.set('title', title)
             cache.set('rlist', rlist)            
-            # this works
-            #context = {'kind': kind,'olist':rlist,'title':title}
-            return redirect(reverse('specific_list'))
+            return redirect(reverse('cached_list'))
             
         context = {'form':bound_form,'rlist':rlist}
         return render(request,self.template_name,context)
