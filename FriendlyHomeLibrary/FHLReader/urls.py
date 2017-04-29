@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^movies', views.UserMovieList.as_view(), name='user_movies'),
     url(r'^channels', views.UserChannels.as_view(), name='user_channels'),
     url(r'^random', views.RandomList.as_view(), name='random_list'),
+    url(r'^specific', views.SpecificFileList.as_view(), name='specific_list'),
 ]
