@@ -13,14 +13,15 @@ from FHLBuilder import utility,choices
 from FHLBuilder import models as bmodels
 
 def setFileKind(obj,kind):
-    fKind = kind[0]
     #print("FileKind to %s %s" % (kind,fKind))
-    if fKind == choices.UNKNOWN:
-        # print("unknown")
+    cykind = kind[0]
+    if cykind == choices.UNKNOWN:
+        # don't modify to unknown
         pass
     else:
-        obj.fileKind = fKind
+        obj.fileKind=cykind
         obj.save()
+        
 
 def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
     #print ("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
@@ -49,7 +50,7 @@ def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
     dbobj.save()
     return dbobj
 
-def add_movie(mTitle, mFileName, mSlug, mCollection):
+def add_movie(mTitle, mFileName, mSlug, mCollection, fKind=choices.MOVIE):
     #print ("---> ADD Movie %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
     try:
         dbobj = bmodels.Movie.objects.get(slug__iexact=mSlug)
@@ -61,7 +62,7 @@ def add_movie(mTitle, mFileName, mSlug, mCollection):
         #print("CATH add movie %s to collection %s" % (mSlug,mCollection.slug))
         dbobj = bmodels.Movie(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
         dbobj.save()
-    dbobj.fileKind = choices.MOVIE
+    setFileKind(dbobj,fKind)
     dbobj.save()
     return dbobj
 
@@ -256,8 +257,8 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
         nc = newCollection
         if as_movie(extension):
             mSlug = slugify( unicode('%s%s' % (nc.slug,mTitle)))
-            movie = add_movie(mTitle,base,mSlug,nc)
-            setFileKind(movie,formKind)
+            movie = add_movie(mTitle,base,mSlug,nc,formKind)
+            #setFileKind(movie,formKind)
             if len(formTag):
                 xSlug = slugify(unicode('%s' % (formTag)))
                 xTag=add_tag(formTag,xSlug)
@@ -315,4 +316,5 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
             print ("SKIPPING - unhandled extension %s/%s" % (path,base))
 
     return album,musician
+
 

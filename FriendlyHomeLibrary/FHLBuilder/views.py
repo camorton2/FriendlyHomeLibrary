@@ -22,6 +22,8 @@ from FHLBuilder import collection
 from FHLBuilder import choices
 from FHLBuilder import utility
 from FHLBuilder import query
+from FHLBuilder import diagnostics
+import FHLBuilder.view_utility as vu
 
 from FHLReader import kodi
 
@@ -46,39 +48,12 @@ class TagDetailView(View):
     def get(self,request,slug):
         print("TagDetailView GET")
         tag=get_object_or_404(models.Tag,slug__iexact=slug)
-        slist = utility.link_file_list(tag.song_tags.all())
-        plist = utility.link_file_list(tag.picture_tags.all())
-        mlist = tag.movie_tags.all()
-        asPlayList = False
-        if 'playlist' in request.GET:
-            asPlayList = True
-        context = {'tag':tag,
-            'songlist':slist,
-            'movielist':mlist,
-            'picturelist':plist,
-            'asPlayList':asPlayList}
-        return render(request, self.template_name,context)
-
+        songs = utility.link_file_list(tag.song_tags.all())
+        pictures = utility.link_file_list(tag.picture_tags.all())
+        movies = tag.movie_tags.all()
+        return vu.collection_view(request, songs, pictures, movies, tag.name)
 
 # songs
-class SongList(View):
-    template_name='FHLBuilder/song_list.html'
-    def get(self,request):
-        #print("SongList GET")
-        slist = utility.link_file_list(models.Song.objects.all())
-        title = ('All Songs %d' % models.Song.objects.count())
-        if 'playlist' in request.GET:
-            context = {
-                'listTitle': title, 
-                'songlist': slist,
-                'asPlayList':True}
-            return render(request,self.template_name,context)
-        context = {
-            'listTitle': title, 
-            'songlist': slist,
-            'asPlayList':False }
-        return render(request,self.template_name,context)
-
 class SongDetailView(View):
     template_name = 'FHLBuilder/song_detail.html'
     form_class=forms.SongForm
@@ -129,7 +104,7 @@ class SongDetailView(View):
                     'objectForm':bound_form}
                 return render(request,self.template_name, formContext)
         _ = kodi.playback_requests(song,request)
-        
+
         songContext = {
             'song':song,
             'playit':playit,
@@ -138,70 +113,37 @@ class SongDetailView(View):
         return render(request,self.template_name, songContext)
 
 
-@require_authenticated_permission('FHLBuilder.song_builder')
-class SongFormView(View):
-    form_class=forms.SongForm
-    template_name = 'FHLBuilder/song_form.html'
-
-    def get(self, request):
-        return render(request,self.template_name,
-            {'form':self.form_class()})
-
-    def post(self,request):
-        bound_form=self.form_class(request.POST)
-        if bound_form.is_valid():
-            new_song=bound_form.save()
-            return redirect(new_song)
-        else:
-            return render(request,self.template_name,
-                          {'form':bound_form})
-
-
-@require_authenticated_permission('FHLBuilder.tag_reader')
-class SongUpdate(View):
-    form_class=forms.SongForm
-    model=models.Song
-    template_name='FHLBuilder/song_update.html'
-
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-
-    def get(self,request,slug):
-        song = self.get_object(slug)
-        context={'form': self.form_class(instance=song),
-            'song': song,}
-        return render(request,self.template_name,context)
-
-    def post(self,request,slug):
-        song = self.get_object(slug)
-        bound_form = self.form_class(request.POST,instance=song)
-        if bound_form.is_valid():
-            new_song = bound_form.save()
-            return redirect(new_song)
-        else:
-            context={'form': bound_form,'song': song}
-            return render(request,self.template_name,context)
-
-
-#Collections
+# LISTS
 class CollectionList(View):
-    template_name='FHLBuilder/collection_list.html'
     def get(self,request):
-        print("CollectionList GET")
-        if 'kind' in request.GET and request.GET.get('kind'):
-            print("collection kind selection")
-            kind = request.GET.get('kind')
-        else:
-            kind = 'MV'
+        #print("CollectionList GET")
+        kind = vu.select_kind(request)
         clist = query.handle_collection_kind(
             models.Collection.objects.all(), kind)
-        context = {
-            'clist': clist,
-            'listkind':kind,
-            'choices': choices.KIND_CHOICES
-            }
-        return render(request,self.template_name,context)
+        title = 'Library Collections'
+        return vu.view_list(request,clist,title,kind)
 
+
+class FileList(View):
+    def get(self,request):
+        #print("CollectionList GET")
+        kind = vu.select_kind(request)
+        olist = []
+        if kind == choices.SONG:
+            olist = models.Song.objects.all()
+            title = ('All Songs %d' % olist.count())
+            return vu.collection_view(request, olist, [], [], title, True, kind)
+        elif kind == choices.PICTURE:
+            olist = models.Picture.objects.all()
+            title = ('All Pictures %d' % olist.count())
+            return vu.collection_view(request, [], olist, [], title, True, kind)
+        # Videos
+        else:
+            olist,title =  vu.movies_bykind(kind)
+        #return vu.view_list(request,olist,title,kind)
+        return vu.collection_view(request, [], [], olist, title,True, kind)
+
+# Collections
 
 class CollectionMixins:
     def handle_collection(self,path,drive,kind,tag):
@@ -225,7 +167,7 @@ class CollectionMixins:
         if not goodPath:
             message = ('ERROR path does not exist check drive setup %s' % scanPath)
             print(message)
-            raise kodi.MyException(message)            
+            raise kodi.MyException(message)
         for root, dirs, files in os.walk(scanPath):
             try:
                 #myroot = utility.to_str(root[len(setPath):])
@@ -254,63 +196,17 @@ class CollectionMixins:
         return album,artist
 
 class CollectionDetailView(View, CollectionMixins):
-    template_name = 'FHLBuilder/collection_detail.html'
 
     def get(self,request,slug):
-        #print("CollectionDetail GET %s" % slug)
-        collection=get_object_or_404(models.Collection,slug__iexact=slug)
+        # print("CollectionDetail GET %s" % slug)
+        target=get_object_or_404(models.Collection,slug__iexact=slug)
 
-        # tags
-        if 'tq' in request.GET and request.GET['tq']:
-            tq = request.GET['tq']
-            tqSlug = slugify(unicode(tq))
-            new_tag = collection.add_tag(tq,tqSlug)
-            clist=collection.song_set.all()
-            for obj in clist:
-                obj.tags.add(new_tag)
+        songs = target.song_set.all()
+        pictures = target.picture_set.all()
+        movies = target.movie_set.all()
 
-        # songs
-        songObjects = collection.song_set.all()
-        mySongList = utility.link_file_list(songObjects)
-
-        ########################################
-        # Pictures
-        # Setup slideshow if there are pictures
-        group = collection.picture_set.all()
-        count = len(group)
-        current = 1
-        if 'cNext' in request.GET and request.GET.get('cNext'):
-            current = int(request.GET.get('cNext'))
-            print("next with current %d" % current)
-            current = current+1
-            if current > count:
-                current = 1
-        if 'cPrev' in request.GET and request.GET.get('cPrev'):
-            current = int(request.GET.get('cPrev'))
-            print("prev with current %d" % current)
-            if current == 1:
-                current = count
-            else:
-                current=current-1
-        picture = None
-        filename = None
-        if count:
-           picture = group[current-1]
-           filename = utility.object_path(picture)
-
-        asPlayList = False;
-        if 'playlist' in request.GET:
-            asPlayList = True
-        context = {
-            'collection':collection,
-            'songlist':mySongList,
-            'picture':picture,
-            'pictureCount':count,
-            'filename': filename,
-            'index': current,
-            'asPlayList': asPlayList
-            }
-        return render(request, self.template_name, context)
+        return vu.collection_view(request, songs, pictures, movies,
+            target.title, False, choices.MOVIE, True)
 
 
 @require_authenticated_permission('FHLBuilder.collection_builder')
@@ -324,14 +220,14 @@ class CollectionFormView(View,CollectionMixins):
 
     def post(self,request):
         #print("CollectionFormView POST")
-        
+
         bound_form=self.form_class(request.POST)
         if bound_form.is_valid():
             album,artist = self.add_members(
                 bound_form.cleaned_data['filePath'],
                 bound_form.drive,
                 bound_form.cleaned_data['kind'],
-                bound_form.cleaned_data['tag'])                
+                bound_form.cleaned_data['tag'])
             if artist is not None:
                 # display the page for the musician
                 #return render(request, musician_detail, {'musician':artist})
@@ -341,7 +237,7 @@ class CollectionFormView(View,CollectionMixins):
                 album.save()
                 return redirect(album)
         else:
-            # in the case of an invalid form, redirect to the 
+            # in the case of an invalid form, redirect to the
             # bound form which has the ValidationError
             context = {
                 'form':bound_form
@@ -363,6 +259,7 @@ class CollectionUpdate(View,CollectionMixins):
     def get(self,request,slug):
         print("CollectionUpdate GET")
         target = self.get_object(slug)
+
         context={'form': self.form_class(instance=target),
            'collection': collection}
         return render(request,self.template_name,context)
@@ -372,7 +269,7 @@ class CollectionUpdate(View,CollectionMixins):
         target = self.get_object(slug)
         bound_form = self.form_class(request.POST,instance=target)
         if bound_form.is_valid():
-            print("form valid rescan")
+            #print("form valid rescan")
             try:
                 album,artist = self.add_members(
                     target.filePath,
@@ -398,7 +295,7 @@ class CollectionUpdate(View,CollectionMixins):
                 return redirect(album)
         else:
             print("form not valid")
-            # in the case of an invalid form, redirect to the 
+            # in the case of an invalid form, redirect to the
             # bound form which has the ValidationError
             context = {
                 'form':bound_form
@@ -408,77 +305,7 @@ class CollectionUpdate(View,CollectionMixins):
         return redirect(target)
 
 
-
-# Video Lists
-class MovieList(View):
-    template_name='FHLBuilder/movie_list.html'
-    def get(self,request):
-        title = ('All Movies')
-        movielist = []
-        for mv in models.Movie.objects.all():
-            if mv.fileKind == 'MV':
-                movielist.append(mv)
-        context = {'listTitle': title, 'movielist': movielist}
-        return render(request,self.template_name,context)
-
-class DocumentaryList(View):
-    template_name='FHLBuilder/movie_list.html'
-    def get(self,request):
-        title = ('Documentary')
-        movielist = []
-        for mv in models.Movie.objects.all():
-            if mv.fileKind == 'DD':
-                movielist.append(mv)
-        context = {'listTitle': title, 'movielist': movielist}
-        return render(request,self.template_name,context)
-
-class MiniMovieList(View):
-    template_name='FHLBuilder/movie_list.html'
-    def get(self,request):
-        title = ('Mini-Movie')
-        movielist = []
-        for mv in models.Movie.objects.all():
-            if mv.fileKind == 'MM':
-                movielist.append(mv)
-        context = {'listTitle': title, 'movielist': movielist}
-        return render(request,self.template_name,context)
-
-class ConcertList(View):
-    template_name='FHLBuilder/movie_list.html'
-    def get(self,request):
-        title = ('All Concerts')
-        movielist = []
-        for mv in models.Movie.objects.all():
-            if mv.fileKind == 'CC':
-                movielist.append(mv)
-        context = {'listTitle': title, 'movielist': movielist}
-        return render(request,self.template_name,context)
-
-
-class TVList(View):
-    template_name='FHLBuilder/movie_list.html'
-    def get(self,request):
-        title = ('All TV Shows')
-        movielist = []
-        for mv in models.Movie.objects.all():
-            if mv.fileKind == 'TV':
-                movielist.append(mv)
-        context = {'listTitle': title, 'movielist': movielist}
-        return render(request,self.template_name,context)
-
-
-class MiniSeriesList(View):
-    template_name='FHLBuilder/movie_list.html'
-    def get(self,request):
-        title = ('All Mini Series')
-        movielist = []
-        for mv in models.Movie.objects.all():
-            if mv.fileKind == 'MS':
-                movielist.append(mv)
-        context = {'listTitle': title, 'movielist': movielist}
-        return render(request,self.template_name,context)
-
-
+# Movies
 class MovieDetailView(View):
     template_name = 'FHLBuilder/movie_detail.html'
     form_class=forms.MovieForm
@@ -560,138 +387,65 @@ class MovieDetailView(View):
         return render(request,self.template_name, movieContext)
 
 
-@require_authenticated_permission('FHLBuilder.movie_builder')
-class MovieFormView(View):
-    form_class=forms.MovieForm
-    template_name = 'FHLBuilder/movie_form.html'
-
-    def get(self, request):
-        context = {'form':self.form_class()}
-        return render(request,self.template_name,context)
-
-    def post(self,request):
-        bound_form=self.form_class(request.POST)
-        if bound_form.is_valid():
-            new_movie=bound_form.save()
-            return redirect(new_movie)
-        else:
-            return render(request,self.template_name,
-                          {'form':bound_form})
-
-@require_authenticated_permission('FHLBuilder.tag_reader')
-class MovieUpdate(View):
-    form_class=forms.MovieForm
-    model=models.Movie
-    template_name='FHLBuilder/movie_update.html'
-
-    def get_object(self,slug):
-        return get_object_or_404(self.model,slug=slug)
-
-    def get(self,request,slug):
-        movie = self.get_object(slug)
-        context={
-           'form': self.form_class(instance=movie),
-           'movie': movie}
-        return render(request,self.template_name,context)
-
-    def post(self,request,slug):
-        movie = self.get_object(slug)
-        bound_form = self.form_class(request.POST,instance=movie)
-        if bound_form.is_valid():
-            new_movie = bound_form.save()
-            return redirect(new_movie)
-        else:
-            context={'form': bound_form,'movie': movie}
-            return render(request,self.template_name,context)
-
-
-# Actors
+# Artists:   Actors,Directors,Musicians
 class ActorList(View):
     template_name = 'FHLBuilder/actor_list.html'
-
     def get(self, request):
         context = {'tl': models.Actor.objects.all()}
         return render(request,self.template_name,context)
 
-class ActorDetailView(View):
-    template_name = 'FHLBuilder/actor_detail.html'
 
-    def get(self,request,slug):
-        actor=get_object_or_404(models.Actor,slug__iexact=slug)
-        return render(request, self.template_name, {'actor':actor})
-
-
-# Directors
 class DirectorList(View):
     template_name = 'FHLBuilder/director_list.html'
-
     def get(self, request):
         context = {'tl': models.Director.objects.all()}
         return render(request,self.template_name,context)
 
 
-class DirectorDetailView(View):
-    template_name = 'FHLBuilder/director_detail.html'
-    def get(self,request,slug):
-        director=get_object_or_404(models.Director,slug__iexact=slug)
-        return render(request, self.template_name, {'director':director})
-
-
-# Musicians
 class MusicianList(View):
     template_name = 'FHLBuilder/musician_list.html'
-
     def get(self, request):
         context = {'tl': models.Musician.objects.all()}
         return render(request,self.template_name,context)
 
 
+class ActorDetailView(View):
+    def get(self,request,slug):
+        actor=get_object_or_404(models.Actor,slug__iexact=slug)
+        movies = actor.movies.all()
+        title = ('Movies with actor %s' % actor.fullName)
+        return vu.collection_view(request, [], [], movies,title)
+    
+
+class DirectorDetailView(View):
+    def get(self,request,slug):
+        director=get_object_or_404(models.Director,slug__iexact=slug)
+        movies = director.movies.all()
+        title = ('Movies directed by %s' % director.fullName)
+        return vu.collection_view(request, [], [], movies,title)
+
+
 class MusicianDetailView(View):
+    """
+    Musician detail does not use the common display utility
+    because the musician view displays albums and songs
+    """
     template_name = 'FHLBuilder/musician_detail.html'
 
     def get(self,request,slug):
         musician=get_object_or_404(models.Musician,slug__iexact=slug)
         slist = utility.link_file_list(musician.songs.all())
+        asPlayList = False
         if 'playlist' in request.GET:
-            context = {'musician':musician,'songlist':slist, 'asPlayList':True}
-            return render(request,self.template_name,context)
-        return render(request, self.template_name,
-            {'musician':musician,'songlist':slist})
-
-
-# pictures
-class PictureList(View):
-    template_name='FHLBuilder/pictures.html'
-
-    def get(self,request):
-        print("PictureList GET")
-        count = models.Picture.objects.count()
-        group = models.Picture.objects.all()
-        current = 1
-        if 'cNext' in request.GET and request.GET.get('cNext'):
-            current = int(request.GET.get('cNext'))
-            print("next with current %d" % current)
-            current = current+1
-            if current > count:
-                current = 1
-        if 'cPrev' in request.GET and request.GET.get('cPrev'):
-            current = int(request.GET.get('cPrev'))
-            print("prev with current %d" % current)
-            if current == 1:
-                current = count
-            else:
-                current=current-1
-        picture = group[current-1]
-        filename = utility.object_path(picture)
-        title = ('All Pictures %d' % count)
-        context = {'listTitle': title,
-            'picture': picture, 
-            'filename':filename,
-            'pictureCount':count,
-            'index': current}
+            asPlayList = True
+        context = {
+            'musician':musician,
+            'songlist':slist, 
+            'asPlayList':asPlayList}
         return render(request,self.template_name,context)
 
 
+# pictures
 class PictureDetailView(View):
     template_name = 'FHLBuilder/picture_detail.html'
     form_class=forms.PictureForm
@@ -738,4 +492,15 @@ class PictureDetailView(View):
             'love':love,'like':like,'dislike':dislike,
             'objectForm': self.form_class(instance=picture)}
         return render(request,self.template_name, pictureContext)
+
+# Diagnostics, for playing around, updating database etc
+class DiagnosticsView(View):
+    template_name = 'FHLBuilder/diagnostics.html'
+    def get(self,request):
+        message = ''
+        if 'symlinks' in request.GET:
+            diagnostics.play_with_links()
+        context = { 'message': message}
+        return render(request,self.template_name, context)
+
 

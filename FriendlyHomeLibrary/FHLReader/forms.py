@@ -24,9 +24,15 @@ class RandomForm(forms.ModelForm):
     class Meta:
         model=models.Collection
         fields=[]
-    # Used to select fileKind 
+     
     kind = forms.MultipleChoiceField(choices = choices.KIND_CHOICES,initial=choices.UNKNOWN)
-    # Used to add a tag to everything in the collection
     tag = forms.CharField(max_length=models.CHAR_LENGTH,required=False)
+    count = forms.IntegerField(initial=1)
+
+    def clean_count(self):
+        count=self.cleaned_data['count']
+        if count > 0:
+            return count
+        raise ValidationError(u'please select a count above 0')
 
 

@@ -1,24 +1,21 @@
 {% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
 
 {% block title %}
-{{ block.super }} - Library Collections {{Collection.objects.count}}
+{{ block.super }} - Library
 {% endblock %}
 
 {% block content %}
-
-
-{% if perms.FHLBuilder.collection_builder %}
-<section>
-<p><a href="{% url 'builder_collection_create' %}">Create Collection</a></p>
-</section>
-{% endif %}
-
+<h3>{{title}}: {{clist.objects.count}}</h3>
 <div>
     {% include "FHLBuilder/collection_select.html" %}
 </div>
 
 <section>
-<h4>{{listkind|title}} Collections</h4>
+    {% for x,y in choices %}
+    {% ifequal x listkind %}
+        <h4>{{y}} Collections</h4>
+    {% endifequal %}
+    {% endfor %}
 <ul id='filelist'>    
 {% for collection in clist %}
 <li><a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a></li>

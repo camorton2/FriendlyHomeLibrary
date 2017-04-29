@@ -2,11 +2,12 @@
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 
-from views import UserDetail, UserSongList, UserMovieList
-
+from FHLReader import views
 
 urlpatterns = [
-    url(r'^$', UserDetail.as_view(), name='user_page'),    
-    url(r'^songs', UserSongList.as_view(), name='user_songs'),
-    url(r'^movies', UserMovieList.as_view(), name='user_movies'),
+    url(r'^$', views.UserDetail.as_view(), name='user_page'),    
+    url(r'^songs', views.UserSongList.as_view(), name='user_songs'),
+    url(r'^movies', views.UserMovieList.as_view(), name='user_movies'),
+    url(r'^channels', views.UserChannels.as_view(), name='user_channels'),
+    url(r'^random', views.RandomList.as_view(), name='random_list'),
 ]

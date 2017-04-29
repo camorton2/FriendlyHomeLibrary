@@ -16,6 +16,8 @@ PICTURE = 'PT'
 UNKNOWN = 'UN'
 TV_CARTOON = 'TC'
 MV_CARTOON = 'MC'
+TV_SITCOM = 'TS'
+BF_RANDOM = 'BR'
 KIND_CHOICES = (
     (MOVIE, 'Movie'),
     (MV_CARTOON, 'Movie-Cartoon'),
@@ -24,16 +26,18 @@ KIND_CHOICES = (
     (DOCUMENTARY,'Documentary'),
     (TV, 'TV-show'),
     (TV_CARTOON, 'TV-Cartoon'),
+    (TV_SITCOM, 'TV-Sitcom'),
     (MINISERIES, 'Mini-series'),
     (SONG, 'song'),
     (PICTURE, 'picture'),    
     (AUDIO_BOOK, 'audio-book'),
     (EBOOK, 'e-book'),
     (GAME, 'Game'),
+    (BF_RANDOM, 'BF-random'),
     (UNKNOWN, 'unknown')
 )
 
 # all choices that are video files
 videos = [MOVIE,MINI_MOVIE,CONCERT,DOCUMENTARY,TV,MINISERIES,
-    TV_CARTOON,MV_CARTOON]
+    TV_CARTOON,TV_SITCOM,MV_CARTOON]
 

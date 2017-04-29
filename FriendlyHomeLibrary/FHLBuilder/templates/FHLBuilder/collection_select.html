@@ -1,6 +1,6 @@
 <form method="get" action="" >
 <fieldset>
-    <legend>Collections</legend>    
+    <legend>Categories</legend>    
     {% csrf_token %}
     {% for x,y in choices %}
         {% if not forloop.last %}

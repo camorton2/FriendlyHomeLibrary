@@ -6,7 +6,13 @@
 
 {% block content %}
 
-<h2>{{collection.title}}</h2>
+{% if allowChoice %}
+<div>
+    {% include "FHLBuilder/collection_select.html" %}
+</div>
+{% endif %}
+
+<h2>{{title|title}}</h2>
 
 
 <section>
@@ -19,10 +25,10 @@
 </section>
 
 <ul>
-{% if collection.movie_set.count %}
-<h3>movies</h3>
+{% if movielist.count %}
+<h3>Videos</h3>
 {% endif %}
-{% for mv in collection.movie_set.all %}
+{% for mv in movielist %}
 <li><a href="{{mv.get_absolute_url}}">{{mv.title}}</a></li>
 {% endfor %}
 </ul>
@@ -36,9 +42,20 @@
 </ul>
 </section>
 
-
 {% if user.is_authenticated %}
+<section>
+<form method="get">
+{% csrf_token %}
+<fieldset>
+    <legend>Tags</legend>    
+    {% include "FHLBuilder/tag_select.html" %}
+</fieldset>
+</form>
+</section>
+{% if update %}
+<br>
 <a href="{{collection.get_update_url}}">Update Collection (setinfo or rescan)</a>
+{% endif %}
 {% endif %}
 
 

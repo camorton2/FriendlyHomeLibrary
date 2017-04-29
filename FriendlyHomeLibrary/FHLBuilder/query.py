@@ -80,14 +80,14 @@ def handle_collection_kind(collections, kind):
     """
     clist = []    
     vt = kind in choices.videos
-    st = kind == u'SG'
-    pt = kind == u'PT'
+    st = kind == choices.SONG
+    pt = kind == choices.PICTURE
     for current in collections:
         if vt and current.movie_set.filter(fileKind=kind):
             clist.append(current)
-        elif st and current.song_set:
+        elif st and current.song_set.count():
             clist.append(current)
-        elif pt and current.picture_set:
+        elif pt and current.picture_set.count():
             clist.append(current)
     return clist
 

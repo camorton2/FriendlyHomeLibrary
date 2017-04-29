@@ -6,10 +6,10 @@
 
 {% block content %}
 {% if perms.FHLBuilder.collection_builder %}
-<form action="{% url 'builder_collection_create' %}" method = "post">
+
+<form action="" method = "get">
 {% csrf_token %}
-{{form.as_p}}
-<button type="submit">Create Collection</button>
+<button type="submit" name='symlinks' >Fix Symlinks</button>
 </form>
 
 {% endif %}

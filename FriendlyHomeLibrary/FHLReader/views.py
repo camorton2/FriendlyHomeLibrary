@@ -10,6 +10,8 @@ from FHLBuilder.utility import link_file_list
 from FHLBuilder.query import findSongs, findMovies
 
 from FHLReader import kodi
+from FHLReader import forms
+from FHLReader import query
 
 # Create your views here.
 
@@ -62,9 +64,30 @@ class UserMovieList(View):
             }            
         return render(request,self.template_name,context)
 
-class RandomListQuery(View):
+class UserChannels(View):
+    template_name = 'FHLReader/channels_page.html'
+    def get(self, request):
+        return render(request,self.template_name)
+
+
+class RandomList(View):
     template_name = 'FHLReader/random_select.html'
-    def get(self,request):
-        if 'playlist' in request.GET:
-            print("Eventually figure out how to send a playlist to kodi")
+    form_class=forms.RandomForm
+    def get(self, request):
+        context = {'form':self.form_class()}
+        return render(request,self.template_name,context)
+    
+    def post(self,request):
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            count = bound_form.cleaned_data['count'];
+            kind = bound_form.cleaned_data['kind'];
+            tag = bound_form.cleaned_data['tag'];                
+            print('Valid form count %d kind %s tag %s' % (count,kind,tag))
+            rlist = query.random_select(count,kind,tag)
+        context = {'form':bound_form,'rlist':rlist}
+        
+        return render(request,self.template_name,context)
+        
         

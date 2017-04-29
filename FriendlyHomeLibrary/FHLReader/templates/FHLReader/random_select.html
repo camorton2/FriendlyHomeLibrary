@@ -1,0 +1,22 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} Channels
+{% endblock %}
+
+{% block content %}
+<h3>Create a random list</h3>
+<div>
+<form action="" method = "post">
+{% csrf_token %}
+{{form.as_p}}
+<button type="submit">Go</button>
+</form>
+</div>
+<p>{{message}}</p>
+<div>
+{% for obj in rlist %}
+<li><a href="{{ obj.get_absolute_url }}">{{obj.title|title}}</a></li>
+{% endfor %}
+</div>
+{% endblock %}
