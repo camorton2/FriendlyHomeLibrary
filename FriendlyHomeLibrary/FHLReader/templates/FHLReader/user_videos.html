@@ -1,0 +1,25 @@
+{% extends parent_template|default:"FHLReader/base_reader.html" %}
+
+{% block title %}
+{{ block.super }} - Videos
+{% endblock %}
+
+{% block content %}
+{% if lovedList %}
+    <h4>Videos loved by {{user|title}}</h4>
+    <ul>
+    {% for video in lovedList %}
+        <li><a href="{{ video.get_absolute_url }}">{{video.title|title}}</a></li>
+    {% endfor %}
+    </ul>
+{% endif %}
+
+{% if likedList %}
+    <h4>Videos liked by {{user|title}}</h4>
+    <ul>
+    {% for video in likedList %}
+        <li><a href="{{ video.get_absolute_url }}">{{video.title|title}}</a></li>
+    {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

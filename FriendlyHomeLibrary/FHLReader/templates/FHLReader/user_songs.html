@@ -6,87 +6,69 @@
 
 {% block content %}
 
+<form action="" method = "get">
+{% csrf_token %}
 
-
-{% if asPlayList %}
-    <audio src="" controls id="audioPlayer">
-        Sorry, your browser does not support HTML5 audio.
-    </audio>
-
-    <form action="" method = "get">
-        {% csrf_token %}
+    {% if asPlayList %}
+        <audio src="" controls id="audioPlayer">
+            Sorry, your browser does not support HTML5 audio.
+        </audio>
         <button type="submit" name="filelist">As FileList</button>
-    </form>
-{% else %}
-    <form action="" method = "get">
-        {% csrf_token %}
+    {% else %}
         <button type="submit" name="playlist">As PlayList</button>
-    </form>
+    {% endif %}
+</form>
 
+{% if lovedList %}
+<h4>Songs liked by {{user}}</h4>
+    {% if asPlayList %}
+        {% load static %}
+        {% for song,path in lovedList %}
+            {% if forloop.first %}
+                <ul id="playlist">
+                <li class="current-song"><a href="{% static path %}"> {{song.title|title}}</a></li>
+            {% else %}
+                <li><a href="{% static path %}">{{song.title|title}}</a></li>
+            {% endif %}
+            {% if forloop.last %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <br>
+        <ul>
+        {% for song,path in lovedList %}
+            <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
+        {% endfor %}
+        </ul>
+    {% endif %}
 {% endif %}
 
-{% if songlist %}
-<h4>{{listTitle}}</h4>
+{% if likedList %}
 
-{% if asPlayList %}
+    <h4>Songs liked by {{user}}</h4>
 
-    {% load static %}
-    {% for song,path in songlist %}
-        {% if forloop.first %}
-            <ul id="playlist">
-            <li class="current-song"><a href="{% static path %}"> {{song.title|title}}</a></li>
-        {% else %}
-            <li><a href="{% static path %}">{{song.title|title}}</a></li>
-        {% endif %}
-        {% if forloop.last %}
-            </ul>
-        {% endif %}
-    {% endfor %}
-
-
-{% else %}
-
-    <br>
-    <ul>
-    {% for song,path in songlist %}
-        <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
-    {% endfor %}
-    </ul>
-
-{% endif %}
-{% endif %}
-
-
-{% if songlist2 %}
-
-<h4>{{listTitle2}}</h4>
-
-{% if asPlayList %}
-    {% load static %}
-    {% for song,path in songlist2 %}
-        {% if forloop.first %}
-            <ul id="playlist">
-            <li class="current-song"><a href="{% static path %}"> {{song.title|title}}</a></li>
-        {% else %}
-            <li><a href="{% static path %}">{{song.title|title}}</a></li>
-        {% endif %}
-        {% if forloop.last %}
-            </ul>
-        {% endif %}
-    {% endfor %}
-
-{% else %}
-
-    
-    <br>
-    <ul>
-    {% for song,path in songlist2 %}
-        <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
-    {% endfor %}
-    </ul>
-
-{% endif %}
-
+    {% if asPlayList %}
+        {% load static %}
+        {% for song,path in likedList %}
+            {% if forloop.first %}
+                <ul id="playlist">
+                <li class="current-song"><a href="{% static path %}"> {{song.title|title}}</a></li>
+            {% else %}
+                <li><a href="{% static path %}">{{song.title|title}}</a></li>
+            {% endif %}
+            {% if forloop.last %}
+                </ul>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <br>
+        <ul>
+        {% for song,path in likedList %}
+            <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
+        {% endfor %}
+        </ul>
+    {% endif %}
 {% endif %}
 
 <script src="{% static 'jquery.js' %}" type="text/javascript"></script>

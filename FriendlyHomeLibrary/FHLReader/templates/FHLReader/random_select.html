@@ -10,7 +10,8 @@
 <form action="" method = "post">
 {% csrf_token %}
 {{form.as_p}}
-<button type="submit">Go</button>
+<button type="submit">Run Query</button>
+<button type="submit" name='save-query'>Save and Display Results</button>
 </form>
 </div>
 <p>{{message}}</p>

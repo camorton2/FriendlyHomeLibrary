@@ -48,8 +48,8 @@ class TagDetailView(View):
     def get(self,request,slug):
         print("TagDetailView GET")
         tag=get_object_or_404(models.Tag,slug__iexact=slug)
-        songs = utility.link_file_list(tag.song_tags.all())
-        pictures = utility.link_file_list(tag.picture_tags.all())
+        songs = tag.song_tags.all()
+        pictures = tag.picture_tags.all()
         movies = tag.movie_tags.all()
         return vu.collection_view(request, songs, pictures, movies, tag.name)
 

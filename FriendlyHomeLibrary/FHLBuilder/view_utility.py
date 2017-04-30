@@ -6,18 +6,18 @@ import string
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-#from django.db import models
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.text import slugify
 from django.template import RequestContext,loader
 from django.views.generic import View
+from django.core.cache import cache
 
 from FriendlyHomeLibrary import settings
 
 from FHLUser.decorators import require_authenticated_permission
 
-from FHLBuilder import models, forms
+from FHLBuilder import models
 from FHLBuilder import collection
 from FHLBuilder import choices
 from FHLBuilder import utility
@@ -31,7 +31,9 @@ from FHLReader import kodi
 def collection_view(request, songs, pictures, movies, title, 
     allowChoice=False, kind=choices.MOVIE,update=False):
     template_name = 'FHLBuilder/collection_detail.html'
+    
     mySongList = utility.link_file_list(songs)
+    
     asPlayList = False;
     if 'playlist' in request.GET:
         asPlayList = True
@@ -119,5 +121,4 @@ def select_kind(request):
     else:
         kind = choices.MOVIE
     return kind
-    
-    
+

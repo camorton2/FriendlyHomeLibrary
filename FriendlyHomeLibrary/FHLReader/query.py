@@ -5,12 +5,48 @@ import random
 
 from django.utils.text import slugify
 
-from FHLBuilder import models
+from FHLBuilder import models as bmod
 from FHLBuilder import choices
 
 from FriendlyHomeLibrary import settings
 
+def findSongs(me):
+    #print("FindLikedSongs %s" % user)
+    likedlist = []
+    lovedlist = []
+    for song in bmod.Song.objects.all():
+        #print("checking song %s" % (song.title))
+        if song.likes:
+            list = song.likes.filter(username=me)
+            if list:
+                #print("like song: %s" % song.title)
+                likedlist.append(song)
+        if song.loves:
+            list1 = song.loves.filter(username=me)
+            if list1:
+                #print("love song: %s" % song.title)
+                lovedlist.append(song)
+    #for a in lovedlist:
+    #    print("loved found %s" % a.title)
+    return likedlist,lovedlist
 
+def findVideos(me):
+    #print("FindLikedSongs %s" % user)
+    likedlist = []
+    lovedlist = []
+    for movie in bmod.Movie.objects.all():
+        #print("checking movie %s" % (movie.title))
+        if movie.likes:
+            list = movie.likes.filter(username=me)
+            if list:
+                print("like movie: %s" % movie.title)
+                likedlist.append(movie)
+        if movie.loves:
+            list1 = movie.loves.filter(username=me)
+            if list1:
+                print("love movie: %s" % movie.title)
+                lovedlist.append(movie)
+    return likedlist,lovedlist
 
 
 def kind_from_tag(akind, tagobj):

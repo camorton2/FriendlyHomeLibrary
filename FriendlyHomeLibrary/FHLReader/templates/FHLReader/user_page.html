@@ -8,8 +8,36 @@
 
 <h3>{{me|title}}'s Page</h3>
 <ul>
-<li><a href="{% url 'user_songs' %}">My Songs</a></li>
-<li><a href="{% url 'user_movies' %}">My Movies</a></li>
+
+{% if mySongs %}
+    <li><a href="{% url 'user_songs' %}">My Songs</a></li>
+{% endif %}
+
+{% if myVideos %}
+    <li><a href="{% url 'user_videos' %}">My Videos</a></li>
+{% endif %}
+
+<li><a href="{% url 'user_channels' %}">Channels</a></li>
 </ul>
+<br>
+<form action = "" method = "get">
+{% csrf_token %}    
+    <fieldset>
+    <legend>Queries (warning, these are slow)</legend>    
+
+    {% if mySongs %}
+        <button type="submit" name='my-songs'>Update My Songs</button>
+    {% else %}
+        <button type="submit" name='my-songs'>Find My Songs</button>
+    {% endif %}
+
+    {% if myMovies %}
+        <button type="submit" name='my-videos'>Update My Videos</button>
+    {% else %}
+        <button type="submit" name='my-videos'>Find My Videos</button>
+    {% endif %}
+    
+    </fieldset>
+</form>
 
 {% endblock %}
