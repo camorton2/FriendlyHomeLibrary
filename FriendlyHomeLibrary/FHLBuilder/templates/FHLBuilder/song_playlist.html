@@ -22,6 +22,14 @@
     {% load static %}
     {% for song,path in songlist %}
         {% if forloop.first %}
+        
+            {% if song.musician_set.count %}
+                {% for musician in song.musician_set.all %}
+                    <li>by: <a href="{{musician.get_absolute_url}}">{{musician.fullName|title}}</a></li>
+                {% endfor %}
+                <br>
+            {% endif %}
+        
             <audio src="" controls id="audioPlayer">
                 Sorry, your browser does not support HTML5 audio.
             </audio>
@@ -39,6 +47,14 @@
 
     <ul id="filelist">
     {% for song,path in songlist %}
+        {% if forloop.first %}
+            {% if song.musician_set.count %}
+                {% for musician in song.musician_set.all %}
+                    <li>by: <a href="{{musician.get_absolute_url}}">{{musician.fullName|title}}</a></li>
+                {% endfor %}
+                <br>
+            {% endif %}
+        {% endif %}
         <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
     {% endfor %}
     </ul>
