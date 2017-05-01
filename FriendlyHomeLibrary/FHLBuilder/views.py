@@ -38,7 +38,7 @@ class HomePage(View):
 class TagList(View):
     template_name = 'FHLBuilder/tag_list.html'
     def get(self, request):
-        print("TagList GET")
+        #print("TagList GET")
         context = {'tags': models.Tag.objects.all()}
         return render(request,self.template_name,context)
 
@@ -46,7 +46,7 @@ class TagList(View):
 class TagDetailView(View):
     template_name = 'FHLBuilder/tag_detail.html'
     def get(self,request,slug):
-        print("TagDetailView GET")
+        #print("TagDetailView GET")
         tag=get_object_or_404(models.Tag,slug__iexact=slug)
         songs = tag.song_tags.all()
         pictures = tag.picture_tags.all()
@@ -73,7 +73,7 @@ class SongDetailView(View):
             new_mus.songs.add(song)
             new_mus.save()
         elif 'pref' in request.GET and request.GET.get('pref'):
-            print("preference selection")
+            #print("preference selection")
             query.handle_pref(song, request.GET.get('pref'),request.user)
 
         love,like,dislike = query.my_preference(song,request.user)
@@ -166,13 +166,13 @@ class CollectionMixins:
         #print('setPath %s exists %s' % (scanPath,goodPath))
         if not goodPath:
             message = ('ERROR path does not exist check drive setup %s' % scanPath)
-            print(message)
+            utility.log(message)
             raise kodi.MyException(message)
         for root, dirs, files in os.walk(scanPath):
             try:
                 #myroot = utility.to_str(root[len(setPath):])
                 myroot = unicode(root[len(setPath):])
-                #print("LOOP myroot %s dirs %s files %s\n" % (myroot,dirs,files))
+                utility.log("START myroot %s dirs %s files %s\n" % (myroot,dirs,files))
                 if knownCollection is None:
                     album = self.handle_collection(myroot,drive,kind,tag)
                 else:
@@ -498,9 +498,23 @@ class DiagnosticsView(View):
     template_name = 'FHLBuilder/diagnostics.html'
     def get(self,request):
         message = ''
+        blist = []
+        title = 'diagnostics'
         if 'symlinks' in request.GET:
             diagnostics.play_with_links()
-        context = { 'message': message}
+        if 'verify-songs' in request.GET:
+            title = 'missing songs'
+            blist = diagnostics.verify_list(models.Song.objects.all())
+        if 'verify-movies' in request.GET:
+            title = 'missing movies'
+            blist = diagnostics.verify_list(models.Movie.objects.all())
+        if 'verify-pictures' in request.GET:
+            title = 'missing pictures'
+            blist = diagnostics.verify_list(models.Picture.objects.all())
+            
+        context = { 'message': message,
+            'brokenList': blist,
+            'title': title }
         return render(request,self.template_name, context)
 
 

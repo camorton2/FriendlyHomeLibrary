@@ -32,14 +32,17 @@ def collection_view(request, songs, pictures, movies, title,
     allowChoice=False, kind=choices.MOVIE,update=False):
     template_name = 'FHLBuilder/collection_detail.html'
     
-    mySongList = utility.link_file_list(songs)
+    songList = utility.link_file_list(songs)
     
     asPlayList = False;
     if 'playlist' in request.GET:
         asPlayList = True
 
     # pictures, setup slideshow        
+    
     count = len(pictures)
+    pictureList = utility.link_file_list(pictures)
+    
     current = 1
     if 'cNext' in request.GET and request.GET.get('cNext'):
         current = int(request.GET.get('cNext'))
@@ -56,9 +59,14 @@ def collection_view(request, songs, pictures, movies, title,
             current=current-1
     picture = None
     filename = None
+    
     if count:
-       picture = pictures[current-1]
-       filename = utility.object_path(picture)
+        picture,filename = pictureList[current-1]
+        #picture = target[0]
+        #filename = target[1]
+        
+       #picture = pictures[current-1]
+       #filename = utility.object_path(picture)
 
     # movies, in future to setup playlist
 
@@ -78,7 +86,7 @@ def collection_view(request, songs, pictures, movies, title,
 
     context = {
         'title':title,
-        'songlist':mySongList,
+        'songlist':songList,
         'picture':picture,
         'pictureCount':count,
         'filename': filename,

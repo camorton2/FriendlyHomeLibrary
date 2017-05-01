@@ -3,8 +3,11 @@ from __future__ import unicode_literals
 
 import os
 import time
+
 import FHLBuilder.utility as utils
+
 from FriendlyHomeLibrary import settings
+
 from xbmcjson import XBMC
 
 ##
@@ -29,7 +32,7 @@ def init_xbmc(ip):
     print('local with host %s' % host)
     user = settings.XBMC_USER
     password = settings.XBMC_PASSWD
-    xbmc_i = XBMC(get_json_rpc(host), user, password)        
+    xbmc_i = XBMC(get_json_rpc(host), user, password)
     return xbmc_i
 
 def look_at_res(res):
@@ -57,7 +60,7 @@ def look_at_res(res):
     return success
 
 def to_kodi(thefile,host,xbmc_i):
-    """ ping kodi and if successful open the player with the file 
+    """ ping kodi and if successful open the player with the file
         thefile should be the full samba or local path, not the django
         static file path used for html
         Control of the playback is passed to kodi on the selected host
@@ -76,14 +79,14 @@ def to_kodi(thefile,host,xbmc_i):
         look_at_res(result)
     else:
         message = unicode('Error unable to ping kodi at host %s' % host)
-        raise MyException(message)    
+        raise MyException(message)
 
 def send_to_kodi(ob,ip,local=False):
     """ send an object (song, movie) to kodi for playback
-        where ob is the object, ip is the ip address 
+        where ob is the object, ip is the ip address
         of kodi where playback is requested
     """
-    host = ip + settings.KODI_PORT 
+    host = ip + settings.KODI_PORT
     if local:
         # use files from the local symbols links, no longer required
         # only need when running from 127.0.0.1
@@ -97,13 +100,13 @@ def send_to_kodi(ob,ip,local=False):
         to_kodi(thefile,host,xbmc_i)
     except Exception as ex:
         # in this case I want to see what the exception is
-        # but there's no way to handle it, 
+        # but there's no way to handle it,
         message = unicode('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
         print (message)
         raise MyException(message)
 
 def send_to_kodi_local(ob,request):
-    """ send object (song,movie) to kodi using client ip in html request 
+    """ send object (song,movie) to kodi using client ip in html request
     """
     print('kodi_local')
     try:
@@ -125,15 +128,15 @@ def send_to_kodi_bf(ob):
     """ send to kodi BF machehinc using hard-coded ip from settings """
     print('kodi_bf')
     send_to_kodi(ob,settings.HOST_BF)
-        
+
 ##
-# 
+#
 # //Play a single video from file
-# http://192.168.15.117/jsonrpc?request={"jsonrpc":"2.0","id":"1","method":"Player.Open","params":{"item":{"file":"Media/Big_Buck_Bunny_1080p.mov"}}}    
+# http://192.168.15.117/jsonrpc?request={"jsonrpc":"2.0","id":"1","method":"Player.Open","params":{"item":{"file":"Media/Big_Buck_Bunny_1080p.mov"}}}
 # http://192.168.2.30/
 
 def stream_to_vlc(movie,request):
-    """ instruct vlc to stream the movie using host/client from 
+    """ instruct vlc to stream the movie using host/client from
         html request
         note, no correct interface at this time, uses command line
     """
@@ -169,4 +172,4 @@ def playback_requests(obj,request):
     elif 'vlc_plugin' in request.POST:
         return True
     return False
-    
+

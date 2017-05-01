@@ -1,3 +1,4 @@
 FriendlyHomeLibrary/static
+FriendlyHomeLibrary/logs
 *.pyc
 FriendlyHomeLibrary/FriendlyHomeLibrary/settings.py

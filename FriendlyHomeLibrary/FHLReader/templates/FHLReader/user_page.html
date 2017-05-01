@@ -17,6 +17,11 @@
     <li><a href="{% url 'user_videos' %}">My Videos</a></li>
 {% endif %}
 
+{% if myPictures %}
+    <li><a href="{% url 'user_pictures' 'liked' %}">My liked Pictures</a></li>
+    <li><a href="{% url 'user_pictures' 'loved' %}">My loved Pictures</a></li>
+{% endif %}
+
 <li><a href="{% url 'user_channels' %}">Channels</a></li>
 </ul>
 <br>
@@ -31,11 +36,18 @@
         <button type="submit" name='my-songs'>Find My Songs</button>
     {% endif %}
 
-    {% if myMovies %}
+    {% if myVideos %}
         <button type="submit" name='my-videos'>Update My Videos</button>
     {% else %}
         <button type="submit" name='my-videos'>Find My Videos</button>
     {% endif %}
+
+    {% if myPictures %}
+        <button type="submit" name='my-pictures'>Update My Pictures</button>
+    {% else %}
+        <button type="submit" name='my-pictures'>Find My Pictures</button>
+    {% endif %}
+
     
     </fieldset>
 </form>

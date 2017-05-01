@@ -35,6 +35,9 @@ class MyCache:
         self.lovedS = ('lovedS-%s' % me)
         self.likedV = ('likedV-%s' % me)
         self.lovedV = ('lovedV-%s' % me)
+        self.likedP = ('likedP-%s' % me)
+        self.lovedP = ('lovedP-%s' % me)
+        
 
     def cache_query(self,songs,pictures,videos,channel):
         cache.set(self.songs, songs)
@@ -49,6 +52,20 @@ class MyCache:
     def cache_my_videos(self,liked, loved):
         cache.set(self.likedV, liked)
         cache.set(self.lovedV, loved)
+
+    def cache_my_pictures(self,liked, loved):
+        cache.set(self.likedP, liked)
+        cache.set(self.lovedP, loved)
+
+    def has_my_songs(self):
+        return self.likedS in cache or self.lovedS in cache
+
+    def has_my_videos(self):
+        return self.likedV in cache or self.lovedV in cache
+
+    def has_my_pictures(self):
+        return self.likedP in cache or self.lovedP in cache
+
 
     def get_my_songs(self):
         liked = []
@@ -66,6 +83,15 @@ class MyCache:
             liked = cache.get(self.likedV)
         if self.lovedV in cache:
             loved = cache.get(self.lovedV)
+        return liked,loved
+
+    def get_my_pictures(self):
+        liked = []
+        loved = []
+        if self.likedP in cache:
+            liked = cache.get(self.likedP)
+        if self.lovedP in cache:
+            loved = cache.get(self.lovedP)
         return liked,loved
 
     def get_query(self):

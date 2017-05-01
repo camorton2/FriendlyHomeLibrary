@@ -3,9 +3,28 @@ from __future__ import unicode_literals
 
 import os
 import string
+import datetime
+
 from FriendlyHomeLibrary import settings
 
+
 #Utility functions
+
+def log(msg):
+    try:
+        log = unicode('%s/log%s' % (settings.LOG_PATH,datetime.date.today()))
+        with open(log,'a+') as f:
+            f.write(msg)
+            f.write('\n')
+            f.close()
+    except UnicodeDecodeError:
+        print("RATS UnicodeDecodeError in to_str with %s" % msg)
+        f.close()
+    except UnicodeEncodeError:
+        print("RATS UnicodeEncodeError in to_str with %s" % msg)
+        f.close()
+
+
 def to_str(unicode_or_string):
     try:
         if isinstance(unicode_or_string,unicode):
@@ -37,6 +56,12 @@ def get_drive_slink(driveNo):
 
 def object_path(obj):
     """ return the path from links in django's static path """
+    if obj is None:
+        message = unicode('error - request path object None')
+        raise Exception(message)        
+    if obj.collection is None:
+        message = unicode('error - request path object collection none %s type %s' % (obj.title,type(obj)))
+        raise Exception(message)
     drive = get_drive_slink(obj.collection.drive)
     thePath = unicode(os.path.join(u'links/', drive))
     thePath = unicode(os.path.join(thePath, obj.collection.filePath,obj.fileName))

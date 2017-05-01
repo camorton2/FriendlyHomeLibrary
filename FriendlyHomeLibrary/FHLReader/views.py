@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.core.cache import cache
 
 from FHLBuilder import choices
-from FHLBuilder.models import Song, Movie
+from FHLBuilder.models import Song, Movie, Picture
 
 import FHLBuilder.view_utility as vu
 import FHLBuilder.query as bq
@@ -31,26 +31,20 @@ class UserDetail(View):
         mycache = cu.MyCache(me)
                 
         if 'my-songs' in request.GET:
-            # Do the query, cache results
-            likedS,lovedS = rq.findSongs(me)
+            likedS,lovedS = rq.find_objects(me, Song.objects.all())
             mycache.cache_my_songs(likedS,lovedS)
-            mySongs = True
         if 'my-videos' in request.GET:
-            # Do the query, cache results
-            likedV,lovedV = rq.findVideos(me)
+            likedV,lovedV = rq.find_objects(me, Movie.objects.all())
             mycache.cache_my_videos(likedV,lovedV)
-            myMovies = True
-
-        likedS,lovedS = mycache.get_my_songs()
-        mySongs = likedS or lovedS
-               
-        likedV,lovedV = mycache.get_my_videos()
-        myVideos = likedV or lovedV
+        if 'my-pictures' in request.GET:
+            likedP,lovedP = rq.find_objects(me, Picture.objects.all())
+            mycache.cache_my_pictures(likedP,lovedP)
         
         context = {
             'me': me,
-            'mySongs': mySongs,
-            'myVideos': myVideos
+            'mySongs': mycache.has_my_songs(),
+            'myVideos': mycache.has_my_videos(),
+            'myPictures': mycache.has_my_pictures()
             }
         return render(request,self.template_name,context)    
 
@@ -62,9 +56,8 @@ class UserSongList(View):
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
         
-        # in this case chose playlist by default
         playlist = True
-        # print("UserSongList GET")
+
         if 'filelist' in request.GET:
             playlist=False
         
@@ -81,7 +74,6 @@ class UserSongList(View):
             
         return render(request,self.template_name,context)
 
-# movies
 class UserVideoList(View):
     template_name='FHLReader/user_videos.html'
     def get(self,request):
@@ -89,16 +81,37 @@ class UserVideoList(View):
         mycache = cu.MyCache(me)
         
         liked, loved = mycache.get_my_videos()
-                        
-        #likedList = bu.link_file_list(liked)
-        #lovedList = bu.link_file_list(loved)
-            
+        
         context = {
             'lovedList': loved,
             'likedList': liked,
             }            
-            
+        
         return render(request,self.template_name,context)
+
+class UserPictureList(View):
+    
+    def get(self,request, pref):
+        me = User.objects.get(username=request.user)
+        mycache = cu.MyCache(me)
+        
+        liked, loved = mycache.get_my_pictures()
+        
+        # join the pictures for a single slideshow
+        #pictures = loved
+        #pictures.append(liked)
+        
+        if pref == 'liked':
+            pictures = liked
+        elif pref == 'loved':
+            pictures = loved
+        else:
+            pictures = []
+            
+        return vu.collection_view(request,
+            [],pictures,[],'My Pictures', False)
+
+
 
 class UserChannels(View):
     template_name = 'FHLReader/channels_page.html'

@@ -6,12 +6,22 @@
 
 {% block content %}
 {% if perms.FHLBuilder.collection_builder %}
-
+<br>
 <form action="" method = "get">
 {% csrf_token %}
-<button type="submit" name='symlinks' >Fix Symlinks</button>
+    <button type="submit" name='symlinks' >Fix Symlinks</button>
+    <button type="submit" name='verify-songs' >Verify Songs</button>
+    <button type="submit" name='verify-movies' >Verify Movies</button>
+    <button type="submit" name='verify-pictures' >Verify Pictures</button>
 </form>
 
+<h4>{{title|title}} {{ message }}</h4>
+
+<ul>
+{% for oops in brokenList %}
+    <li><a href="{{ oops.get_absolute_url }}">{{oops.title|title}} path {{ oops.collection.filePath }}</a></li>
+{% endfor %}
+</ul>
 {% endif %}
 {% endblock %}
 

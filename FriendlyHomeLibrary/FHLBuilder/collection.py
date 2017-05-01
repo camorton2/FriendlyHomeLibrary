@@ -24,10 +24,15 @@ def setFileKind(obj,kind):
         
 
 def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
-    #print ("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
+    
     try:
         dbobj = bmodels.Collection.objects.get(slug__iexact=cSlug)
+        if dbobj.filePath != cPath:
+            # create a new slug by adding -1
+            fslug = slugify( unicode( '%s-%d' % (cSlug,1) ))
+            return add_collection(cAlbum, fslug, cPath, cDrive, saveIt)
     except bmodels.Collection.DoesNotExist:
+        utility.log("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
         path = unicode(cPath)
         album = unicode(cAlbum)
         dbobj = bmodels.Collection(filePath=path,title=album,slug=cSlug,drive=cDrive)
@@ -36,10 +41,11 @@ def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
     return dbobj
 
 def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
-    #print ("---> ADD Song %s, track %s, filename %s, slug %s: " % (sTitle,sTrack,sFileName,sSlug))
+    
     try:
         dbobj = bmodels.Song.objects.get(slug__iexact=sSlug)
     except bmodels.Song.DoesNotExist:
+        utility.log("---> ADD Song %s, track %s, filename %s, slug %s: " % (sTitle,sTrack,sFileName,sSlug))
         sCollection.save()
         track = unicode(sTrack)
         title = unicode(sTitle)
@@ -51,15 +57,14 @@ def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
     return dbobj
 
 def add_movie(mTitle, mFileName, mSlug, mCollection, fKind=choices.MOVIE):
-    #print ("---> ADD Movie %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
+    
     try:
         dbobj = bmodels.Movie.objects.get(slug__iexact=mSlug)
-        #print ("SKIPPING - duplicate %s" % mSlug)
     except bmodels.Movie.DoesNotExist:
+        utility.log("---> ADD Movie %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
         mCollection.save()
         title = unicode(mTitle)
         fileName = unicode(mFileName)
-        #print("CATH add movie %s to collection %s" % (mSlug,mCollection.slug))
         dbobj = bmodels.Movie(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
         dbobj.save()
     setFileKind(dbobj,fKind)
@@ -70,6 +75,7 @@ def add_picture(mTitle, mFileName, mSlug, mCollection):
     try:
         dbobj = bmodels.Picture.objects.get(slug__iexact=mSlug)
     except bmodels.Picture.DoesNotExist:
+        utility.log("---> ADD Picture %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
         mCollection.save()
         title = unicode(mTitle)
         fileName = unicode(mFileName)
@@ -80,10 +86,10 @@ def add_picture(mTitle, mFileName, mSlug, mCollection):
     return dbobj
 
 def add_musician(aName, aSlug):
-    #print("---> ADD Musician %s, slug %s" % (aName, aSlug))
     try:
         dbobj = bmodels.Musician.objects.get(slug__iexact=aSlug)
     except bmodels.Musician.DoesNotExist:
+        utility.log("---> ADD Musician %s, slug %s" % (aName, aSlug))
         for b in bmodels.Musician.objects.all():
             if utility.slugCompare(aSlug,b.slug):
                 return b
@@ -93,30 +99,30 @@ def add_musician(aName, aSlug):
     return dbobj
 
 def add_actor(aName, aSlug):
-    #print("---> ADD Actor %s, slug %s" % (aName, aSlug))
     try:
         dbobj = bmodels.Actor.objects.get(slug__iexact=aSlug)
     except bmodels.Actor.DoesNotExist:
+        print("---> ADD Actor %s, slug %s" % (aName, aSlug))
         name = unicode(aName)
         dbobj = bmodels.Actor(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
 
 def add_director(aName, aSlug):
-    #print("---> ADD Director %s, slug %s" % (aName, aSlug))
     try:
         dbobj = bmodels.Director.objects.get(slug__iexact=aSlug)
     except bmodels.Director.DoesNotExist:
+        print("---> ADD Director %s, slug %s" % (aName, aSlug))
         name = unicode(aName)
         dbobj = bmodels.Director(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
 
 def add_tag(tName, tSlug):
-    #print("---> ADD Tag %s, slug %s" % (tName, tSlug))
     try:
         dbobj = bmodels.Tag.objects.get(slug__iexact=tSlug)
     except bmodels.Tag.DoesNotExist:
+        print("---> ADD Tag %s, slug %s" % (tName, tSlug))
         name = unicode(tName)
         dbobj = bmodels.Tag(name=name,slug=tSlug)
         dbobj.save()
@@ -164,10 +170,10 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
     except Exception as ex:
         # in this case I want to see what the exception is, but the file is ok and
         # will not be ignored
-        print ("SKIP (os.stat) %s unhandled exception %s" % (theFile,type(ex).__name__))
+        utility.log("SKIP (os.stat) %s unhandled exception %s" % (theFile,type(ex).__name__))
         return album, musician
     if not statinfo.st_size:
-        print("SKIP file with 0 size %s" % theFile)
+        utility.log("SKIP file with 0 size %s" % theFile)
         return album, musician
     base = unicode(os.path.basename(theFile))
     mTitle, extension = os.path.splitext(base)
@@ -187,8 +193,8 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
         except Exception as ex:
             # in this case I want to see what the exception is, but the file is ok and
             # will not be ignored
-            print ("ERROR (idetag) %s unhandled exception %s" % (theFile,type(ex).__name__))
-
+            utility.log("ERROR (idetag) %s unhandled exception %s" % (theFile,type(ex).__name__))
+            
         if tag is None:
             # pick some reasonable defaults
             myArtist = u'various'
@@ -203,6 +209,8 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 title=mTitle
             if tag.album is None:
                 collection = newCollection
+            elif title == 'None':
+                title = mTitle
             else:
                 addC = True
                 # handle the collection (album) which only has a path and a name
@@ -305,7 +313,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
             except Exception as ex:
                 # in this case I want to see what the exception is, but the file is ok and
                 # will not be ignored
-                print ("ERROR (opening for info) %s unhandled exception %s" % (fname,type(ex).__name__))
+                utility.log("ERROR (opening for info) %s unhandled exception %s" % (fname,type(ex).__name__))
 
             if len(formTag):
                 xSlug = slugify(unicode('%s' % (formTag)))
@@ -313,8 +321,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 picture.tags.add(xTag)
                 picture.save()
         else:
-            print ("SKIPPING - unhandled extension %s/%s" % (path,base))
-
+            utility.log("SKIPPING - unhandled extension %s/%s" % (path,base))
     return album,musician
 
 
