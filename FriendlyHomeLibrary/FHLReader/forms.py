@@ -36,3 +36,49 @@ class RandomForm(forms.ModelForm):
         raise ValidationError(u'please select a count above 0')
 
 
+class CartoonForm(forms.ModelForm):
+    """
+    The idea is to allow the user to create a playlist of count
+    random cartoons, optionally matching by tag or title
+    """
+    class Meta:
+        model=models.Collection
+        fields=[]
+     
+    atitle = forms.CharField(max_length=models.CHAR_LENGTH,
+        required=False,
+        label='title contains')
+    atag = forms.CharField(max_length=models.CHAR_LENGTH,required=False,
+        label='with tag')
+    count = forms.IntegerField(initial=1)
+
+    def clean_count(self):
+        count=self.cleaned_data['count']
+        if count > 0:
+            return count
+        raise ValidationError(u'please select a count above 0')
+
+
+class MovieChannelForm(forms.ModelForm):
+    """
+    The idea is to allow the user to create a playlist of count
+    random items, optionally matching by tag or title
+    """
+    class Meta:
+        model=models.Collection
+        fields=[]
+     
+    atitle = forms.CharField(max_length=models.CHAR_LENGTH,
+        required=False,
+        label='title contains')
+    atag = forms.CharField(max_length=models.CHAR_LENGTH,required=False,
+        label='with tag')
+    count = forms.IntegerField(initial=1)
+
+    def clean_count(self):
+        count=self.cleaned_data['count']
+        if count > 0:
+            return count
+        raise ValidationError(u'please select a count above 0')
+
+

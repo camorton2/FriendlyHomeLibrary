@@ -22,7 +22,7 @@ class CommonFileForm(forms.ModelForm):
 class SongForm(CommonFileForm):
     class Meta:
         model=models.Song
-        fields=['title','year','fileKind']
+        fields=['title','year']
 
 class PictureForm(CommonFileForm):
     class Meta:

@@ -16,28 +16,32 @@ from xbmcjson import XBMC
 ##
 
 class MyException(Exception):
+    """ simple exception takes message """
     def __init__(self, msg):
-        """ simple exception takes message """
         print('CTOR MyException %s' % msg)
         self.message = msg
 
+
 def get_json_rpc(host):
+    """ given the host construct the json rpc """
     jsonrpc = "jsonrpc"
     if not host.endswith("/"):
         jsonrpc = "/" + jsonrpc
     return host + jsonrpc
 
+
 def init_xbmc(ip):
+    """ given an ip address, setup the kodi connection """
     host = unicode('http://%s' % ip)
-    print('local with host %s' % host)
     user = settings.XBMC_USER
     password = settings.XBMC_PASSWD
     xbmc_i = XBMC(get_json_rpc(host), user, password)
     return xbmc_i
 
+
 def look_at_res(msg, res):
     """ takes the result from a kodi json command """
-    
+
     if res is not None:
         success = False
         if "result" in res and (res["result"] == "OK" or
@@ -59,6 +63,7 @@ def look_at_res(msg, res):
         if success:
             print("Success.")
     return success
+
 
 def to_kodi(thefile,host,xbmc_i):
     """ ping kodi and if successful open the player with the file
@@ -82,6 +87,7 @@ def to_kodi(thefile,host,xbmc_i):
         message = unicode('Error unable to ping kodi at host %s' % host)
         raise MyException(message)
 
+
 def send_to_kodi(ob,ip,local=False):
     """ send an object (song, movie) to kodi for playback
         where ob is the object, ip is the ip address
@@ -93,14 +99,13 @@ def send_to_kodi(ob,ip,local=False):
         # only need when running from 127.0.0.1
         thefile = utils.object_path_local(ob)
     else:
-        print("using Samba")
         thefile = utils.object_path_samba(ob)
     try:
         xbmc_i = init_xbmc(host)
         to_kodi(thefile,host,xbmc_i)
     except Exception as ex:
         # in this case I want to see what the exception is
-        # but there's no way to handle it,
+        # but there's no way to handle it, just pass it back for display
         message = unicode('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
         print (message)
         raise MyException(message)
@@ -128,52 +133,46 @@ def playback_requests(ob,request):
     elif 'kodi_lf' in request.POST:
         send_to_kodi(ob,settings.HOST_LF)
     elif 'kodi_bf' in request.POST:
-        send_to_kodi(ob,settings.HOST_BF)    
+        send_to_kodi(ob,settings.HOST_BF)
     elif 'vlc_plugin' in request.POST:
         return True
     return False
 
 
 ##########################################################
+# Kodi playlist section
+##########################################################
 
 def play_kodi(playlist,host,xbmc_i):
-    """ ping kodi and if successful open the player with the file
-        thefile should be the full samba or local path, not the django
-        static file path used for html
+    """ ping kodi and if successful create a playlist and open kodi
         Control of the playback is passed to kodi on the selected host
         xbmc_i should be the initialized kodi connection
         host is unused except in the message for an exception
     """
-    
+
     ping_result = xbmc_i.JSONRPC.Ping()
     look_at_res('ping',ping_result)
     if ping_result:
-        id_context = {'playlistid':settings.KODI_PLAYLIST}        
+        id_context = {'playlistid':settings.KODI_PLAYLIST}
         repeat_context = { 'repeat': 'all'}
         open_context = {'item':id_context, 'options': repeat_context}
-        
+
         # clear the playlist
         cresult = xbmc_i.Playlist.Clear(id_context)
         look_at_res('playlist clear', cresult)
-        
-        # add to playlist 
+
+        # add to playlist
         for ob in playlist:
             thefile = utils.object_path_samba(ob)
-            print('file %s' % thefile)
-            acontext = { 'file': thefile }
-            print('acontext')
-            pcontext = { 'playlistid': settings.KODI_PLAYLIST, 
+            acontext = {'file': thefile }
+            pcontext = {'playlistid': settings.KODI_PLAYLIST,
                 'item': acontext }
-            print('pcontext')
             addresult = xbmc_i.Playlist.Add(pcontext)
-            print('after Playlist.Add')
             msg = ('playlist add %s' % thefile)
             look_at_res(msg, addresult)
-            
+
         # play it
-        print('after for, before open')
         result = xbmc_i.Player.Open(open_context)
-        print('after open')
         look_at_res('playlist open', result)
     else:
         message = unicode('Error unable to ping kodi at host %s' % host)
@@ -186,28 +185,26 @@ def play_to_kodi(playlist,ip):
         of kodi where playback is requested
     """
     host = ip + settings.KODI_PORT
-    
+
     try:
-        print("Attempt to init with host %s" % host)
         xbmc_i = init_xbmc(host)
         play_kodi(playlist,host,xbmc_i)
     except Exception as ex:
         # in this case I want to see what the exception is
-        # but there's no way to handle it,
+        # but there's no way to handle it, just give back message
         message = unicode('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
         print (message)
         raise MyException(message)
 
 
-
 def playlist_requests(playlist,request):
     """ handle play requests for playlist
-        given the html POST request
+        given the html GET request
         caller should catch MyException which is used for all
         errors in kodi playback
     """
     print('playlist_request')
-    if 'kodi_local' in request.GET:        
+    if 'kodi_local' in request.GET:
         try:
             clientip = request.META['REMOTE_ADDR']
         except KeyError:
@@ -225,18 +222,7 @@ def playlist_requests(playlist,request):
         return True
     return False
 
-
-
-##########################################################
-
-
-
-##
-#
-# //Play a single video from file
-# http://192.168.15.117/jsonrpc?request={"jsonrpc":"2.0","id":"1","method":"Player.Open","params":{"item":{"file":"Media/Big_Buck_Bunny_1080p.mov"}}}
-# http://192.168.2.30/
-
+############## vlc ################
 def stream_to_vlc(movie,request):
     """ instruct vlc to stream the movie using host/client from
         html request

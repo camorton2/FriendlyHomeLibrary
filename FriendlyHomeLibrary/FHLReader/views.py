@@ -110,7 +110,8 @@ class UserPictureList(View):
 class UserChannels(View):
     template_name = 'FHLReader/channels_page.html'
     def get(self, request):
-        return render(request,self.template_name)
+        context = {'choices': choices.videos}
+        return render(request,self.template_name,context)
 
 class CachedFileList(View):
     """
@@ -162,4 +163,75 @@ class RandomList(View):
         context = {'form':bound_form,'rlist':rlist}
         return render(request,self.template_name,context)
         
+
+class RandomCartoon(View):
+    template_name = 'FHLReader/random_cartoon.html'
+    form_class=forms.CartoonForm
+
+    def get(self, request):
+        print("RandomList GET")
+        context = {'form':self.form_class()}
+        return render(request,self.template_name,context)                
+
+    
+    def post(self, request):
+        print("RandomList POST")
+        me = User.objects.get(username=request.user)
+        mycache = cu.MyCache(me)
+        
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            count = bound_form.cleaned_data['count'];
+            title = bound_form.cleaned_data['atitle'];
+            tag = bound_form.cleaned_data['atag'];                
+            print('Valid form count %d title %s tag %s' % (count,title,tag))
+            kind = (choices.TV_CARTOON, 'TV-Cartoon')
+            rlist = rq.random_select(count,title,tag,kind)
+            if 'save-query' in request.POST:
+                # cache the query results and redirect to the cache-display
+                return cu.cache_list_bykind(rlist,choices.MOVIE,'random_list',mycache)
+        # display the list as files with the form    
+        context = {'form':bound_form,'rlist':rlist}
+        return render(request,self.template_name,context)
+        
+        
+class MovieChannel(View):
+    template_name = 'FHLReader/movie_channel.html'
+    form_class=forms.MovieChannelForm
+
+    def getKind(self,akind):
+        print('kind passed %s' % akind)
+        for x in choices.KIND_CHOICES:
+            if x[0] == akind:
+                return x
+        print('ERROR defaulting to cartoon')
+        return (choices.TV_CARTOON, 'TV-Cartoon')
+        
+
+    def get(self, request, akind):
+        print("MovieChannel GET")
+        context = {'form':self.form_class()}
+        return render(request,self.template_name,context)                
+
+    
+    def post(self, request, akind):
+        print("MovieChannel POST")
+        me = User.objects.get(username=request.user)
+        mycache = cu.MyCache(me)
+        kind = self.getKind(akind)
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            count = bound_form.cleaned_data['count'];
+            title = bound_form.cleaned_data['atitle'];
+            tag = bound_form.cleaned_data['atag'];                
+            print('Valid form count %d title %s tag %s' % (count,title,tag))
+            rlist = rq.random_select(count,title,tag,kind)
+            if 'save-query' in request.POST:
+                # cache the query results and redirect to the cache-display
+                return cu.cache_list_bykind(rlist,choices.MOVIE,'random_list',mycache)
+        # display the list as files with the form    
+        context = {'form':bound_form,'rlist':rlist}
+        return render(request,self.template_name,context)
         

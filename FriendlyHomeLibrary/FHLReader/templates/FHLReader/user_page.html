@@ -1,14 +1,13 @@
 {% extends parent_template|default:"FHLReader/base_reader.html" %}
 
 {% block title %}
-{{ block.super }} User {{user}}
+{{ block.super }} User {{me.username}}
 {% endblock %}
 
 {% block content %}
 
 <h3>{{me.username|title}}'s Page</h3>
 <ul>
-
 {% if mySongs %}
     <li><a href="{% url 'user_songs' 'liked' %}">My liked Songs</a></li>
     <li><a href="{% url 'user_songs' 'loved' %}">My loved Songs</a></li>
@@ -23,15 +22,15 @@
     <li><a href="{% url 'user_pictures' 'liked' %}">My liked Pictures</a></li>
     <li><a href="{% url 'user_pictures' 'loved' %}">My loved Pictures</a></li>
 {% endif %}
-
-<li><a href="{% url 'user_channels' %}">Channels</a></li>
+    <li><a href="{% url 'user_channels' %}">Channels</a></li>
 </ul>
+
 <br>
+
 <form action = "" method = "get">
 {% csrf_token %}    
     <fieldset>
     <legend>Queries (warning, these are slow)</legend>    
-
     {% if mySongs %}
         <button type="submit" name='my-songs'>Update My Songs</button>
     {% else %}
@@ -49,8 +48,6 @@
     {% else %}
         <button type="submit" name='my-pictures'>Find My Pictures</button>
     {% endif %}
-
-    
     </fieldset>
 </form>
 

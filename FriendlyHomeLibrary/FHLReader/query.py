@@ -50,7 +50,7 @@ def kind_from_all(akind):
         return bmod.Song.objects.all()
     if kind == choices.PICTURE:
         return bmod.Picture.objects.all()
-    return CommonFile.objects.none()
+    return bmod.CommonFile.objects.none()
     
 
 def random_select(count, kind, tag):
@@ -82,6 +82,43 @@ def random_select(count, kind, tag):
     for ind in rand_entities:
         flist.append(mylist[ind])
     return flist
+
     
+def random_select(count, title, tag,kind):
+    """
+    Find a list of count random cartoons
+    """
+    
+    #kind = choices.TV_CARTOON
+    #kind = (choices.TV_CARTOON, 'TV-Cartoon')
+    # begin empty
+    mylist = bmod.CommonFile.objects.none()
+    
+    if len(tag):
+        # get this tag
+        tSlug = slugify(unicode('%s' % (tag)))
+        try:
+            target = bmod.Tag.objects.get(slug__iexact=tSlug)
+            mylist = kind_from_tag(kind,target)
+        except bmod.Tag.DoesNotExist:
+            return mylist
+    else:
+        mylist = kind_from_all(kind)
+            
+    # refine list for title
+    if len(title):
+        mylist = mylist.filter(title__icontains=title)    
+            
+    mysize = mylist.count()
+    if mysize <= count:
+        return mylist
+    
+    rand_entities = random.sample( range(mysize), count)
+    print(mysize)
+    print(rand_entities)
+    flist = []
+    for ind in rand_entities:
+        flist.append(mylist[ind])
+    return flist
     
     

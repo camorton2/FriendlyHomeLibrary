@@ -6,11 +6,8 @@ import string
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-#from django.db import models
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.text import slugify
-from django.template import RequestContext,loader
 from django.views.generic import View
 
 from FriendlyHomeLibrary import settings
@@ -30,6 +27,7 @@ from FHLReader import kodi
 # Views
 
 class HomePage(View):
+    """ main homepage """
     template_name = 'FHLBuilder/base_fhlbuilder.html'
     def get(self, request):
         return render(request,self.template_name,)
@@ -38,7 +36,6 @@ class HomePage(View):
 class TagList(View):
     template_name = 'FHLBuilder/tag_list.html'
     def get(self, request):
-        #print("TagList GET")
         context = {'tags': models.Tag.objects.all()}
         return render(request,self.template_name,context)
 
@@ -196,8 +193,6 @@ class CollectionMixins:
         return album,artist
 
 class CollectionDetailView(View, CollectionMixins):
-
-
     def get(self,request,slug):
         # print("CollectionDetail GET %s" % slug)
         target=get_object_or_404(models.Collection,slug__iexact=slug)

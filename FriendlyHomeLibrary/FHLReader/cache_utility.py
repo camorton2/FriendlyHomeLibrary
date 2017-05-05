@@ -6,16 +6,10 @@ import string
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render, redirect
-from django.utils.text import slugify
-from django.template import RequestContext,loader
-from django.views.generic import View
+from django.shortcuts import redirect
 from django.core.cache import cache
 
 from FriendlyHomeLibrary import settings
-
-from FHLUser.decorators import require_authenticated_permission
 
 from FHLBuilder import models
 from FHLBuilder import collection
@@ -25,6 +19,9 @@ from FHLBuilder import query
 
 
 class MyCache:
+    """
+    class holds all interaction with the cache
+    """
     def __init__(self,me):
         self.me = me.username
         self.songs = ('songs-%s' % self.me)
@@ -40,34 +37,47 @@ class MyCache:
         
 
     def cache_query(self,songs,pictures,videos,channel):
+        """
+        cache the results of a given query
+        """
         cache.set(self.songs, songs)
         cache.set(self.pictures, pictures)
         cache.set(self.videos, videos)
         cache.set(self.channel, channel)
 
+
     def cache_my_songs(self,liked, loved):
+        """ cache the results of the liked/loved songs query """
         cache.set(self.likedS, liked)
         cache.set(self.lovedS, loved)
 
+
     def cache_my_videos(self,liked, loved):
+        """ cache the results of the liked/loved videos query """
         cache.set(self.likedV, liked)
         cache.set(self.lovedV, loved)
 
+
     def cache_my_pictures(self,liked, loved):
+        """ cache the results of the liked/loved pictures query """
         cache.set(self.likedP, liked)
         cache.set(self.lovedP, loved)
 
     def has_my_songs(self):
+        """ determine if the liked/loved songs query is in cache """
         return self.likedS in cache or self.lovedS in cache
 
     def has_my_videos(self):
+        """ determine if the liked/loved videos query is in the cache """
         return self.likedV in cache or self.lovedV in cache
 
     def has_my_pictures(self):
+        """ determine if the liked/loved pictures query is in the cache """
         return self.likedP in cache or self.lovedP in cache
 
 
     def get_my_songs(self):
+        """ return the cached result from the liked/loved songs query """
         liked = []
         loved = []
         if self.likedS in cache:
@@ -77,6 +87,7 @@ class MyCache:
         return liked,loved
 
     def get_my_videos(self):
+        """ return the cached result of the liked/loved videos query """
         liked = []
         loved = []
         if self.likedV in cache:
@@ -86,6 +97,7 @@ class MyCache:
         return liked,loved
 
     def get_my_pictures(self):
+        """ return the cached result of the liked/loved pictures query """
         liked = []
         loved = []
         if self.likedP in cache:
@@ -95,37 +107,38 @@ class MyCache:
         return liked,loved
 
     def get_query(self):
+        """ get the cached result of the most recent query """
         songs = []
         videos = []
         pictures = []
         channel = None
-
         if self.songs in cache:
             songs = cache.get(self.songs)
         if self.videos in cache:
             videos = cache.get(self.videos)
-            print('cache get videos')
-            for x in videos:
-                print('in list %s' % x.title)
         if self.pictures in cache:
             pictures = cache.get(self.pictures)
         if self.channel in cache:
             channel = cache.get(self.channel)
-
         return songs,pictures,videos,channel
 
+
     def clear_query(self):
+        """ clear the currently cached query """
         cache.set(self.songs,[])
         cache.set(self.videos,[])
         cache.set(self.pictures,[])
         cache.set(self.channel,[])
 
+
     def clear_me(self):
+        """ clear the liked/loved queries from the cache """
         cache.set(self.likedS,[])
         cache.set(self.lovedS,[])
         cache.set(self.likedV,[])
         cache.set(self.lovedV,[])
-
+        cache.set(self.lovedP,[])
+        cache.set(self.likedP,[])
 
 
 def cache_list_bykind(rlist,kind,channel,mycache):
@@ -144,7 +157,6 @@ def cache_list_bykind(rlist,kind,channel,mycache):
     elif kind[0] == choices.PICTURE:
         pictures = rlist
     elif kind[0] in choices.videos:
-        print('list to videos')
         videos = rlist
     else:
         print('ERROR no kind selected')
