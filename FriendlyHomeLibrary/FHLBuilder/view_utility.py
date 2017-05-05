@@ -28,7 +28,7 @@ from FHLReader import kodi
 
 
 
-def collection_view(request, songs, pictures, movies, title, 
+def collection_view(request, songs, pictures, movies, artists, title, 
     allowChoice=False, kind=choices.MOVIE,update=False):
     template_name = 'FHLBuilder/collection_detail.html'
     
@@ -84,6 +84,25 @@ def collection_view(request, songs, pictures, movies, title,
         for obj in movies:
             obj.tags.add(new_tag)
 
+    for x in movies:
+        print('view has movie %s' % x.title)
+
+    # kodi playlist options
+    # TODO collections with more than one?
+    message = ''
+    try:
+        if movies and kodi.playlist_requests(movies,request):
+            message = u'success - movies sent'
+        elif songs and kodi.playlist_requests(songs,request):
+            message = u'success - songs sent'
+        elif pictures and kodi.playlist_requests(pictures,request):
+            message = u'success - pictures sent'
+        
+    except kodi.MyException,ex:
+        message = ex.message
+        print('Caught %s' % ex.message)
+
+
     context = {
         'title':title,
         'songlist':songList,
@@ -97,6 +116,8 @@ def collection_view(request, songs, pictures, movies, title,
         'choices': choices.KIND_CHOICES,
         'listkind':kind,
         'allowChoice': allowChoice,
+        'artists': artists,
+        'message': message
         }
     return render(request, template_name, context)
     

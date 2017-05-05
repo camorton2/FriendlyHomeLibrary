@@ -26,17 +26,17 @@ from FHLBuilder import query
 
 class MyCache:
     def __init__(self,me):
-        self.me = me
-        self.songs = ('songs-%s',me)
-        self.videos = ('videos-%s',me)
-        self.pictures = ('pictures-%s',me)
-        self.channel = ('channel-%s',me)
-        self.likedS = ('likedS-%s' % me)
-        self.lovedS = ('lovedS-%s' % me)
-        self.likedV = ('likedV-%s' % me)
-        self.lovedV = ('lovedV-%s' % me)
-        self.likedP = ('likedP-%s' % me)
-        self.lovedP = ('lovedP-%s' % me)
+        self.me = me.username
+        self.songs = ('songs-%s' % self.me)
+        self.videos = ('videos-%s' % self.me)
+        self.pictures = ('pictures-%s' % self.me)
+        self.channel = ('channel-%s' % self.me)
+        self.likedS = ('likedS-%s' % self.me)
+        self.lovedS = ('lovedS-%s' % self.me)
+        self.likedV = ('likedV-%s' % self.me)
+        self.lovedV = ('lovedV-%s' % self.me)
+        self.likedP = ('likedP-%s' % self.me)
+        self.lovedP = ('lovedP-%s' % self.me)
         
 
     def cache_query(self,songs,pictures,videos,channel):
@@ -104,6 +104,9 @@ class MyCache:
             songs = cache.get(self.songs)
         if self.videos in cache:
             videos = cache.get(self.videos)
+            print('cache get videos')
+            for x in videos:
+                print('in list %s' % x.title)
         if self.pictures in cache:
             pictures = cache.get(self.pictures)
         if self.channel in cache:
@@ -141,7 +144,10 @@ def cache_list_bykind(rlist,kind,channel,mycache):
     elif kind[0] == choices.PICTURE:
         pictures = rlist
     elif kind[0] in choices.videos:
+        print('list to videos')
         videos = rlist
+    else:
+        print('ERROR no kind selected')
 
     mycache.cache_query(songs,pictures,videos,channel)
     return redirect(reverse('cached_list'))

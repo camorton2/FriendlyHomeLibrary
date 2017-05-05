@@ -50,44 +50,38 @@ class UserDetail(View):
 
 
 class UserSongList(View):
-    template_name='FHLReader/user_songs.html'
-
-    def get(self,request):
+    def get(self,request,pref):
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
         
-        playlist = True
-
-        if 'filelist' in request.GET:
-            playlist=False
-        
         liked, loved = mycache.get_my_songs()
                                         
-        likedList = bu.link_file_list(liked)
-        lovedList = bu.link_file_list(loved)
+        if pref == 'liked':
+            songs = liked
+        elif pref == 'loved':
+            songs = loved
+        else:
+            songs = []
             
-        context = {
-            'lovedList':lovedList,
-            'likedList':likedList,
-            'asPlayList':playlist
-            }            
-            
-        return render(request,self.template_name,context)
+        return vu.collection_view(request,
+            songs,[],[],[],'My Songs', False)
 
 class UserVideoList(View):
-    template_name='FHLReader/user_videos.html'
-    def get(self,request):
+    def get(self,request,pref):
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
         
         liked, loved = mycache.get_my_videos()
         
-        context = {
-            'lovedList': loved,
-            'likedList': liked,
-            }            
-        
-        return render(request,self.template_name,context)
+        if pref == 'liked':
+            videos = liked
+        elif pref == 'loved':
+            videos = loved
+        else:
+            videos = []
+            
+        return vu.collection_view(request,
+            [],[],videos,[],'My Videos', False)
 
 class UserPictureList(View):
     
@@ -109,7 +103,7 @@ class UserPictureList(View):
             pictures = []
             
         return vu.collection_view(request,
-            [],pictures,[],'My Pictures', False)
+            [],pictures,[],[],'My Pictures', False)
 
 
 
@@ -134,7 +128,7 @@ class CachedFileList(View):
         songs, pictures, videos,channel = mycache.get_query()
         
         return vu.collection_view(request,
-            songs,pictures,videos,
+            songs,pictures,videos,[],
             'Saved Collection',
             False)
              

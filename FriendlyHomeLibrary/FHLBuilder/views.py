@@ -51,7 +51,7 @@ class TagDetailView(View):
         songs = tag.song_tags.all()
         pictures = tag.picture_tags.all()
         movies = tag.movie_tags.all()
-        return vu.collection_view(request, songs, pictures, movies, tag.name)
+        return vu.collection_view(request,songs,pictures,movies,[],tag.name)
 
 # songs
 class SongDetailView(View):
@@ -132,16 +132,16 @@ class FileList(View):
         if kind == choices.SONG:
             olist = models.Song.objects.all()
             title = ('All Songs %d' % olist.count())
-            return vu.collection_view(request, olist, [], [], title, True, kind)
+            return vu.collection_view(request, olist, [], [],[], title, True, kind)
         elif kind == choices.PICTURE:
             olist = models.Picture.objects.all()
             title = ('All Pictures %d' % olist.count())
-            return vu.collection_view(request, [], olist, [], title, True, kind)
+            return vu.collection_view(request, [], olist, [],[], title, True, kind)
         # Videos
         else:
             olist,title =  vu.movies_bykind(kind)
         #return vu.view_list(request,olist,title,kind)
-        return vu.collection_view(request, [], [], olist, title,True, kind)
+        return vu.collection_view(request, [], [], olist, [], title,True, kind)
 
 # Collections
 
@@ -197,6 +197,7 @@ class CollectionMixins:
 
 class CollectionDetailView(View, CollectionMixins):
 
+
     def get(self,request,slug):
         # print("CollectionDetail GET %s" % slug)
         target=get_object_or_404(models.Collection,slug__iexact=slug)
@@ -204,9 +205,10 @@ class CollectionDetailView(View, CollectionMixins):
         songs = target.song_set.all()
         pictures = target.picture_set.all()
         movies = target.movie_set.all()
+        artists = target.album_musicians.all()
 
         return vu.collection_view(request, songs, pictures, movies,
-            target.title, False, choices.MOVIE, True)
+            artists,target.title, False, choices.MOVIE, True)
 
 
 @require_authenticated_permission('FHLBuilder.collection_builder')
@@ -414,7 +416,7 @@ class ActorDetailView(View):
         actor=get_object_or_404(models.Actor,slug__iexact=slug)
         movies = actor.movies.all()
         title = ('Movies with actor %s' % actor.fullName)
-        return vu.collection_view(request, [], [], movies,title)
+        return vu.collection_view(request, [], [], movies,[],title)
     
 
 class DirectorDetailView(View):
@@ -422,7 +424,7 @@ class DirectorDetailView(View):
         director=get_object_or_404(models.Director,slug__iexact=slug)
         movies = director.movies.all()
         title = ('Movies directed by %s' % director.fullName)
-        return vu.collection_view(request, [], [], movies,title)
+        return vu.collection_view(request, [], [], movies,[],title)
 
 
 class MusicianDetailView(View):
@@ -434,14 +436,24 @@ class MusicianDetailView(View):
 
     def get(self,request,slug):
         musician=get_object_or_404(models.Musician,slug__iexact=slug)
-        slist = utility.link_file_list(musician.songs.all())
+        songs = musician.songs.all()
+        slist = utility.link_file_list(songs)
         asPlayList = False
         if 'playlist' in request.GET:
             asPlayList = True
+        message = ''
+        try:
+            if songs and kodi.playlist_requests(songs,request):
+                message = u'success - songs sent'
+        except kodi.MyException,ex:
+            message = ex.message
+            print('Caught %s' % ex.message)            
+            
         context = {
             'musician':musician,
             'songlist':slist, 
-            'asPlayList':asPlayList}
+            'asPlayList':asPlayList,
+            'message':message}
         return render(request,self.template_name,context)
 
 

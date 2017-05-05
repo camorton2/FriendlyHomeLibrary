@@ -223,7 +223,7 @@ class Director(Artist):
 
 
 class Musician(Artist):
-    albums = models.ManyToManyField(Collection, blank=True)
+    albums = models.ManyToManyField(Collection, blank=True, related_name='album_musicians')
     concerts = models.ManyToManyField(Movie, blank=True, related_name='concert_musicians')
     songs = models.ManyToManyField(Song, blank=True)
     def get_absolute_url(self):

@@ -1,0 +1,26 @@
+
+
+{% if directors %}
+    {% for d in directors %}
+        <li><a href="{{d.get_absolute_url}}">{{d.fullName|title}}</a></li>
+    {% endfor %}
+{% endif %}
+{% if actors %}
+    {% for a in actors %}
+        <li><a href="{{a.get_absolute_url}}">{{a.fullName|title}}</a></li>
+    {% endfor %}
+{% endif %}
+
+<section>
+{% include "FHLBuilder/kodi_buttons_get.html" %}
+</section>
+
+
+<ul id="filelist">
+{% for mv in movielist %}
+    <li><a href="{{ mv.get_absolute_url }}">{{mv.title|title}}</a></li>
+{% endfor %}
+</ul>
+
+
+

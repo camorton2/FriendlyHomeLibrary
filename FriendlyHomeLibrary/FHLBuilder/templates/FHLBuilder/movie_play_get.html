@@ -1,0 +1,13 @@
+
+<section>
+<form action="" method = "get">
+{% csrf_token %}
+<fieldset>
+    <legend>Playback Options</legend>    
+    <button type="submit" name="kodi_local">Kodi Playlist local</button>
+    <button type="submit" name="kodi_lf">Kodi Playlist LF</button>
+    <button type="submit" name="kodi_bf">Kodi Playlist BF</button>
+</form>
+</section>
+
+<p>{{message}}</p>

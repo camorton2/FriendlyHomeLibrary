@@ -18,26 +18,21 @@
 <section>
 <ul>
 {% if songlist %}
-<h3>Songs</h3>
-{% include "FHLBuilder/song_playlist.html" %}
+    {% include "FHLBuilder/song_playlist.html" %}
 {% endif %}
 </ul>
 </section>
 
 <ul>
-{% if movielist.count %}
-<h3>Videos</h3>
+{% if movielist %}
+    {% include 'FHLBuilder/movie_playlist.html' %}
 {% endif %}
-{% for mv in movielist %}
-<li><a href="{{mv.get_absolute_url}}">{{mv.title}}</a></li>
-{% endfor %}
 </ul>
 </section>
 <section>
 <ul>
 {% if picture %}
-<h3>Pictures</h3>
-{% include "FHLBuilder/picture_list.html" %}
+    {% include "FHLBuilder/picture_list.html" %}
 {% endif %}
 </ul>
 </section>

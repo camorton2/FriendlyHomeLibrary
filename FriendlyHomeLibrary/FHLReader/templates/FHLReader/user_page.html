@@ -6,15 +6,17 @@
 
 {% block content %}
 
-<h3>{{me|title}}'s Page</h3>
+<h3>{{me.username|title}}'s Page</h3>
 <ul>
 
 {% if mySongs %}
-    <li><a href="{% url 'user_songs' %}">My Songs</a></li>
+    <li><a href="{% url 'user_songs' 'liked' %}">My liked Songs</a></li>
+    <li><a href="{% url 'user_songs' 'loved' %}">My loved Songs</a></li>
 {% endif %}
 
 {% if myVideos %}
-    <li><a href="{% url 'user_videos' %}">My Videos</a></li>
+    <li><a href="{% url 'user_videos' 'liked' %}">My liked Videos</a></li>
+    <li><a href="{% url 'user_videos' 'loved' %}">My loved Videos</a></li>
 {% endif %}
 
 {% if myPictures %}
