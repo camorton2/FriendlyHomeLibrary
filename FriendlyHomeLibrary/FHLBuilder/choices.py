@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-
 MOVIE = 'MV'
 MINI_MOVIE = 'MM'
 CONCERT = 'CC'
@@ -18,6 +17,7 @@ TV_CARTOON = 'TC'
 MV_CARTOON = 'MC'
 TV_SITCOM = 'TS'
 BF_RANDOM = 'BR'
+
 KIND_CHOICES = (
     (MOVIE, 'Movie'),
     (MV_CARTOON, 'Movie-Cartoon'),
@@ -40,5 +40,22 @@ KIND_CHOICES = (
 # all choices that are video files
 videos = [MOVIE,MINI_MOVIE,CONCERT,DOCUMENTARY,TV,MINISERIES,
     TV_CARTOON,TV_SITCOM,MV_CARTOON]
+
+VIDEO_CHOICES = KIND_CHOICES[0:9]
+SONG_CHOICE = KIND_CHOICES[9]
+PICTURE_CHOICE= KIND_CHOICES[10]
+LIVE_CHOICES = KIND_CHOICES[0:11]
+CARTOON_CHOICE = KIND_CHOICES[6]
+SITCOM_CHOICE = KIND_CHOICES[7]
+MOVIE_CHOICE = KIND_CHOICES[0]
+
+#radio listeners
+
+ME = 'm'
+ALL = 'a'
+
+RADIO_CHOICES = (
+    (ME, 'just me'),
+    (ALL, 'everyone'))
 
 

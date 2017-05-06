@@ -17,6 +17,14 @@
    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
    <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<style>
+body{
+    display: black;
+    margin: 12px;
+    font: 20px Ariel, sans-serif;
+}
+</style>
+
 </head>
 
 <body>
@@ -26,7 +34,7 @@
         <div>{% include "nav.html" %}</div>
         <div>
             {% if user.is_authenticated %}
-               <p><a href="{% url 'user_page' %}">User: {{user.username}}</a></p>
+               <p><a href="{% url 'user_page' %}">Channels: {{user.username}}</a></p>
                 {% if perms.FHLBuilder.collection_builder %}
                 <section>
                     <li><a href="{% url 'builder_collection_create' %}">Create Collection</a></li>

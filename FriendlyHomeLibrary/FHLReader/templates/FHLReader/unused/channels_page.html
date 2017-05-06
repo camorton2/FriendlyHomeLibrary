@@ -5,10 +5,13 @@
 {% endblock %}
 
 {% block content %}
-<h3>Channels under construction</h3>
-{% for i in choices %}
-<li><a href="{% url 'movie_channel' i %}">{{i}} Channel</a></li>
+<h3>Videos Channels</h3>
+{% for a,b in choices %}
+<li><a href="{% url 'movie_channel' a %}">{{b}}</a></li>
 {% endfor %}
-<li><a href="{% url 'cartoon_channel' %}">Cartoons</a></li>
+
+<h3>Special Channels</h3>
+<li><a href="{% url 'saturday-morning' %}">Saturday Morning</a></li>
+<h3>Generic Channels</h3>
 <li><a href="{% url 'random_list' %}">Random by file kind</a></li>
 {% endblock %}

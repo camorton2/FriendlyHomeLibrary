@@ -1,19 +1,18 @@
 
-<h3>{{playit}}</h3>
+<ul>
+<li>Filename {{playit}}</li>
+<li>Date added: {{movie.date_added}}</li>
+</ul>
 
 <section>
 {% load static %}
 <form action="" method = "post">
 {% csrf_token %}
-<button type="submit" name="vlc_plugin">VLC Plugin</button>
-</form>
-</section>
-
-<section>
-{% load static %}
-<form action="" method = "post">
-{% csrf_token %}
-<button type="submit" name="StreamMovie">Stream to VLC</button>
+    <formset>
+    <legend>VLC Options</legend>
+    <button type="submit" name="vlc_plugin">VLC Plugin</button>
+    <button type="submit" name="StreamMovie">Stream to VLC</button>
+    </formset>
 </form>
 </section>
 

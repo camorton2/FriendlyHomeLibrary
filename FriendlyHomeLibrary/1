@@ -1,3 +1,0 @@
-[17/Apr/2017 22:40:09] "GET /builder/collection/create/ HTTP/1.1" 200 3280
-[17/Apr/2017 22:40:15] "POST /builder/collection/create/ HTTP/1.1" 302 0
-[17/Apr/2017 22:40:16] "GET /builder/collection/ HTTP/1.1" 200 3013

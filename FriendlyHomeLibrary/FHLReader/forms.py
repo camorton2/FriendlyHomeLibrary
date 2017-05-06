@@ -36,27 +36,47 @@ class RandomForm(forms.ModelForm):
         raise ValidationError(u'please select a count above 0')
 
 
-class CartoonForm(forms.ModelForm):
+class CountForm(forms.ModelForm):
     """
-    The idea is to allow the user to create a playlist of count
-    random cartoons, optionally matching by tag or title
+    Used for specialty channels to get only a count, the rest is
+    selected automatically
     """
     class Meta:
         model=models.Collection
         fields=[]
      
-    atitle = forms.CharField(max_length=models.CHAR_LENGTH,
-        required=False,
-        label='title contains')
-    atag = forms.CharField(max_length=models.CHAR_LENGTH,required=False,
-        label='with tag')
-    count = forms.IntegerField(initial=1)
+    count = forms.IntegerField(initial=15, label='How many would you like')
 
     def clean_count(self):
         count=self.cleaned_data['count']
         if count > 0:
             return count
         raise ValidationError(u'please select a count above 0')
+
+class RadioForm(forms.ModelForm):
+    """
+    Used for radio stations which pick random songs based on 
+    selected users
+    """
+    class Meta:
+        model=models.Collection
+        fields=[]
+     
+     
+     
+    count = forms.IntegerField(initial=100, label='How many would you like')
+    kind = forms.ChoiceField(choices = choices.RADIO_CHOICES,
+        widget=forms.RadioSelect,
+        initial=choices.ALL,label = 'who is listening')
+    
+    def clean_count(self):
+        count=self.cleaned_data['count']
+        if count > 0:
+            return count
+        raise ValidationError(u'please select a count above 0')
+
+
+
 
 
 class MovieChannelForm(forms.ModelForm):

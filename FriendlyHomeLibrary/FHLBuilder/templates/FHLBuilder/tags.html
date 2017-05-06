@@ -1,0 +1,15 @@
+
+<section>    
+{% if movie.tags.count %}
+    <p><b>Tags</b>: 
+    {% for tag in movie.tags.all %}
+        {% if forloop.last %}
+            <a href="{{tag.get_absolute_url}}">{{tag.name}}</a>
+        {% else %}
+            <a href="{{tag.get_absolute_url}}">{{tag.name}}</a>, 
+        {% endif %}
+    {% endfor %}
+    </p>
+{% endif %}
+</section>
+

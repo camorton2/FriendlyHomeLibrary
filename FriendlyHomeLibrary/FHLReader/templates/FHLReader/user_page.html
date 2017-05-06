@@ -7,7 +7,7 @@
 {% block content %}
 
 <h3>{{me.username|title}}'s Page</h3>
-<ul>
+<h3>My Channels</h3>
 {% if mySongs %}
     <li><a href="{% url 'user_songs' 'liked' %}">My liked Songs</a></li>
     <li><a href="{% url 'user_songs' 'loved' %}">My loved Songs</a></li>
@@ -22,15 +22,32 @@
     <li><a href="{% url 'user_pictures' 'liked' %}">My liked Pictures</a></li>
     <li><a href="{% url 'user_pictures' 'loved' %}">My loved Pictures</a></li>
 {% endif %}
-    <li><a href="{% url 'user_channels' %}">Channels</a></li>
-</ul>
 
+<h3>TV Channels</h3>
+<li><a href="{% url 'special_channel' 'saturday-morning' %}">Saturday Morning</a></li>
+<li><a href="{% url 'special_channel' 'sitcom' %}">Sitcom</a></li>
+<li><a href="{% url 'special_channel' 'silly' %}">Silly</a></li>
+<li><a href="{% url 'special_channel' 'drama' %}">Drama</a></li>
+<li><a href="{% url 'special_channel' 'scifi' %}">Scifi</a></li>
+<li><a href="{% url 'special_channel' 'scary' %}">Scary</a></li>
+
+<h3>Radio Stations</h3>
+<li><a href="{% url 'radio_channel' %}">Radio</a></li>
+    
+<h3>Videos Channels</h3>
+{% for a,b in choices %}
+    <li><a href="{% url 'movie_channel' a %}">{{b}}</a></li>
+{% endfor %}
+
+<h3>Generic Channels</h3>
+<li><a href="{% url 'random_list' %}">Random by file kind</a></li>
 <br>
+
 
 <form action = "" method = "get">
 {% csrf_token %}    
     <fieldset>
-    <legend>Queries (warning, these are slow)</legend>    
+    <legend>Update My Channels</legend>    
     {% if mySongs %}
         <button type="submit" name='my-songs'>Update My Songs</button>
     {% else %}

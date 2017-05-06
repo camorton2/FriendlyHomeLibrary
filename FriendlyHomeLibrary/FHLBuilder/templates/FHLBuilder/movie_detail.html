@@ -18,59 +18,54 @@
 
 <section>    
 {% if movie.tags.count %}
-<h3>Tags</h3>
-<ul id='filelist'>
-{% for tag in movie.tags.all %}
-{% if forloop.last %}
-<a href="{{tag.get_absolute_url}}">{{tag.name}}</a>
-{% else %}
-<a href="{{tag.get_absolute_url}}">{{tag.name}}</a>, 
-{% endif %}
-{% endfor %}
-</ul>
+    <p><b>Tags</b>: 
+    {% for tag in movie.tags.all %}
+        {% if forloop.last %}
+            <a href="{{tag.get_absolute_url}}">{{tag.name}}</a>
+        {% else %}
+            <a href="{{tag.get_absolute_url}}">{{tag.name}}</a>, 
+        {% endif %}
+    {% endfor %}
+    </p>
 {% endif %}
 </section>
 
 <section>    
 {% if movie.movie_directors.count %}
-<h3>Directors</h3>
-<ul id='filelist'>
-{% for director in movie.movie_directors.all %}
-{% if forloop.last %}
-<a href="{{director.get_absolute_url}}">{{director.fullName}}</a>
-{% else %}
-<a href="{{director.get_absolute_url}}">{{director.fullName}}</a>, 
-{% endif %}
-{% endfor %}
-</ul>
+    <p><b>Directors:</b>
+    {% for director in movie.movie_directors.all %}
+        {% if forloop.last %}
+            <a href="{{director.get_absolute_url}}">{{director.fullName}}</a>
+        {% else %}
+            <a href="{{director.get_absolute_url}}">{{director.fullName}}</a>, 
+        {% endif %}
+    {% endfor %}
+    </p>
 {% endif %}
 </section>
 
 <section>    
 {% if movie.movie_actors.count %}
-<h3>Actors</h3>
-<ul id='filelist'>
-<!--list of objects related to tag -->
-{% for actor in movie.movie_actors.all %}
-{% if forloop.last %}
-<a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a>
-{% else %}
-<a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a>, 
-{% endif %}
-{% endfor %}
-</ul>
+    <p><b>Actors:</b>
+    {% for actor in movie.movie_actors.all %}
+        {% if forloop.last %}
+            <a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a>
+        {% else %}
+            <a href="{{actor.get_absolute_url}}">{{actor.fullName}}</a>, 
+        {% endif %}
+    {% endfor %}
+    </p>
 {% endif %}
 </section>
 
 <section>    
 {% if movie.concert_musicians.count %}
-<h3>Musicians</h3>
-<ul id='filelist'>
-<!--list of objects related to tag -->
-{% for musician in movie.concert_musicians.all %}
-<li><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a></li>
-{% endfor %}
-</ul>
+    <h3>Musicians</h3>
+    <ul id='filelist'>
+    {% for musician in movie.concert_musicians.all %}
+        <li><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a></li>
+    {% endfor %}
+    </ul>
 {% endif %}
 </section>
 
@@ -93,6 +88,7 @@
     {% endif %}
 </fieldset>
 </form>
+
 <section>
     {% include "FHLBuilder/likesandloves.html" %}        
     {% include "FHLBuilder/object_update.html" %}        
@@ -103,6 +99,5 @@
 <section>
 {% include "FHLBuilder/play_movie_options.html" %} 
 </section>
-
 
 {% endblock %}

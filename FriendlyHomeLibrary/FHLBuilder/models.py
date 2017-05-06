@@ -57,6 +57,8 @@ class CommonFile(models.Model):
     year = models.IntegerField(default=0000)
     title = models.CharField(max_length=CHAR_LENGTH)
     slug = models.SlugField(max_length=CHAR_LENGTH,unique=True)
+    date_added = models.DateField(auto_now_add=True)
+    
     def __unicode__(self):
         return self.title
     class Meta:

@@ -179,9 +179,9 @@ def cache_list(rlist,channel,mycache):
     for obj in rlist:
         if obj.fileKind[0] == choices.SONG:
             songs.append(obj)
-        elif kind[0] == choices.PICTURE:
+        elif obj.fileKind[0] == choices.PICTURE:
             pictures.append(obj)
-        elif kind[0] in choices.videos:
+        elif obj.fileKind in choices.videos:
             videos.append(obj)
 
     mycache.cache_query(songs,pictures,videos,channel)

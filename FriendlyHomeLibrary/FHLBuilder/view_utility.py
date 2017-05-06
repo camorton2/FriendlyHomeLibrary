@@ -30,6 +30,7 @@ from FHLReader import kodi
 
 def collection_view(request, songs, pictures, movies, artists, title, 
     allowChoice=False, kind=choices.MOVIE,update=False):
+        
     template_name = 'FHLBuilder/collection_detail.html'
     
     songList = utility.link_file_list(songs)
@@ -46,30 +47,21 @@ def collection_view(request, songs, pictures, movies, artists, title,
     current = 1
     if 'cNext' in request.GET and request.GET.get('cNext'):
         current = int(request.GET.get('cNext'))
-        print("next with current %d" % current)
         current = current+1
         if current > count:
             current = 1
     if 'cPrev' in request.GET and request.GET.get('cPrev'):
         current = int(request.GET.get('cPrev'))
-        print("prev with current %d" % current)
         if current == 1:
             current = count
         else:
             current=current-1
+
     picture = None
     filename = None
     
     if count:
         picture,filename = pictureList[current-1]
-        #picture = target[0]
-        #filename = target[1]
-        
-       #picture = pictures[current-1]
-       #filename = utility.object_path(picture)
-
-    # movies, in future to setup playlist
-
 
     # tags all objects
     if 'tq' in request.GET and request.GET['tq']:
@@ -83,9 +75,6 @@ def collection_view(request, songs, pictures, movies, artists, title,
             obj.tags.add(new_tag)
         for obj in movies:
             obj.tags.add(new_tag)
-
-    for x in movies:
-        print('view has movie %s' % x.title)
 
     # kodi playlist options
     # TODO collections with more than one?
