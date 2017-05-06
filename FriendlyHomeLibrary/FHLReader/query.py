@@ -108,7 +108,7 @@ def random_select(count, title, tag,kind):
     return random_count(mylist,count)
 
 
-def videos_by_title(alist):
+def tv_by_title(alist):
     """
     Find a list of videos matching any of a list of titles
     """
@@ -126,7 +126,7 @@ def saturday_select(count):
         'schoolhouse','thunderbirds','littlerascals',
         'threestooges']
 
-    return random_count(videos_by_title(titles),count)
+    return random_count(tv_by_title(titles),count)
 
 
 def silly_select(count):
@@ -138,10 +138,10 @@ def silly_select(count):
         'getsmart','seinfeld',
         'carolburnet','evildead','brisco',
         'mrbean','muppetshow','snl','thinblue',
-        'dirkgently'
+        'dirkgently','hitchhiker'
         ]
 
-    return random_count(videos_by_title(titles),count)
+    return random_count(tv_by_title(titles),count)
 
 
 def drama_select(count):
@@ -155,7 +155,7 @@ def drama_select(count):
         'weeds','treme','vinyl'
         ]
 
-    return random_count(videos_by_title(titles),count)
+    return random_count(tv_by_title(titles),count)
 
 
 def scifi_select(count):
@@ -164,10 +164,10 @@ def scifi_select(count):
     """
     titles = ['drwho','startrek','firefly','lost',
         'xfiles','supergirl','terminator',
-        'twilightzone','legendsoftomorrow'
+        'twilightzone','legend','stng'
         ]
 
-    return random_count(videos_by_title(titles),count)
+    return random_count(tv_by_title(titles),count)
 
 
 def scary_select(count):
@@ -178,7 +178,7 @@ def scary_select(count):
         'xfiles','ghoststories','haunting','twilightzone'
         ]
 
-    return random_count(videos_by_title(titles),count)
+    return random_count(tv_by_title(titles),count)
 
 
 def sitcom_select(count):

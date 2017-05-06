@@ -11,8 +11,6 @@ from django.utils.text import slugify
 from FHLBuilder import models, choices, utility
 from FriendlyHomeLibrary import settings
 
-# Create your models here.
-
 
 class RandomForm(forms.ModelForm):
     """
@@ -27,7 +25,7 @@ class RandomForm(forms.ModelForm):
      
     kind = forms.MultipleChoiceField(choices = choices.KIND_CHOICES,initial=choices.UNKNOWN)
     tag = forms.CharField(max_length=models.CHAR_LENGTH,required=False)
-    count = forms.IntegerField(initial=1)
+    count = forms.IntegerField(initial=15)
 
     def clean_count(self):
         count=self.cleaned_data['count']
@@ -53,6 +51,7 @@ class CountForm(forms.ModelForm):
             return count
         raise ValidationError(u'please select a count above 0')
 
+
 class RadioForm(forms.ModelForm):
     """
     Used for radio stations which pick random songs based on 
@@ -62,9 +61,7 @@ class RadioForm(forms.ModelForm):
         model=models.Collection
         fields=[]
      
-     
-     
-    count = forms.IntegerField(initial=100, label='How many would you like')
+    count = forms.IntegerField(initial=40, label='How many would you like')
     kind = forms.ChoiceField(choices = choices.RADIO_CHOICES,
         widget=forms.RadioSelect,
         initial=choices.ALL,label = 'who is listening')
@@ -74,9 +71,6 @@ class RadioForm(forms.ModelForm):
         if count > 0:
             return count
         raise ValidationError(u'please select a count above 0')
-
-
-
 
 
 class MovieChannelForm(forms.ModelForm):
@@ -93,7 +87,7 @@ class MovieChannelForm(forms.ModelForm):
         label='title contains')
     atag = forms.CharField(max_length=models.CHAR_LENGTH,required=False,
         label='with tag')
-    count = forms.IntegerField(initial=1)
+    count = forms.IntegerField(initial=15)
 
     def clean_count(self):
         count=self.cleaned_data['count']

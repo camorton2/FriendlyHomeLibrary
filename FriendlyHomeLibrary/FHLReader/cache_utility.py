@@ -162,7 +162,7 @@ def cache_list_bykind(rlist,kind,channel,mycache):
         print('ERROR no kind selected')
 
     mycache.cache_query(songs,pictures,videos,channel)
-    return redirect(reverse('cached_list'))
+    #return redirect(reverse('cached_list'))
 
 
 def cache_list(rlist,channel,mycache):
@@ -185,5 +185,5 @@ def cache_list(rlist,channel,mycache):
             videos.append(obj)
 
     mycache.cache_query(songs,pictures,videos,channel)
-    return redirect(reverse('cached_list'))
+    #return redirect(reverse('cached_list'))
 

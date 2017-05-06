@@ -146,6 +146,9 @@ class RandomList(View):
         print("RandomList POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
+
+        if 'save-query' in request.POST:
+            return redirect(reverse('cached_list'))
         
         rlist = []
         bound_form = self.form_class(request.POST)
@@ -153,11 +156,9 @@ class RandomList(View):
             count = bound_form.cleaned_data['count'];
             kind = bound_form.cleaned_data['kind'];
             tag = bound_form.cleaned_data['tag'];                
-            print('Valid form count %d kind %s tag %s' % (count,kind,tag))
             rlist = rq.random_select(count,'',tag,kind)
-            if 'save-query' in request.POST:
-                # cache the query results and redirect to the cache-display
-                return cu.cache_list_bykind(rlist,kind,'random_list',mycache)
+            cu.cache_list_bykind(rlist,kind,'random_list',mycache)
+            
         # display the list as files with the form    
         context = {'form':bound_form,'rlist':rlist}
         return render(request,self.template_name,context)
@@ -180,11 +181,17 @@ class SpecialChannel(View):
         print("RandomList POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
-        
+
+        if 'save-query' in request.POST:
+            return redirect(reverse('cached_list'))
+
         rlist = []
         bound_form = self.form_class(request.POST)
+        
         if bound_form.is_valid():
+            
             count = bound_form.cleaned_data['count'];
+            
             if select == 'saturday-morning':
                 rlist = rq.saturday_select(count)
             elif select == 'sitcom':
@@ -198,10 +205,9 @@ class SpecialChannel(View):
             elif select == 'scary':
                 rlist = rq.scary_select(count)
                                     
-            if 'save-query' in request.POST:
-                # cache the query results and redirect to the cache-display
-                return cu.cache_list_bykind(rlist,choices.MOVIE_CHOICE,
+            cu.cache_list_bykind(rlist,choices.MOVIE_CHOICE,
                     'special_channel',mycache)
+                
                     
         # display the list as files with the form    
         context = {'form':bound_form,'rlist':rlist}
@@ -234,6 +240,10 @@ class MovieChannel(View):
         print("MovieChannel POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
+        
+        if 'save-query' in request.POST:
+            return redirect(reverse('cached_list'))
+                
         kind = self.getKind(akind)
         rlist = []
         bound_form = self.form_class(request.POST)
@@ -243,9 +253,8 @@ class MovieChannel(View):
             tag = bound_form.cleaned_data['atag']             
             print('Valid form count %d title %s tag %s' % (count,title,tag))
             rlist = rq.random_select(count,title,tag,kind)
-            if 'save-query' in request.POST:
-                # cache the query results and redirect to the cache-display
-                return cu.cache_list_bykind(rlist,kind,'random_list',mycache)
+            cu.cache_list_bykind(rlist,kind,'random_list',mycache)
+                
         # display the list as files with the form    
         context = {'form':bound_form,'rlist':rlist}
         return render(request,self.template_name,context)
@@ -265,6 +274,10 @@ class RadioChannel(View):
         print("RandomList POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
+
+        if 'save-query' in request.POST:
+            return redirect(reverse('cached_list'))
+
         
         rlist = []
         bound_form = self.form_class(request.POST)
@@ -275,12 +288,9 @@ class RadioChannel(View):
             if kind == choices.ME:
                 justme = True
             rlist = rq.radio_select(count,justme,me)
-
-            if 'save-query' in request.POST:
-                # cache the query results and redirect to the cache-display
-                return cu.cache_list_bykind(rlist,choices.SONG_CHOICE,
-                    'special_channel',mycache)
-            
+            cu.cache_list_bykind(rlist,choices.SONG_CHOICE,
+                'special_channel',mycache)
+                
         # display the list as files with the form    
         context = {'form':bound_form,'rlist':rlist}
         return render(request,self.template_name,context)
