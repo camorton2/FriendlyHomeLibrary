@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from FHLBuilder.models import Song, Movie
+from FHLBuilder.models import Song, Movie, Collection
 from FHLBuilder import choices
 
 from FriendlyHomeLibrary import settings
 
 def my_preference(obj,me):
+    """
+    Given an object and a user return a triple
+    indicating loves,likes,dislikes
+    """
     if obj.loves.filter(username=me):
-        print("select love")
         return True,False,False
     if obj.likes.filter(username=me):
-        print("select like")
         return False,True,False
     if obj.dislikes.filter(username=me):
-        print("select dislike")
         return False,False,True
     return False,False,False
 
@@ -36,24 +37,19 @@ def handle_pref(obj,pref,me):
     obj.save()
 
 
-def handle_collection_kind(collections, kind):
+def handle_collection_kind(kind):
     """
     In queryset collections create a list of collections 
     containing files of kind
     """
-    clist = []    
-    vt = kind in choices.videos
-    st = kind == choices.SONG
-    pt = kind == choices.PICTURE
-    for current in collections:
-        if vt and current.movie_set.filter(fileKind=kind):
-            clist.append(current)
-        elif st and current.song_set.count():
-            clist.append(current)
-        elif pt and current.picture_set.count():
-            clist.append(current)
-    return clist
-
+    if kind in choices.SONG:
+        return Collection.objects.exclude(songs=None)
+    if kind in choices.PICTURE:
+        return Collection.objects.exclude(pictures=None)
+    if kind in choices.videos:
+        return Collection.objects.all().filter(
+            movies__fileKind__contains=kind).distinct()
+    return []
 
 def next_group(pictures):
     """

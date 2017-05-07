@@ -2,8 +2,8 @@
     <a href="{% url 'homepage' %}">Home</a>
     <a href="{% url 'builder_collection_list' %}">Collections</a>    
     <a href="{% url 'builder_tag_list' %}">Tags</a>
-    <a href="{% url 'builder_actor_list' %}">Actors</a>
-    <a href="{% url 'builder_director_list' %}">Directors</a>
-    <a href="{% url 'builder_musician_list' %}">Musicians</a>
+    <a href="{% url 'artist_list' 'actor' %}">Actors</a>
+    <a href="{% url 'artist_list' 'director' %}">Directors</a>
+    <a href="{% url 'artist_list' 'musician' %}">Musicians</a>
     <a href="{% url 'builder_file_list' %}">Files</a>
 </nav>

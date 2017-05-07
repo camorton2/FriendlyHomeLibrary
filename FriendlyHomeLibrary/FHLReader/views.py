@@ -153,12 +153,16 @@ class RandomList(View):
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
+            print(' valid form ')
             count = bound_form.cleaned_data['count'];
             kind = bound_form.cleaned_data['kind'];
             tag = bound_form.cleaned_data['tag'];                
+            print( kind )
             rlist = rq.random_select(count,'',tag,kind)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
             
+        for x in rlist:
+            print(x.title)
         # display the list as files with the form    
         context = {'form':bound_form,'rlist':rlist}
         return render(request,self.template_name,context)
@@ -189,7 +193,6 @@ class SpecialChannel(View):
         bound_form = self.form_class(request.POST)
         
         if bound_form.is_valid():
-            
             count = bound_form.cleaned_data['count'];
             
             if select == 'saturday-morning':
@@ -204,8 +207,8 @@ class SpecialChannel(View):
                 rlist = rq.drama_select(count)
             elif select == 'scary':
                 rlist = rq.scary_select(count)
-                                    
-            cu.cache_list_bykind(rlist,choices.MOVIE_CHOICE,
+            # cache the list
+            cu.cache_list_bykind(rlist,choices.MOVIE,
                     'special_channel',mycache)
                 
                     
@@ -244,7 +247,7 @@ class MovieChannel(View):
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
                 
-        kind = self.getKind(akind)
+        kind = akind #self.getKind(akind)
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
@@ -253,6 +256,8 @@ class MovieChannel(View):
             tag = bound_form.cleaned_data['atag']             
             print('Valid form count %d title %s tag %s' % (count,title,tag))
             rlist = rq.random_select(count,title,tag,kind)
+            for a in rlist:
+                print(a.title)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
                 
         # display the list as files with the form    
@@ -288,7 +293,7 @@ class RadioChannel(View):
             if kind == choices.ME:
                 justme = True
             rlist = rq.radio_select(count,justme,me)
-            cu.cache_list_bykind(rlist,choices.SONG_CHOICE,
+            cu.cache_list_bykind(rlist,choices.SONG,
                 'special_channel',mycache)
                 
         # display the list as files with the form    

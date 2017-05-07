@@ -8,11 +8,12 @@ from FHLBuilder import choices
 liked = 'liked'
 loved = 'loved'
 
+# used to select by video kind
 v = '|'.join(x for x in choices.videos)
 vchannel = unicode(r'^channel/(%s)$' % v)
 
-special = ['sitcom','saturday-morning','silly',
-    'scifi','drama','scary']
+# used to select channel
+special = ['sitcom','saturday-morning','silly','scifi','drama','scary']
 st = '|'.join(x for x in special)
 schannel = unicode(r'^channel/(%s)$' % st)
 

@@ -4,8 +4,12 @@ from django.contrib.auth.decorators import login_required
 
 from FHLBuilder import views as bv
 
+# used to select person
+people = ['actor','director','musician']
+st = '|'.join(x for x in people)
+artist = unicode(r'^artist/(%s)$' % st)
+
 urlpatterns = [
-#    url(r'^$',HomePage.as_view(),name='homepage'),
 
 #lists
     url(r'^tag/$',
@@ -17,15 +21,17 @@ urlpatterns = [
     url(r'^files/$',
       bv.FileList.as_view(),
       name='builder_file_list'),
-    url(r'^actor/$',
-      bv.ActorList.as_view(),
-      name='builder_actor_list'),
-    url(r'^director/$',
-      bv.DirectorList.as_view(),
-      name='builder_director_list'),
-    url(r'^musician/$',
-      bv.MusicianList.as_view(),
-      name='builder_musician_list'),
+    url(artist, bv.ArtistList.as_view(), name='artist_list'),
+    
+#    url(r'^actor/$',
+#      bv.ActorList.as_view(),
+#      name='builder_actor_list'),
+#    url(r'^director/$',
+#      bv.DirectorList.as_view(),
+#      name='builder_director_list'),
+#    url(r'^musician/$',
+#      bv.MusicianList.as_view(),
+#      name='builder_musician_list'),
       
 # Tags
     url(r'^tag/(?P<slug>[\w\-]+)/$',

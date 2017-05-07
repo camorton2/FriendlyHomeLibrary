@@ -1,0 +1,14 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} - Artist {{ artist.fullName|title }}
+{% endblock %}
+
+{% block content %}
+<h3>{{ title|title }}</h3>
+<ul>
+{% for person in targetlist %}
+   <li><a href="{{ person.get_absolute_url}}"> {{person.fullName|title}}</a></li>
+{% endfor %}
+</ul>
+{% endblock %}

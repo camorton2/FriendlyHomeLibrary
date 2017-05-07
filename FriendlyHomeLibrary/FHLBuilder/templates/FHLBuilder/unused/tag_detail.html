@@ -1,0 +1,34 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{block.super}} - Tag {{ tag.name }}
+{% endblock %}
+
+{% block content %}
+
+<h2>{{tag.name|title}}</h2>
+
+{% if tag.song_tags.count %}
+    <section>
+        <h3>Songs</h3>
+        {% include "FHLBuilder/song_playlist.html" %}
+    </section>
+{% endif %}
+
+{% if movielist.count %}
+    <section>
+        <h3>Movies</h3>
+        {% for mv in movielist %}
+            <li><a href="{{mv.get_absolute_url}}">{{mv.title}}</a></li>
+        {% endfor %}
+    </section>
+{% endif %}
+    
+{% if tag.picture_tags.count %}
+    <section>
+        <h3>Pictures</h3>
+        {% include "FHLBuilder/picture_list.html" %}
+    </section>
+{% endif %}
+
+{% endblock %}

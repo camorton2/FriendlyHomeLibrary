@@ -14,21 +14,12 @@
 <section>
 
 <h3>Details for {{obj.name}}</h3>
-<a href="">
-{{tag.title}}
-</a>
-<a href="">
-{{tag.filename}}
-</a>
-<a href="">
-{{tag.filepath}}
-</a>
+<a href="">{{tag.title}}</a>
+<a href="">{{tag.filename}}</a>
+<a href="">{{tag.filepath}}</a>
 <ul>
-<!--list of songs related to tag -->
 {% for tag in obj.tag_set.all %}
-<li><a href="">
-{{tag.name}}
-</a></li>
+    <li><a href="">{{tag.name}}</a></li>
 {% endfor %}
 </ul>
 

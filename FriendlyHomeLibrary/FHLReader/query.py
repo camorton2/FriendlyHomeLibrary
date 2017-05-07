@@ -23,11 +23,10 @@ def find_objects(me, target):
     return likedlist,lovedlist
 
 
-def kind_from_tag(akind, tagobj):
+def kind_from_tag(kind, tagobj):
     """
     given a tag, find all objects matching kind
     """
-    kind = akind[0]
     if kind in choices.videos:
         return tagobj.movie_tags.filter(fileKind=kind)
     if kind == choices.SONG:
@@ -37,11 +36,10 @@ def kind_from_tag(akind, tagobj):
     return CommonFile.objects.none()
 
 
-def kind_from_all(akind):
+def kind_from_all(kind):
     """
     given a kind, find all objects in the database matching that kind
     """
-    kind = akind[0]
     if kind in choices.videos:
         return bmod.Movie.objects.filter(fileKind=kind)
     if kind == choices.SONG:
@@ -52,6 +50,10 @@ def kind_from_all(akind):
 
 
 def random_count(mylist,count):
+    """
+    given QuerySet mylist, randomly select count
+    objects and return them as a list
+    """
     mysize = mylist.count()
     if mysize <= count:
         return mylist
@@ -64,6 +66,10 @@ def random_count(mylist,count):
 
 
 def tag_select(kind,tag):
+    """
+    given objects of kind from the given tag
+    if the tag is not passed, returns empty list
+    """
     mylist = bmod.CommonFile.objects.none()
     if len(tag):
         tSlug = slugify(unicode('%s' % (tag)))
@@ -77,8 +83,9 @@ def tag_select(kind,tag):
 
 def random_select(count, kind, tag):
     """
-    Find a list of count random objects (or all if there are less than count)
-    with matching kind and tag
+    return QuerySet of count random objects
+    correspondong to any of the parameters passed in
+    tag is optional, count and kind are not    
     """
     mylist = bmod.CommonFile.objects.none()
     if len(tag):
@@ -88,17 +95,19 @@ def random_select(count, kind, tag):
     return random_count(mylist,count)
 
 
-def random_select(count, title, tag,kind):
+def random_select(count, title, tag, kind):
     """
-    Find a list of count random cartoons
+    return QuerySet of count random objects
+    correspondong to any of the parameters passed in
+    title and tag are optional, count and kind are not
     """
-
     mylist = bmod.CommonFile.objects.none()
 
     # either tag or full list
     if len(tag):
         mylist = tag_select(kind,tag)
     else:
+        # no tag was chosen, start with all matching kind
         mylist = kind_from_all(kind)
 
     # refine for title
@@ -113,7 +122,7 @@ def tv_by_title(alist):
     Find a list of videos matching any of a list of titles
     """
     query = reduce(operator.or_, (Q(title__icontains = item) for item in alist))
-    return bmod.Movie.objects.filter(query)
+    return bmod.Movie.tv_objects.filter(query)
 
 
 def saturday_select(count):
@@ -190,7 +199,7 @@ def sitcom_select(count):
     q2 = Q(title__icontains='flintstones')
     q3 = Q(title__icontains='southpark')
     
-    alist = bmod.Movie.objects.filter(q1|q2|q3)
+    alist = bmod.Movie.tv_objects.filter(q1|q2|q3)
     return random_count(alist,count)
 
 

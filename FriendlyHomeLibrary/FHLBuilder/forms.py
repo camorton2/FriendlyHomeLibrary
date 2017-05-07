@@ -55,8 +55,11 @@ class BasicCollectionForm(forms.ModelForm):
     class Meta:
         model=models.Collection
         fields=[]
-    # Used to select fileKind to apply to everything in the collection
-    kind = forms.MultipleChoiceField(choices = choices.KIND_CHOICES,initial=choices.UNKNOWN)
+    
+    kind = forms.ChoiceField(choices = choices.LIVE_CHOICES,
+        widget=forms.RadioSelect, label = 'Pick collection kind',
+        initial=choices.MOVIE)    
+    
     # Used to add a tag to everything in the collection
     tag = forms.CharField(max_length=models.CHAR_LENGTH,required=False)
 
@@ -66,8 +69,10 @@ class CollectionForm(forms.ModelForm):
         model=models.Collection
         fields=['filePath']
 
-    # Used to select fileKind to apply to everything in the collection
-    kind = forms.MultipleChoiceField(choices = choices.KIND_CHOICES,initial=choices.UNKNOWN)
+    kind = forms.ChoiceField(choices = choices.LIVE_CHOICES,
+        widget=forms.RadioSelect, label = 'Pick a collection kind',
+        initial=choices.MOVIE)    
+    
     # Used to add a tag to everything in the collection
     tag = forms.CharField(max_length=models.CHAR_LENGTH,required=False)
     drive = -1

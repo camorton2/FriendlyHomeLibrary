@@ -109,9 +109,9 @@ def collection_sets(collections):
     variousc = []
     if collections is not None:
         for current in collections:
-            sc = current.song_set.count()
-            mc = current.movie_set.count()
-            pc = current.picture_set.count()
+            sc = current.songs.count()
+            mc = current.movies.count()
+            pc = current.pictures.count()
             if sc and not mc and not pc:
                 # only songs
                 songc.append(current)

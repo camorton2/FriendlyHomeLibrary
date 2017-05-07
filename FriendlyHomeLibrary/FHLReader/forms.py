@@ -23,7 +23,9 @@ class RandomForm(forms.ModelForm):
         model=models.Collection
         fields=[]
      
-    kind = forms.MultipleChoiceField(choices = choices.KIND_CHOICES,initial=choices.UNKNOWN)
+    kind = forms.ChoiceField(choices = choices.LIVE_CHOICES,
+        widget=forms.RadioSelect, label = 'Pick a movie kind',
+        initial=choices.MOVIE)
     tag = forms.CharField(max_length=models.CHAR_LENGTH,required=False)
     count = forms.IntegerField(initial=15)
 

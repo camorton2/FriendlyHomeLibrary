@@ -102,7 +102,7 @@ def collection_view(request, songs, pictures, movies, artists, title,
         'asPlayList': asPlayList,
         'movielist':movies,
         'update':update,
-        'choices': choices.KIND_CHOICES,
+        'choices': choices.LIVE_CHOICES,
         'listkind':kind,
         'allowChoice': allowChoice,
         'artists': artists,
@@ -112,9 +112,12 @@ def collection_view(request, songs, pictures, movies, artists, title,
     
 
 def movies_bykind(kind):
+    """
+    Given a kind, select only matching movie objects
+    """
     movies = models.Movie.objects.filter(fileKind=kind)
     count = movies.count()
-    for x,y in choices.KIND_CHOICES:
+    for x,y in choices.LIVE_CHOICES:
         if x == kind:
             desc = y
             break
@@ -128,12 +131,15 @@ def view_list(request,alist,title,kind):
         'title':title,
         'clist': alist,
         'listkind':kind,
-        'choices': choices.KIND_CHOICES
+        'choices': choices.LIVE_CHOICES
         }
     return render(request,template_name,context)
     
 
 def select_kind(request):
+    """
+    Given a GET request, select kind or default to movie
+    """
     if 'kind' in request.GET and request.GET.get('kind'):
         kind = request.GET.get('kind')
     else:

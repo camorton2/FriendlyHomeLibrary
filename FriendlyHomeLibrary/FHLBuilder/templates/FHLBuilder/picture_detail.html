@@ -6,33 +6,40 @@
 
 {% block content %}
 
-<h2>{{picture.title}}</h2>
+<section>
+<li>Title: {{picture.title|title}}</li>
+{% if picture.year %}
+    <li>Year: {{ picture.year }}</li>
+{% endif %}
+<li>Filename: {{playit}}</li>
+<li>Date added: {{picture.date_added}}</li>
 {% if picture.data1 %}
-<li> {{ picture.data1}}</li>
+    <li> {{ picture.data1}}</li>
 {% endif %}
 {% if picture.data2 %}
-<li> {{ picture.data2}}</li>
+    <li> {{ picture.data2}}</li>
 {% endif %}
 {% if picture.data3 %}
-<li> {{ picture.data2}}</li>
+    <li> {{ picture.data2}}</li>
 {% endif %}
 {% if picture.data4 %}
-<li> {{ picture.data4}}</li>
+    <li> {{ picture.data4}}</li>
 {% endif %}
 
 {% load static %}
-<div>full file {% static playit %}</div>
 <img src="{% static playit %}" style="width:100%">
+
+</section>
 
 
 <section>
 {% if picture.tags.count %}
-<h3>Tags</h3>
-<ul id='filelist'>
-{% for tag in picture.tags.all %}
-<li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
-{% endfor %}
-</ul>
+    <h3>Tags</h3>
+    <ul id='filelist'>
+    {% for tag in picture.tags.all %}
+    <li><a href="{{tag.get_absolute_url}}">{{tag.name}}</a></li>
+    {% endfor %}
+    </ul>
 {% endif %}
 </section>
 
@@ -51,6 +58,4 @@
 </section>
 
 {% endif %}
-
-
 {% endblock %}

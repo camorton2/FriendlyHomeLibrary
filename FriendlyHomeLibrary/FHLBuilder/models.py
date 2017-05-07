@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
-from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.db import models
+from django.db.models import Q
+from django.utils.encoding import python_2_unicode_compatible
+
 from FriendlyHomeLibrary import settings
+
 from . import choices
 
 # Create your models here.
@@ -67,16 +70,30 @@ class CommonFile(models.Model):
                      ("common_reader", "common reader"))
 
 
+class TV_Manager(models.Manager):
+    def get_queryset(self):
+        q1 = Q(fileKind__exact=choices.TV)
+        q2 = Q(fileKind__exact=choices.TV_CARTOON)
+        q3 = Q(fileKind__exact=choices.TV_SITCOM)
+        return super(TV_Manager,self).get_queryset().filter(q1|q2|q3)
+
+
 # any video is called a movie
 class Movie(CommonFile):
     collection = models.ForeignKey(Collection,
       models.SET_NULL,
       blank=True,
-      null=True)
+      null=True,related_name='movies')
     tags = models.ManyToManyField(Tag, blank=True, related_name='movie_tags')
     likes = models.ManyToManyField(User, blank=True, related_name='movie_likes')
     loves = models.ManyToManyField(User, blank=True, related_name='movie_loves')
     dislikes = models.ManyToManyField(User, blank=True, related_name='movie_dislikes')
+    
+    # default manager
+    objects = models.Manager() 
+    # just finds TV shows
+    tv_objects = TV_Manager()
+    
     def get_absolute_url(self):
         return reverse('builder_movie_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
@@ -90,7 +107,7 @@ class Game(CommonFile):
     collection = models.ForeignKey(Collection,
       models.SET_NULL,
       blank=True,
-      null=True)
+      null=True,related_name='games')
     tags = models.ManyToManyField(Tag, blank=True, related_name='game_tags')
     likes = models.ManyToManyField(User, blank=True, related_name='game_likes')
     loves = models.ManyToManyField(User, blank=True, related_name='game_loves')
@@ -110,7 +127,7 @@ class Book(CommonFile):
     collection = models.ForeignKey(Collection,
       models.SET_NULL,
       blank=True,
-      null=True)
+      null=True,related_name='books')
     tags = models.ManyToManyField(Tag, blank=True, related_name='book_tags')
     likes = models.ManyToManyField(User, blank=True, related_name='book_likes')
     loves = models.ManyToManyField(User, blank=True, related_name='book_loves')
@@ -129,7 +146,7 @@ class Picture(CommonFile):
     collection = models.ForeignKey(Collection,
       models.SET_NULL,
       blank=True,
-      null=True)
+      null=True,related_name='pictures')
     tags = models.ManyToManyField(Tag, blank=True, related_name='picture_tags')
     likes = models.ManyToManyField(User, blank=True, related_name='picture_likes')
     loves = models.ManyToManyField(User, blank=True, related_name='picture_loves')
@@ -154,7 +171,7 @@ class Song(CommonFile):
     collection = models.ForeignKey(Collection,
       models.SET_NULL,
       blank=True,
-      null=True)
+      null=True, related_name='songs')
     track = models.IntegerField()
     tags = models.ManyToManyField(Tag, blank=True, related_name='song_tags')
     likes = models.ManyToManyField(User, blank=True, related_name='song_likes')
@@ -175,7 +192,7 @@ class Chapter(CommonFile):
     collection = models.ForeignKey(Collection,
       models.SET_NULL,
       blank=True,
-      null=True)
+      null=True,related_name='chapters')
     def get_absolute_url(self):
         return reverse('builder_chapter_detail',kwargs={'slug': self.slug})
     def get_update_url(self):

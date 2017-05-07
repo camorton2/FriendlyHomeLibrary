@@ -1,5 +1,0 @@
-cp song_confirm_delete.html musician_confirm_delete.html
-cp song_detail.html musician_detail.html
-cp song_form.html musician_form.html
-cp song_list.html musician_list.html
-cp song_update.html musician_update.html

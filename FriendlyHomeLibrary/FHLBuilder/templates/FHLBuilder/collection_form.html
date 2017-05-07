@@ -6,11 +6,11 @@
 
 {% block content %}
 {% if perms.FHLBuilder.collection_builder %}
-<form action="{% url 'builder_collection_create' %}" method = "post">
-{% csrf_token %}
-{{form.as_p}}
-<button type="submit">Create Collection</button>
-</form>
+    <form action="{% url 'builder_collection_create' %}" method = "post">
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type="submit">Create Collection</button>
+    </form>
 
 {% endif %}
 {% endblock %}

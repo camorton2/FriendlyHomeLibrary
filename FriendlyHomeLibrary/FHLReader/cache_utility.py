@@ -148,18 +148,20 @@ def cache_list_bykind(rlist,kind,channel,mycache):
     redirect to the cache-list display page
     """
 
+    print('cache by kind %s' % kind)
+
     songs = []
     videos = []
     pictures = []
 
-    if kind[0] == choices.SONG:
+    if kind == choices.SONG:
         songs = rlist
-    elif kind[0] == choices.PICTURE:
+    elif kind == choices.PICTURE:
         pictures = rlist
-    elif kind[0] in choices.videos:
+    elif kind in choices.videos:
         videos = rlist
     else:
-        print('ERROR no kind selected')
+        print('ERROR no kind selected %s' % kind)
 
     mycache.cache_query(songs,pictures,videos,channel)
     #return redirect(reverse('cached_list'))
