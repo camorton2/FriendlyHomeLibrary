@@ -67,7 +67,8 @@ class RadioForm(forms.ModelForm):
     kind = forms.ChoiceField(choices = choices.RADIO_CHOICES,
         widget=forms.RadioSelect,
         initial=choices.ALL,label = 'who is listening')
-    
+    xmas = forms.BooleanField(label = 'include Christmas', 
+        initial=False,required=False)
     def clean_count(self):
         count=self.cleaned_data['count']
         if count > 0:

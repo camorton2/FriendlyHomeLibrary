@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import datetime
+
 import random, operator
 
 from django.db.models import Q
@@ -222,13 +224,13 @@ def mix(rest,mine,mixit):
     return result
 
 
-def radio_select(count,justme,me):
+def radio_list(start,count,justme,me):
     if justme:
         g1 = Q(likes__username=me)
         g2 = Q(loves__username=me)
         b1 = Q(dislikes__username=me)
-        set1 = bmod.Song.objects.all().exclude(b1)
-        set2 = bmod.Song.objects.filter(g1|g2)
+        set1 = start.exclude(b1)
+        set2 = start.filter(g1|g2)
         
         if set2.count():
             # take about one tenth of the list from favourites
@@ -239,6 +241,54 @@ def radio_select(count,justme,me):
             rest = random_count(set1,count-portion)        
             return mix(rest,mine,mixit)
         return random_count(set1,count)            
-    final = bmod.Song.objects.filter(dislikes=None)
-    return random_count(final,count)
+    final = start.filter(dislikes=None)
+    return random_count(final,count)    
 
+
+def radio_select(count,justme,me):
+    
+    b1 = Q(tags__name__icontains='christmas')
+    b2 = Q(title__icontains='christmas')
+    b3 = Q(tags__name__icontains='seasonal')
+    start = bmod.Song.objects.exclude(b1|b2|b3)
+    return radio_list(start,count,justme,me)
+
+
+def radio_select_christmas(count,justme,me):
+    
+    b1 = Q(tags__name__icontains='christmas')
+    b2 = Q(title__icontains='christmas')
+    b3 = Q(tags__name__icontains='seasonal')
+    
+    start = bmod.Song.objects.exclude(b1|b2|b3)
+    therest = radio_list(start,count,justme,me)
+
+    start = bmod.Song.objects.filter(b1|b2|b3)
+    xmas = radio_list(start,count,justme,me)
+    
+    return christmas(count, therest, xmas)
+
+def christmas(count, rest, xmas):
+    """
+    Use today's date to mix Christmas songs
+    with the rest of the songs
+    """
+    month = datetime.date.today().month
+    day = datetime.date.today().day
+    
+    if month == 12:
+        if day in [23,24,25,26]:
+            return mix(xmas,rest,15)
+        if day < 15:
+            return mix(xmas,rest,4)
+        return mix(xmas,rest,8)
+    if month == 1:
+        if day < 4:
+            return mix(xmas,rest,4)
+    if month == 11:
+        if day < 25:
+            return mix(rest,xmas,8)
+        else:
+            return mix(rest,xmas,5)
+            
+    return mix(rest,xmas,15)

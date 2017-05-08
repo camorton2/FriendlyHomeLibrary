@@ -22,17 +22,6 @@ urlpatterns = [
       bv.FileList.as_view(),
       name='builder_file_list'),
     url(artist, bv.ArtistList.as_view(), name='artist_list'),
-    
-#    url(r'^actor/$',
-#      bv.ActorList.as_view(),
-#      name='builder_actor_list'),
-#    url(r'^director/$',
-#      bv.DirectorList.as_view(),
-#      name='builder_director_list'),
-#    url(r'^musician/$',
-#      bv.MusicianList.as_view(),
-#      name='builder_musician_list'),
-      
 # Tags
     url(r'^tag/(?P<slug>[\w\-]+)/$',
       bv.TagDetailView.as_view(),
@@ -67,12 +56,12 @@ urlpatterns = [
     url(r'^collection/create/$',
       login_required(bv.CollectionFormView.as_view()),
       name='builder_collection_create'),
+    url(r'^collection/(?P<slug>[\w\-]+)/update/$',
+      login_required(bv.CollectionUpdate.as_view()),
+      name='builder_collection_update'),      
     url(r'^collection/(?P<slug>[\w\-]+)/$',
       bv.CollectionDetailView.as_view(),
       name='builder_collection_detail'),
-    url(r'^collection/(?P<slug>[\w\-]+)/update/$',
-      login_required(bv.CollectionUpdate.as_view()),
-      name='builder_collection_update'),
 
 # Movies
     url(r'^movie/(?P<slug>[\w\-]+)/$',

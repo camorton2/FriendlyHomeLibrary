@@ -29,7 +29,7 @@ from FHLReader import kodi
 
 
 def collection_view(request, songs, pictures, movies, artists, title, 
-    allowChoice=False, kind=choices.MOVIE,update=False):
+    allowChoice=False, kind=choices.MOVIE,update=None):
         
     template_name = 'FHLBuilder/collection_detail.html'
     

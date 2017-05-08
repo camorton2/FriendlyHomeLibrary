@@ -236,7 +236,7 @@ class CollectionDetailView(View, CollectionMixins):
         artists = target.album_musicians.all()
 
         return vu.collection_view(request, songs, pictures, movies,
-            artists,target.title, False, choices.MOVIE, True)
+            artists,target.title, False, choices.MOVIE, target)
 
 
 @require_authenticated_permission('FHLBuilder.collection_builder')
@@ -257,8 +257,10 @@ class CollectionFormView(View,CollectionMixins):
         once the form is valid start walking files
         and populating the database
         """
+        print('CollectionFormView POST')
         bound_form=self.form_class(request.POST)
         if bound_form.is_valid():
+            print('valid create kind %s' % bound_form.cleaned_data['kind'])
             album,artist = self.add_members(
                 bound_form.cleaned_data['filePath'],
                 bound_form.drive,
@@ -315,6 +317,7 @@ class CollectionUpdate(View,CollectionMixins):
         bound_form = self.form_class(request.POST,instance=target)
         if bound_form.is_valid():
             try:
+                print('valid update tag %s' % bound_form.cleaned_data['tag'])
                 album,artist = self.add_members(
                     target.filePath,
                     target.drive,

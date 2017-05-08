@@ -13,13 +13,12 @@ from FHLBuilder import utility,choices
 from FHLBuilder import models as bmodels
 
 def setFileKind(obj,kind):
-    #print("FileKind to %s %s" % (kind,fKind))
-    cykind = kind[0]
-    if cykind == choices.UNKNOWN:
+    
+    if kind == choices.UNKNOWN:
         # don't modify to unknown
         pass
     else:
-        obj.fileKind=cykind
+        obj.fileKind=kind
         obj.save()
         
 
@@ -57,7 +56,7 @@ def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
     return dbobj
 
 def add_movie(mTitle, mFileName, mSlug, mCollection, fKind=choices.MOVIE):
-    
+    print('add_movie kind %s' % fKind)    
     try:
         dbobj = bmodels.Movie.objects.get(slug__iexact=mSlug)
     except bmodels.Movie.DoesNotExist:
@@ -265,6 +264,8 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
         nc = newCollection
         if as_movie(extension):
             mSlug = slugify( unicode('%s%s' % (nc.slug,mTitle)))
+            
+            print('before add movie kind %s' % formKind)
             movie = add_movie(mTitle,base,mSlug,nc,formKind)
             #setFileKind(movie,formKind)
             if len(formTag):

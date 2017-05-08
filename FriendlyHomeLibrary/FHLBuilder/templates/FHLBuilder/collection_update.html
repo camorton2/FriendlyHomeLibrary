@@ -6,9 +6,10 @@
 
 {% block content %}
 
+<h1>Collection Update URL</h1>
+
 {% if perms.FHLBuilder.collection_builder %}
-    <a href="{{collection.get_absolute_url}}"> {{collection.title|title}}</a>
-    <form action="{{collection.get_update_url}}" method = "post">
+    <form action=" method = "post">
     {% csrf_token %}
         {{form.as_p}}
         <button type="submit">Update Collection</button>

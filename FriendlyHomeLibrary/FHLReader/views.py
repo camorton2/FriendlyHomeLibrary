@@ -289,10 +289,15 @@ class RadioChannel(View):
         if bound_form.is_valid():
             count = bound_form.cleaned_data['count']
             kind = bound_form.cleaned_data['kind']
+            xmas = bound_form.cleaned_data['xmas']
+            
             justme = False
             if kind == choices.ME:
                 justme = True
-            rlist = rq.radio_select(count,justme,me)
+            if xmas:
+                rlist = rq.radio_select_christmas(count,justme,me)
+            else:
+                rlist = rq.radio_select(count,justme,me)
             cu.cache_list_bykind(rlist,choices.SONG,
                 'special_channel',mycache)
                 
