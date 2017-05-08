@@ -37,9 +37,13 @@
 </ul>
 </section>
 
-{% if update %}
-    <br>
-    <a href="{{ update.get_update_url }}">Update Collection (setinfo or rescan)</a>
+{% if perms.FHLBuilder.collection_builder %}
+
+    {% if update %}
+        <br>
+        <a href="{{ update.get_update_url }}">Update Collection (setinfo or rescan)</a>
+    {% endif %}
+
 {% else %}
 
     {% if user.is_authenticated %}

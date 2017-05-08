@@ -14,7 +14,7 @@ from FriendlyHomeLibrary import settings
 
 class RandomForm(forms.ModelForm):
     """
-    The idea is to allow the user to create a playlist of count
+    The idea is to allow the user to create a list of count
     random objects matching a kind and/or tag
     For songs, a playlist can be created in html
     but the ultimate goal is to create a playlist for kodi
@@ -24,10 +24,34 @@ class RandomForm(forms.ModelForm):
         fields=[]
      
     kind = forms.ChoiceField(choices = choices.LIVE_CHOICES,
-        widget=forms.RadioSelect, label = 'Pick a movie kind',
+        widget=forms.RadioSelect, label = 'Pick a kind',
         initial=choices.MOVIE)
     tag = forms.CharField(max_length=models.CHAR_LENGTH,required=False)
-    count = forms.IntegerField(initial=15)
+    count = forms.IntegerField(initial=15, label='How many would you like')
+
+    def clean_count(self):
+        count=self.cleaned_data['count']
+        if count > 0:
+            return count
+        raise ValidationError(u'please select a count above 0')
+
+
+class RecentForm(forms.ModelForm):
+    """
+    The idea is to allow the user to create a list of count
+    most recent objects matching a kind and/or tag
+    For songs, a playlist can be created in html
+    but the ultimate goal is to create a playlist for kodi
+    """
+    class Meta:
+        model=models.Collection
+        fields=[]
+     
+    kind = forms.ChoiceField(choices = choices.LIVE_CHOICES,
+        widget=forms.RadioSelect, label = 'Pick a kind',
+        initial=choices.MOVIE)
+        
+    count = forms.IntegerField(initial=15, label='How many would you like')
 
     def clean_count(self):
         count=self.cleaned_data['count']

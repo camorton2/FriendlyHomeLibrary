@@ -2,15 +2,18 @@
 <fieldset>
     <legend>Categories</legend>    
     {% csrf_token %}
+    <table>
     {% for x,y in choices %}
-        {% if not forloop.last %}
-        {% ifequal listkind x %}
-        <input type="radio" name="kind" value={{x}} checked>{{y}} 
-        {% else %}
-        <input type="radio" name="kind" value={{x}}>{{y}} 
+        {% ifequal x 'TV' %}
+            <br>
         {% endifequal %}
-        {% endif %}
+        {% ifequal listkind x %}
+            <input type="radio" name="kind" value={{x}} checked>{{y}} 
+        {% else %}
+            <input type="radio" name="kind" value={{x}}>{{y}} 
+        {% endifequal %}
     {% endfor %}
+    </table>
     <p><input type="submit" value="Apply"></p>
 
 </fieldset>    

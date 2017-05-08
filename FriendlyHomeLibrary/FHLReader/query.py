@@ -38,6 +38,21 @@ def kind_from_tag(kind, tagobj):
     return CommonFile.objects.none()
 
 
+def recent_bykind(kind, count):
+    """
+    given a kind, find all objects in the database matching that kind
+    """
+    print('query recent by kind %s' % kind)
+    ob = '-date_added'
+    if kind in choices.videos:
+        return bmod.Movie.objects.filter(fileKind=kind).distinct().order_by(ob)[0:count]
+    if kind == choices.SONG:
+        return bmod.Song.objects.all().distinct().order_by(ob)[0:count]
+    if kind == choices.PICTURE:
+        return bmod.Picture.objects.all().distinct().order_by(ob)[0:count]
+    return bmod.CommonFile.objects.none()
+
+
 def kind_from_all(kind):
     """
     given a kind, find all objects in the database matching that kind

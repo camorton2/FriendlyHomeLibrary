@@ -166,6 +166,40 @@ class RandomList(View):
         # display the list as files with the form    
         context = {'form':bound_form,'rlist':rlist}
         return render(request,self.template_name,context)
+
+
+class RecentList(View):
+    template_name = 'FHLReader/random_select.html'
+    form_class=forms.RecentForm
+    
+    def get(self, request):
+        print("RecentList GET")
+        context = {'form':self.form_class()}
+        return render(request,self.template_name,context)                
+        
+    def post(self, request):
+        print("RecentList POST")
+        me = User.objects.get(username=request.user)
+        mycache = cu.MyCache(me)
+
+        if 'save-query' in request.POST:
+            return redirect(reverse('cached_list'))
+        
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            print(' valid form ')
+            count = bound_form.cleaned_data['count'];
+            kind = bound_form.cleaned_data['kind'];
+            print( kind )
+            rlist = rq.recent_bykind(kind,count)
+            cu.cache_list_bykind(rlist,kind,'random_list',mycache)
+            
+        for x in rlist:
+            print(x.title)
+        # display the list as files with the form    
+        context = {'form':bound_form,'rlist':rlist}
+        return render(request,self.template_name,context)
         
 
 class SpecialChannel(View):
