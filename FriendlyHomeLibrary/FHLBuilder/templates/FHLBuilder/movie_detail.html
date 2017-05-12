@@ -8,6 +8,9 @@
 
 <h2>Movie: {{movie.title}}</h2>
 
+<li>Filename {{playit}}</li>
+<li>Date added: {{movie.date_added}}</li>
+
 <section>
 <ul>
     {% if movie.year > 0 %}
@@ -74,26 +77,9 @@
 </section>
 
 {% if user.is_authenticated %}
-<section>
-<form method="get">
-{% csrf_token %}    
-<fieldset>
-    <legend>Tags</legend>    
-    {% include "FHLBuilder/tag_select.html" %}
-    {% include "FHLBuilder/director_select.html" %}
-    {% if movie.fileKind == 'CC' %}
-    {% include "FHLBuilder/musician_select.html" %}
-    {% else %}
-    {% include "FHLBuilder/actor_select.html" %}
-    {% endif %}
-</fieldset>
-</form>
-
-<section>
-    {% include "FHLBuilder/likesandloves.html" %}        
-    {% include "FHLBuilder/object_update.html" %}        
-</section>
-
+    <section>
+        {% include "FHLBuilder/object_update.html" %}        
+    </section>
 {% endif %}
 
 <section>

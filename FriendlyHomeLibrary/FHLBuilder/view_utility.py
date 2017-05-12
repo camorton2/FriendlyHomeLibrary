@@ -41,6 +41,7 @@ def collection_view(request, songs, pictures, movies, artists, title,
 
     # pictures, setup slideshow        
     
+    print('pictures sent length %d' % (len(pictures)))
     count = len(pictures)
     pictureList = utility.link_file_list(pictures)
     
@@ -50,6 +51,7 @@ def collection_view(request, songs, pictures, movies, artists, title,
         current = current+1
         if current > count:
             current = 1
+        print('next %d count %d' % (current,count))
     if 'cPrev' in request.GET and request.GET.get('cPrev'):
         current = int(request.GET.get('cPrev'))
         if current == 1:
@@ -143,6 +145,6 @@ def select_kind(request):
     if 'kind' in request.GET and request.GET.get('kind'):
         kind = request.GET.get('kind')
     else:
-        kind = choices.MOVIE
+        kind = choices.PICTURE
     return kind
 

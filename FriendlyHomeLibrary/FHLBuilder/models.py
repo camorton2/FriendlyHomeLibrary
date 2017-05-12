@@ -7,9 +7,12 @@ from django.db import models
 from django.db.models import Q
 from django.utils.encoding import python_2_unicode_compatible
 
+from django.utils.timezone import now
+
 from FriendlyHomeLibrary import settings
 
-from . import choices
+from FHLBuilder import choices
+
 
 # Create your models here.
 
@@ -60,7 +63,7 @@ class CommonFile(models.Model):
     year = models.IntegerField(default=0000)
     title = models.CharField(max_length=CHAR_LENGTH)
     slug = models.SlugField(max_length=CHAR_LENGTH,unique=True)
-    date_added = models.DateField(auto_now_add=True)
+    date_added = models.DateField(default = now)
     
     def __unicode__(self):
         return self.title
@@ -172,7 +175,7 @@ class Song(CommonFile):
       models.SET_NULL,
       blank=True,
       null=True, related_name='songs')
-    track = models.IntegerField()
+    track = models.IntegerField(default=0)
     tags = models.ManyToManyField(Tag, blank=True, related_name='song_tags')
     likes = models.ManyToManyField(User, blank=True, related_name='song_likes')
     loves = models.ManyToManyField(User, blank=True, related_name='song_loves')

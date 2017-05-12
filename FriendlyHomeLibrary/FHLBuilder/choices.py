@@ -20,6 +20,8 @@ TV_SITCOM = 'TS'
 BF_RANDOM = 'BR'
 
 KIND_CHOICES = (
+    (SONG, 'song'),
+    (PICTURE, 'picture'),    
     (MOVIE, 'Movie'),
     (MOVIE_3D, '3D Movie'),
     (MV_CARTOON, 'Movie-Cartoon'),
@@ -30,12 +32,10 @@ KIND_CHOICES = (
     (TV_CARTOON, 'TV-Cartoon'),
     (TV_SITCOM, 'TV-Sitcom'),
     (MINISERIES, 'Mini-series'),
-    (SONG, 'song'),
-    (PICTURE, 'picture'),    
+    (BF_RANDOM, 'BF-random'),
     (AUDIO_BOOK, 'audio-book'),
     (EBOOK, 'e-book'),
     (GAME, 'Game'),
-    (BF_RANDOM, 'BF-random'),
     (UNKNOWN, 'unknown')
 )
 
@@ -43,7 +43,8 @@ KIND_CHOICES = (
 videos = [MOVIE,MOVIE_3D,MINI_MOVIE,CONCERT,DOCUMENTARY,TV,MINISERIES,
     TV_CARTOON,TV_SITCOM,MV_CARTOON]
 
-VIDEO_CHOICES = KIND_CHOICES[0:9]
+VIDEO_CHOICES = KIND_CHOICES[2:12]
+VIDEO_CHOICES_FORM = KIND_CHOICES[2:13]
 SONG_CHOICE = KIND_CHOICES[9]
 PICTURE_CHOICE= KIND_CHOICES[10]
 LIVE_CHOICES = KIND_CHOICES[0:12]
@@ -61,4 +62,15 @@ RADIO_CHOICES = (
     (ME, 'just me'),
     (ALL, 'everyone'))
 
+LIKE = 'lk'
+LOVE = 'lv'
+DISLIKE = 'dl'
+INDIFFERENT = 'in'
+
+PREF_CHOICES = (
+    (LOVE, 'love'),
+    (LIKE, 'like'),
+    (DISLIKE, 'dislike'),
+    (INDIFFERENT, 'indifferent')
+    )
 

@@ -5,6 +5,7 @@ import os
 from eyed3 import mp3,id3
 import enzyme
 import exifread
+import time
 
 from django.utils.text import slugify
 from django.db import models
@@ -39,24 +40,22 @@ def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
             dbobj.save()
     return dbobj
 
-def add_song(sTrack, sTitle, sFileName, sSlug, sCollection):
+def add_song(sTitle, sFileName, sSlug, sCollection):
     
     try:
         dbobj = bmodels.Song.objects.get(slug__iexact=sSlug)
     except bmodels.Song.DoesNotExist:
-        utility.log("---> ADD Song %s, track %s, filename %s, slug %s: " % (sTitle,sTrack,sFileName,sSlug))
+        utility.log("---> ADD Song %s, filename %s, slug %s: " % (sTitle,sFileName,sSlug))
         sCollection.save()
-        track = unicode(sTrack)
         title = unicode(sTitle)
         fileName = unicode(sFileName)
-        dbobj = bmodels.Song(track=track,title=title,slug=sSlug,fileName=fileName, collection=sCollection)
+        dbobj = bmodels.Song(title=title,slug=sSlug,fileName=fileName, collection=sCollection)
         dbobj.save()
     dbobj.fileKind = choices.SONG
     dbobj.save()
     return dbobj
 
 def add_movie(mTitle, mFileName, mSlug, mCollection, fKind=choices.MOVIE):
-    print('add_movie kind %s' % fKind)    
     try:
         dbobj = bmodels.Movie.objects.get(slug__iexact=mSlug)
     except bmodels.Movie.DoesNotExist:
@@ -159,10 +158,81 @@ def as_movie(ext):
         return True
     return False
 
+def fix_song(song,theFile,collection):
+    """
+    Given a song, file and collection, attempt to get
+    album,title,artist,genre information from the id3 tag
+    to populate the database
+    """
+    tag = None
+    try:
+        tag = id3.Tag()
+        tag.parse(theFile)
+    except IOError:
+        # id3 library has an issue with ? so just give up
+        return None
+    except Exception as ex:
+        utility.log("ERROR (idetag) %s unhandled exception %s" % (theFile,type(ex).__name__))
+        return None
+            
+    if tag is None:
+        # pick some reasonable defaults
+        myArtist = u'various'
+        title = song.title
+    else:
+        myArtist = unicode(tag.artist)
+        if myArtist is None :
+            myArtist = u'various'
+        title = unicode(tag.title)
+        if title is None:
+            title=song.title
+        elif title == 'None':
+            title=song.title
+            
+        album = tag.album
+        if album is None:
+            pass
+        elif album == 'None':
+            pass
+        else:
+            collection.title = album
+            
+    t1, t2 = tag.track_num
+    if t1 is None:
+        t1=0
+    song.track = t1
+    
+    # musician has name, slug
+    artistSlug = slugify( unicode('%s%s' % (myArtist,'-mus')))
+    musician = add_musician(aName=myArtist, aSlug=artistSlug)
+    musician.albums.add(collection)
+    musician.songs.add(song)
+    musician.save()
+    
+    genre = tag.genre
+    if genre is None:
+        pass
+    elif genre.name == 'None':
+        pass
+    elif genre.name == 'Unknown':
+        pass
+    else:
+        genreSlug = slugify(unicode('%s' % (genre.name)))
+        gen = add_tag(unicode(genre.name),genreSlug)
+        song.tags.add(gen)
+
+    return musician
+
 def add_file(root,myfile,path,newCollection,formKind,formTag):
-    album = newCollection
+    """
+    passed the root, file, path from an os walk
+    newCollection was created to hold the new database object
+    formKind, formTag are from the create collections form
+    returns musician (null unless it was found for a song) to allow redirect if appropriate
+    """
+    
     musician = None
-    # Still to do: log messages
+
     theFile = unicode(os.path.join(root,myfile))
     try:
         statinfo = os.stat(theFile)
@@ -170,84 +240,32 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
         # in this case I want to see what the exception is, but the file is ok and
         # will not be ignored
         utility.log("SKIP (os.stat) %s unhandled exception %s" % (theFile,type(ex).__name__))
-        return album, musician
+        return musician
     if not statinfo.st_size:
         utility.log("SKIP file with 0 size %s" % theFile)
-        return album, musician
+        return musician
     base = unicode(os.path.basename(theFile))
     mTitle, extension = os.path.splitext(base)
     mTitle = unicode(mTitle)
     extension = unicode(extension)
+    adate = time.gmtime(os.path.getmtime(theFile))
+    fdate = time.strftime('%Y-%m-%d',adate)
+
     if mp3.isMp3File(theFile):
-        addC = False
+        nc = newCollection
+        sSlug = slugify( unicode('%s%s-sg' % (nc.slug,mTitle)))            
+        song = add_song(mTitle,base,sSlug,nc)
+        song.date_added = fdate
 
-        tag = None
-        try:
-            tag = id3.Tag()
-            tag.parse(theFile)
-        except IOError:
-            # id3 library has an issue with ? so just create without
-            # id3 information
-            pass
-        except Exception as ex:
-            # in this case I want to see what the exception is, but the file is ok and
-            # will not be ignored
-            utility.log("ERROR (idetag) %s unhandled exception %s" % (theFile,type(ex).__name__))
-            
-        if tag is None:
-            # pick some reasonable defaults
-            myArtist = u'various'
-            title = mTitle
-            collection = newCollection
-        else:
-            myArtist = unicode(tag.artist)
-            if myArtist is None :
-                myArtist = u'various'
-            title = unicode(tag.title)
-            if title is None:
-                title=mTitle
-            if tag.album is None:
-                collection = newCollection
-            elif title == 'None':
-                title = mTitle
-            else:
-                addC = True
-                # handle the collection (album) which only has a path and a name
-                collectionSlug = slugify( unicode( '%s' % (tag.album) ))
-                collection = add_collection(cAlbum=unicode(tag.album),
-                    cSlug=collectionSlug,cPath=path,
-                    cDrive=newCollection.drive)
-                album = collection
-                newCollection = collection
-        # song has track, title, filename, slug, collection
-        songSlug = slugify( unicode('%s%s' % (title,collection.slug)))
-        t1, t2 = tag.track_num
-        if t1 is None:
-            t1=0
-        song = add_song(sTrack=t1,sTitle=title, sFileName=myfile,
-            sSlug=songSlug, sCollection=collection)
-        # musician has name, slug
-        artistSlug = slugify( unicode('%s%s' % (myArtist,'-mus')))
-
-        musician = add_musician(aName=myArtist, aSlug=artistSlug)
-        #setFileKind(song, formKind)
         if len(formTag):
             xSlug = slugify(unicode('%s' % (formTag)))
             xTag=add_tag(formTag,xSlug)
             song.tags.add(xTag)
 
-        if addC:
-            musician.albums.add(collection)
-        musician.songs.add(song)
-        musician.save()
-
-        genre = tag.genre
-        if genre is not None:
-            genreSlug = slugify(unicode('%s' % (genre.name)))
-            if genreSlug is not 'Unknown':
-                gen = add_tag(unicode(genre.name),genreSlug)
-                song.tags.add(gen)
+        # fill in extra details from the id3 tag on file if possible
+        musician = fix_song(song,theFile,nc)
         song.save()
+        
     else:
         # This section is for the info on mkv files
         # currently not being used, but may be in future
@@ -263,20 +281,22 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
 
         nc = newCollection
         if as_movie(extension):
-            mSlug = slugify( unicode('%s%s' % (nc.slug,mTitle)))
-            
-            print('before add movie kind %s' % formKind)
+            mSlug = slugify( unicode('%s%s-mv' % (nc.slug,mTitle)))            
             movie = add_movie(mTitle,base,mSlug,nc,formKind)
-            #setFileKind(movie,formKind)
+            movie.date_added = fdate
+            
             if len(formTag):
                 xSlug = slugify(unicode('%s' % (formTag)))
                 xTag=add_tag(formTag,xSlug)
                 movie.tags.add(xTag)
-                movie.save()
+                
+            movie.save()
         elif as_picture(extension):
             mSlug = slugify( unicode('%s%s-pict' % (nc.slug,mTitle)))
-            #print("PICTURE %s album %s" % (mSlug,nc.slug))
             picture = add_picture(mTitle,base,mSlug,nc)
+            picture.date_added = fdate
+            picture.save()
+            
             # supposed to be faster with details=False
             #itags = exifread.process_file(theFile, details=False)
             fname = unicode(theFile)
@@ -320,9 +340,10 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 xSlug = slugify(unicode('%s' % (formTag)))
                 xTag=add_tag(formTag,xSlug)
                 picture.tags.add(xTag)
-                picture.save()
+                
+            picture.save()
         else:
             utility.log("SKIPPING - unhandled extension %s/%s" % (path,base))
-    return album,musician
+    return musician
 
 

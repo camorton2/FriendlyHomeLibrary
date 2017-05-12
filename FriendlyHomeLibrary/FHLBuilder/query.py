@@ -19,21 +19,40 @@ def my_preference(obj,me):
         return False,False,True
     return False,False,False
 
+def my_preference_dict(obj,me):
+    """
+    Given an object and a user return a triple
+    indicating loves,likes,dislikes
+    """
+    if obj.loves.filter(username=me):
+        return { 'pref': choices.LOVE }
+    if obj.likes.filter(username=me):
+        return { 'pref': choices.LIKE }
+    if obj.dislikes.filter(username=me):
+        return { 'pref': choices.DISLIKE }
+    return { 'pref': choices.INDIFFERENT }
+
 
 def handle_pref(obj,pref,me):
     love,like,dislike = my_preference(obj,me)
-    if pref == 'liked':
+    if pref == choices.LIKE:
+        print('like')
         obj.likes.add(me)
         obj.loves.remove(me)
         obj.dislikes.remove(me)
-    elif pref == 'loved':
+    elif pref == choices.LOVE:
+        print('love')
         obj.loves.add(me)
         obj.likes.remove(me)
         obj.dislikes.remove(me)
-    elif pref == 'disliked':
+    elif pref == choices.DISLIKE:
         obj.dislikes.add(me)
         obj.loves.remove(me)
         obj.likes.remove(me)
+    elif pref == choices.INDIFFERENT:
+        obj.loves.remove(me)
+        obj.likes.remove(me)
+        obj.dislikes.remove(me)
     obj.save()
 
 

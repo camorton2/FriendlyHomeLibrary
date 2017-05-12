@@ -9,6 +9,12 @@ people = ['actor','director','musician']
 st = '|'.join(x for x in people)
 artist = unicode(r'^artist/(%s)$' % st)
 
+# used to select list order
+okind = ['byname','newest','oldest']
+ot = '|'.join(x for x in okind)
+sorder = unicode(r'^files/(%s)$' % ot)
+
+
 urlpatterns = [
 
 #lists
@@ -18,9 +24,7 @@ urlpatterns = [
     url(r'^collection/$',
       bv.CollectionList.as_view(),
       name='builder_collection_list'),
-    url(r'^files/$',
-      bv.FileList.as_view(),
-      name='builder_file_list'),
+    url(sorder, bv.FileList.as_view(), name='builder_file_list'),
     url(artist, bv.ArtistList.as_view(), name='artist_list'),
 # Tags
     url(r'^tag/(?P<slug>[\w\-]+)/$',

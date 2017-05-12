@@ -43,7 +43,7 @@ class TagDetailView(View):
     """ view all objects with this tag """
     def get(self,request,slug):
         """
-        Given the slug, find the corresponding tag and 
+        Given the slug, find the corresponding tag and
         collect object lists to pass to the collection view
         """
         #print("TagDetailView GET")
@@ -60,35 +60,18 @@ class SongDetailView(View):
 
     def get(self,request,slug):
         """
-        get responds to tag input (tags, musician, preferences)
+        display form with initial values
         """
         song=get_object_or_404(models.Song,slug__iexact=slug)
         playit = utility.object_path(song)
-        if 'tq' in request.GET and request.GET['tq']:
-            # new tag
-            tq = request.GET['tq']
-            tqSlug = slugify(unicode(tq))
-            new_tag = collection.add_tag(tq,tqSlug)
-            song.tags.add(new_tag)
-        elif 'musician' in request.GET and request.GET['musician']:
-            # new musician
-            mus = request.GET['musician']
-            mSlug = slugify(unicode(mus+'-mus'))
-            new_mus = collection.add_musician(mus,mSlug)
-            new_mus.songs.add(song)
-            new_mus.save()
-        elif 'pref' in request.GET and request.GET.get('pref'):
-            # preference selected
-            query.handle_pref(song, request.GET.get('pref'),request.user)
 
-        # used to setup defaults for preference radio
-        love,like,dislike = query.my_preference(song,request.user)
+        myform = self.form_class(instance=song,
+            initial = query.my_preference_dict(song,request.user))
 
         context = {
             'song':song,
             'playit':playit,
-            'love':love,'like':like,'dislike':dislike,
-            'objectForm':self.form_class(instance=song)}
+            'objectForm':myform}
         return render(request, self.template_name, context)
 
 
@@ -99,7 +82,6 @@ class SongDetailView(View):
         """
         song=get_object_or_404(models.Song,slug__iexact=slug)
         playit = utility.object_path(song)
-        love,like,dislike = query.my_preference(song,request.user)
 
         bound_form = self.form_class(request.POST,instance=song)
         if 'UpdateObject' in request.POST:
@@ -107,10 +89,32 @@ class SongDetailView(View):
                 new_song = bound_form.save()
                 song.title=new_song.title
                 song.year=new_song.year
+
+                # tag
+                tq = bound_form.cleaned_data['tag']
+                if len(tq):
+                    tqSlug = slugify(unicode(tq))
+                    new_tag = collection.add_tag(tq,tqSlug)
+                    song.tags.add(new_tag)
+                # new musician
+                mus = bound_form.cleaned_data['musician']
+                if len(mus):
+                    mSlug = slugify(unicode(mus+'-mus'))
+                    new_mus = collection.add_musician(mus,mSlug)
+                    new_mus.songs.add(song)
+
+                pref = bound_form.cleaned_data['pref']
+                # user selected a preference
+                if len(pref):
+                    query.handle_pref(song,pref,request.user)
+
                 song.save()
+                bound_form = self.form_class(
+                    instance=song,
+                    initial = query.my_preference_dict(song,request.user)
+                    )
                 formContext = {
                     'song':song,'playit':playit,
-                    'love':love,'like':like,'dislike':dislike,
                     'objectForm':bound_form}
                 return render(request,self.template_name, formContext)
         _ = kodi.playback_requests(song,request)
@@ -118,17 +122,16 @@ class SongDetailView(View):
         songContext = {
             'song':song,
             'playit':playit,
-            'love':love,'like':like,'dislike':dislike,
-            'objectForm': self.form_class(instance=song)}
+            'objectForm': bound_form}
         return render(request,self.template_name, songContext)
 
 
 class CollectionList(View):
     """ collection list view from main menu """
     def get(self,request):
-        """ 
-        get simply sets up the list and passes it 
-        to the common collection list view    
+        """
+        get simply sets up the list and passes it
+        to the common collection list view
         """
         kind = vu.select_kind(request)
         clist = query.handle_collection_kind(kind)
@@ -140,23 +143,47 @@ class FileList(View):
     """
     Handle the view of all files
     """
-    def get(self,request):
+    def get(self,request,myorder):
         """
         setup song, picture, movie lists for the common collection view
         """
+
         kind = vu.select_kind(request)
+        print('GET FileList with myorder %s and kind %s' % (myorder,kind))
         olist = []
+
+        if myorder == 'newest':
+            ob = '-date_added'
+        elif myorder == 'oldest':
+            ob = 'date_added'
+        else:
+            ob = 'title'
+
+        songs = []
+        pictures=[]
+        movies=[]
+        artists = []
         if kind == choices.SONG:
-            olist = models.Song.objects.all()
-            title = ('All Songs %d' % olist.count())
-            return vu.collection_view(request, olist, [], [],[], title, True, kind)
+            songs = models.Song.objects.all().order_by(ob)
+            title = ('All Songs %d' % songs.count())
         elif kind == choices.PICTURE:
-            olist = models.Picture.objects.all()
-            title = ('All Pictures %d' % olist.count())
-            return vu.collection_view(request, [], olist, [],[], title, True, kind)
+            pictures = models.Picture.objects.all().order_by(ob)
+            print('pictures selected length %d count %d' % (len(pictures),pictures.count()))
+            title = ('All Pictures %d' % pictures.count())
         else:
             olist,title =  vu.movies_bykind(kind)
-        return vu.collection_view(request, [], [], olist, [], title,True, kind)
+            movies = olist.order_by(ob)
+
+        return vu.collection_view(
+            request=request,
+            songs=songs,
+            pictures=pictures,
+            movies=movies,
+            artists=artists,
+            title=title,
+            allowChoice=True,
+            kind=kind,
+            update=None)
 
 
 class CollectionMixins:
@@ -182,14 +209,14 @@ class CollectionMixins:
         this is the main connection to the file system
         """
         #print("ADD_MEMBERS path %s" % (path))
-        
+
         sDrive = utility.get_drive(drive)
         album = None
         artist = None
         setPath = os.path.join(settings.MY_MEDIA_FILES_ROOT,sDrive)
         scanPath = os.path.join(setPath,path)
         goodPath = os.path.exists(scanPath)
-        
+
         if not goodPath:
             message = ('ERROR path does not exist check drive setup %s' % scanPath)
             utility.log(message)
@@ -197,14 +224,13 @@ class CollectionMixins:
         for root, dirs, files in os.walk(scanPath):
             try:
                 myroot = unicode(root[len(setPath):])
-                utility.log("START myroot %s dirs %s files %s\n" % (myroot,dirs,files))
                 if knownCollection is None:
                     album = self.handle_collection(myroot,drive,kind,tag)
                 else:
                     album = knownCollection
                 for obj in files:
                     try:
-                        album,artist = collection.add_file(
+                        artist = collection.add_file(
                             unicode(root),
                             unicode(obj),
                             myroot,
@@ -280,7 +306,7 @@ class CollectionFormView(View,CollectionMixins):
                 'form':bound_form
                 }
             return render(request,self.template_name,context)
-            
+
         # display all collections as a reasonable default if form
         # did not redirect with other options
         return redirect(reverse('builder_collection_list'))
@@ -306,8 +332,7 @@ class CollectionUpdate(View,CollectionMixins):
         print("CollectionUpdate GET")
         target = self.get_object(slug)
 
-        context={'form': self.form_class(instance=target),
-           'collection': collection}
+        context={'form': self.form_class(instance=target)}
         return render(request,self.template_name,context)
 
     def post(self,request,slug):
@@ -357,48 +382,15 @@ class MovieDetailView(View):
         get responds to tags (actor, director, tag, musician,preferences)
         """
         movie=get_object_or_404(models.Movie,slug__iexact=slug)
-        if 'tq' in request.GET and request.GET['tq']:
-            # new tag
-            tq = request.GET['tq']
-            tqSlug = slugify(unicode(tq))
-            new_tag = collection.add_tag(tq,tqSlug)
-            movie.tags.add(new_tag)
-            movie.save()
-        elif 'actor' in request.GET and request.GET['actor']:
-            # new actor
-            act = request.GET['actor']
-            actSlug = slugify(unicode(act+'-act'))
-            new_actor = collection.add_actor(act,actSlug)
-            new_actor.movies.add(movie)
-            new_actor.save()
-        elif 'director' in request.GET and request.GET['director']:
-            # new director
-            dtr = request.GET['director']
-            dtrSlug = slugify(unicode(dtr+'-dtr'))
-            new_dtr = collection.add_director(dtr,dtrSlug)
-            new_dtr.movies.add(movie)
-            new_dtr.save()
-        elif 'musician' in request.GET and request.GET['musician']:
-            # new musician - for concerts
-            mus = request.GET['musician']
-            mSlug = slugify(unicode(mus+'-mus'))
-            new_mus = collection.add_musician(mus,mSlug)
-            new_mus.concerts.add(movie)
-            new_mus.save()
-        elif 'pref' in request.GET and request.GET.get('pref'):
-            # user selected a preference
-            query.handle_pref(movie, request.GET.get('pref'),request.user)
-            
+
         # real path required for playback
         playit = utility.object_path(movie)
-        
-        # preferences for form display
-        love,like,dislike = query.my_preference(movie,request.user)
-        
+
+        myform = self.form_class(instance=movie,
+            initial = query.my_preference_dict(movie,request.user))
         context = {'movie':movie,
             'playit':playit,
-            'love':love,'like':like,'dislike':dislike,
-            'objectForm':self.form_class(instance=movie)}
+            'objectForm':myform}
         return render(request, self.template_name,context)
 
 
@@ -407,20 +399,58 @@ class MovieDetailView(View):
         post handles object update from the MovieForm
         """
         movie=get_object_or_404(models.Movie,slug__iexact=slug)
-        love,like,dislike = query.my_preference(movie,request.user)
+
         print ("MovieDetail POST for slug %s movie %s " % (slug,movie.title))
         playit = utility.object_path(movie)
-        bound_form = self.form_class(request.POST,instance=movie)
+
+        bound_form = self.form_class(request.POST,
+            instance=movie,
+            initial = query.my_preference_dict(movie,request.user))
+
         if 'UpdateObject' in request.POST:
             if bound_form.is_valid():
                 new_movie = bound_form.save()
                 movie.title=new_movie.title
                 movie.year=new_movie.year
+
+                # tag
+                tq = bound_form.cleaned_data['tag']
+                if len(tq):
+                    tqSlug = slugify(unicode(tq))
+                    new_tag = collection.add_tag(tq,tqSlug)
+                    movie.tags.add(new_tag)
+                # new actor
+                act = bound_form.cleaned_data['actor']
+                if len(act):
+                    actSlug = slugify(unicode(act+'-act'))
+                    new_actor = collection.add_actor(act,actSlug)
+                    new_actor.movies.add(movie)
+                # new director
+                dtr = bound_form.cleaned_data['director']
+                if len(dtr):
+                    dtrSlug = slugify(unicode(dtr+'-dtr'))
+                    new_dtr = collection.add_director(dtr,dtrSlug)
+                    new_dtr.movies.add(movie)
+                # new musician - for concerts
+                mus = bound_form.cleaned_data['musician']
+                if len(mus):
+                    mSlug = slugify(unicode(mus+'-mus'))
+                    new_mus = collection.add_musician(mus,mSlug)
+                    new_mus.concerts.add(movie)
+
+                pref = bound_form.cleaned_data['pref']
+                # user selected a preference
+                if len(pref):
+                    query.handle_pref(movie,pref,request.user)
+
                 movie.save()
+                bound_form = self.form_class(
+                    instance=movie,
+                    initial = query.my_preference_dict(movie,request.user)
+                    )
                 formContext = {
                     'movie':movie,
                     'playit':playit,
-                    'love':love,'like':like,'dislike':dislike,
                     'objectForm':bound_form}
                 return render(request,self.template_name, formContext)
         message = ''
@@ -458,7 +488,7 @@ class ArtistList(View):
             targetlist = models.Director.objects.all()
         else:
             targetlist = []
-            
+
         context = {'title': title,'targetlist': targetlist}
         return render(request,self.template_name,context)
 
@@ -471,7 +501,7 @@ class ActorDetailView(View):
         movies = actor.movies.all()
         title = ('Movies with actor %s' % actor.fullName)
         return vu.collection_view(request, [], [], movies,[],title)
-    
+
 
 class DirectorDetailView(View):
     """ details for director """
@@ -506,11 +536,11 @@ class MusicianDetailView(View):
                 message = u'success - songs sent'
         except kodi.MyException,ex:
             message = ex.message
-            print('Caught %s' % ex.message)            
-            
+            print('Caught %s' % ex.message)
+
         context = {
             'musician':musician,
-            'songlist':slist, 
+            'songlist':slist,
             'asPlayList':asPlayList,
             'message':message}
         return render(request,self.template_name,context)
@@ -522,52 +552,63 @@ class PictureDetailView(View):
     form_class=forms.PictureForm
 
     def get(self,request,slug):
-        """ handle tag, preference in get request  """
+        """ setup picture form   """
+
         picture=get_object_or_404(models.Picture,slug__iexact=slug)
         playit = utility.object_path(picture)
-        if 'tq' in request.GET and request.GET['tq']:
-            # new tag
-            tq = request.GET['tq']
-            tqSlug = slugify(unicode(tq))
-            new_tag = collection.add_tag(tq,tqSlug)
-            picture.tags.add(new_tag)
-        elif 'pref' in request.GET and request.GET.get('pref'):
-            # user selected preference
-            query.handle_pref(picture, request.GET.get('pref'),request.user)
-            
-        # used to populate the form
-        love,like,dislike = query.my_preference(picture,request.user)
+
+        myform = self.form_class(
+            instance=picture,
+            initial = query.my_preference_dict(picture,request.user)
+            )
 
         context = {
             'picture':picture,'playit':playit,
-            'love':love,'like':like,'dislike':dislike,
-            'objectForm':self.form_class(instance=picture)}
+            'objectForm':myform}
         return render(request, self.template_name, context)
 
     def post(self,request,slug):
         """ post request handles update from PictureForm """
-        #print ("PICTURE POST slug %s" % (slug))
+
         picture=get_object_or_404(models.Picture,slug__iexact=slug)
         playit = utility.object_path(picture)
-        love,like,dislike = query.my_preference(picture,request.user)
-        bound_form = self.form_class(request.POST,instance=picture)
+
+        bound_form = self.form_class(request.POST,instance=picture,
+            initial = query.my_preference_dict(picture,request.user))
+
         if 'UpdateObject' in request.POST:
             if bound_form.is_valid():
                 new_picture = bound_form.save()
                 picture.title=new_picture.title
                 picture.year=new_picture.year
+
+                # tag
+                tq = bound_form.cleaned_data['tag']
+                if len(tq):
+                    tqSlug = slugify(unicode(tq))
+                    new_tag = collection.add_tag(tq,tqSlug)
+                    picture.tags.add(new_tag)
+
+                pref = bound_form.cleaned_data['pref']
+                # user selected a preference
+                if len(pref):
+                    query.handle_pref(picture,pref,request.user)
+
                 picture.save()
+                bound_form = self.form_class(
+                    instance=picture,
+                    initial = query.my_preference_dict(picture,request.user)
+                    )
+
                 formContext = {
                     'picture':picture,
                     'playit':playit,
-                    'love':love,'like':like,'dislike':dislike,
                     'objectForm':bound_form}
                 return render(request,self.template_name, formContext)
 
         pictureContext = {
             'picture':picture,'playit':playit,
-            'love':love,'like':like,'dislike':dislike,
-            'objectForm': self.form_class(instance=picture)}
+            'objectForm': bound_form }
         return render(request,self.template_name, pictureContext)
 
 
@@ -590,7 +631,7 @@ class DiagnosticsView(View):
         if 'verify-pictures' in request.GET:
             title = 'missing pictures'
             blist = diagnostics.verify_list(models.Picture.objects.all())
-            
+
         context = { 'message': message,
             'brokenList': blist,
             'title': title }

@@ -1,4 +1,5 @@
 rm FHLBuilder/migrations/0* 
 ./manage.py makemigrations
 ./manage.py migrate
+./manage.py createcachetable
 ./manage.py createsuperuser
