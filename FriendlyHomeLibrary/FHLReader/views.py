@@ -30,7 +30,7 @@ class UserDetail(View):
         # print("UserDetail GET")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
-                
+
         if 'my-songs' in request.GET:
             likedS,lovedS = rq.find_objects(me, Song.objects.all())
             mycache.cache_my_songs(likedS,lovedS)
@@ -48,7 +48,7 @@ class UserDetail(View):
             'myPictures': mycache.has_my_pictures(),
             'choices': choices.VIDEO_CHOICES
             }
-        return render(request,self.template_name,context)    
+        return render(request,self.template_name,context)
 
 
 class UserSongList(View):
@@ -58,16 +58,16 @@ class UserSongList(View):
     def get(self,request,pref):
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
-        
+
         liked, loved = mycache.get_my_songs()
-                                        
+
         if pref == 'liked':
             songs = liked
         elif pref == 'loved':
             songs = loved
         else:
             songs = []
-            
+
         return vu.collection_view(request,
             songs,[],[],[],'My Songs', False)
 
@@ -79,16 +79,16 @@ class UserVideoList(View):
     def get(self,request,pref):
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
-        
+
         liked, loved = mycache.get_my_videos()
-        
+
         if pref == 'liked':
             videos = liked
         elif pref == 'loved':
             videos = loved
         else:
             videos = []
-            
+
         return vu.collection_view(request,
             [],[],videos,[],'My Videos', False)
 
@@ -98,16 +98,16 @@ class UserPictureList(View):
     def get(self,request, pref):
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
-        
+
         liked, loved = mycache.get_my_pictures()
-        
+
         if pref == 'liked':
             pictures = liked
         elif pref == 'loved':
             pictures = loved
         else:
             pictures = []
-            
+
         return vu.collection_view(request,
             [],pictures,[],[],'My Pictures', False)
 
@@ -119,29 +119,30 @@ class CachedFileList(View):
     the cached kind will hold the kind information for the QuerySet
     and the cached title will hold the title to describe the
     cached list
-    """        
+    """
     def get(self,request):
         print("CachedFileList GET")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
-                
+
         songs, pictures, videos,channel = mycache.get_query()
-        
+
         return vu.collection_view(request,
             songs,pictures,videos,[],
             'Saved Collection',
             False)
-             
+
 
 class RandomList(View):
-    template_name = 'FHLReader/random_select.html'
+    template_name = 'FHLReader/channel.html'
     form_class=forms.RandomForm
-    
+
     def get(self, request):
         print("RandomList GET")
-        context = {'form':self.form_class()}
-        return render(request,self.template_name,context)                
-        
+        context = {'form':self.form_class(),
+            'title': 'Build a Random Channel'}
+        return render(request,self.template_name,context)
+
     def post(self, request):
         print("RandomList POST")
         me = User.objects.get(username=request.user)
@@ -149,34 +150,37 @@ class RandomList(View):
 
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
-        
+
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
             print(' valid form ')
             count = bound_form.cleaned_data['count'];
             kind = bound_form.cleaned_data['kind'];
-            tag = bound_form.cleaned_data['tag'];                
+            tag = bound_form.cleaned_data['tag'];
             print( kind )
             rlist = rq.random_select(count,'',tag,kind)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
-            
+
         for x in rlist:
             print(x.title)
-        # display the list as files with the form    
-        context = {'form':bound_form,'rlist':rlist}
+        # display the list as files with the form
+        context = {'form':bound_form,'rlist':rlist,
+            'title': 'Build a Random Channel'
+            }
         return render(request,self.template_name,context)
 
 
 class RecentList(View):
-    template_name = 'FHLReader/random_select.html'
+    template_name = 'FHLReader/channel.html'
     form_class=forms.RecentForm
-    
+
     def get(self, request):
         print("RecentList GET")
-        context = {'form':self.form_class()}
-        return render(request,self.template_name,context)                
-        
+        context = {'form':self.form_class(),
+            'title': 'Build a Recent Channel'}
+        return render(request,self.template_name,context)
+
     def post(self, request):
         print("RecentList POST")
         me = User.objects.get(username=request.user)
@@ -184,23 +188,20 @@ class RecentList(View):
 
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
-        
+
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
-            print(' valid form ')
             count = bound_form.cleaned_data['count'];
             kind = bound_form.cleaned_data['kind'];
-            print( kind )
             rlist = rq.recent_bykind(kind,count)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
-            
-        for x in rlist:
-            print(x.title)
-        # display the list as files with the form    
-        context = {'form':bound_form,'rlist':rlist}
+
+        # display the list as files with the form
+        context = {'form':bound_form,'rlist':rlist,
+            'title': 'Build a Recent Channel'}
         return render(request,self.template_name,context)
-        
+
 
 class SpecialChannel(View):
     """
@@ -211,10 +212,12 @@ class SpecialChannel(View):
 
     def get(self, request, select):
         print("RandomList GET")
-        context = {'form':self.form_class()}
-        return render(request,self.template_name,context)                
+        title = ('Build a channel %s' % (select))
+        context = {'form':self.form_class(),
+            'title': title}
+        return render(request,self.template_name,context)
 
-    
+
     def post(self, request, select):
         print("RandomList POST")
         me = User.objects.get(username=request.user)
@@ -225,10 +228,10 @@ class SpecialChannel(View):
 
         rlist = []
         bound_form = self.form_class(request.POST)
-        
+
         if bound_form.is_valid():
             count = bound_form.cleaned_data['count'];
-            
+
             if select == 'saturday-morning':
                 rlist = rq.saturday_select(count)
             elif select == 'sitcom':
@@ -244,13 +247,15 @@ class SpecialChannel(View):
             # cache the list
             cu.cache_list_bykind(rlist,choices.MOVIE,
                     'special_channel',mycache)
-                
-                    
-        # display the list as files with the form    
-        context = {'form':bound_form,'rlist':rlist}
+
+
+        # display the list as files with the form
+        title = ('Build a channel %s' % (select))
+        context = {'form':bound_form,'rlist':rlist,
+            'title': title}
         return render(request,self.template_name,context)
-        
-        
+
+
 class MovieChannel(View):
     """
     Channels based on movie kinds
@@ -259,45 +264,47 @@ class MovieChannel(View):
     form_class=forms.MovieChannelForm
 
     def getKind(self,akind):
-        print('kind passed %s' % akind)
         for x in choices.VIDEO_CHOICES:
             if x[0] == akind:
                 return x
-        print('ERROR defaulting to cartoon')
         return (choices.TV_CARTOON, 'TV-Cartoon')
-        
+
 
     def get(self, request, akind):
-        print("MovieChannel GET")
-        context = {'form':self.form_class()}
-        return render(request,self.template_name,context)                
 
-    
+        title = ('Build a channel %s' % (akind))
+        context = {'form':self.form_class(),
+            'title': title}
+        return render(request,self.template_name,context)
+
+
     def post(self, request, akind):
-        print("MovieChannel POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
-        
+
+
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
-                
+
         kind = akind #self.getKind(akind)
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
             count = bound_form.cleaned_data['count']
             title = bound_form.cleaned_data['atitle']
-            tag = bound_form.cleaned_data['atag']             
+            tag = bound_form.cleaned_data['atag']
             print('Valid form count %d title %s tag %s' % (count,title,tag))
             rlist = rq.random_select(count,title,tag,kind)
             for a in rlist:
                 print(a.title)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
-                
-        # display the list as files with the form    
-        context = {'form':bound_form,'rlist':rlist}
+
+        title = ('Build a channel %s' % (akind))
+        # display the list as files with the form
+        context = {'form':bound_form,'rlist':rlist,
+            'title': title}
         return render(request,self.template_name,context)
-        
+
 
 class RadioChannel(View):
     template_name = 'FHLReader/channel.html'
@@ -305,10 +312,11 @@ class RadioChannel(View):
 
     def get(self, request):
         print("RandomList GET")
-        context = {'form':self.form_class()}
-        return render(request,self.template_name,context)                
+        context = {'form':self.form_class(),
+            'title': 'Build a Radio Channel'}
+        return render(request,self.template_name,context)
 
-    
+
     def post(self, request):
         print("RandomList POST")
         me = User.objects.get(username=request.user)
@@ -317,14 +325,14 @@ class RadioChannel(View):
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
 
-        
+
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
             count = bound_form.cleaned_data['count']
             kind = bound_form.cleaned_data['kind']
             xmas = bound_form.cleaned_data['xmas']
-            
+
             justme = False
             if kind == choices.ME:
                 justme = True
@@ -334,7 +342,8 @@ class RadioChannel(View):
                 rlist = rq.radio_select(count,justme,me)
             cu.cache_list_bykind(rlist,choices.SONG,
                 'special_channel',mycache)
-                
-        # display the list as files with the form    
-        context = {'form':bound_form,'rlist':rlist}
+
+        # display the list as files with the form
+        context = {'form':bound_form,'rlist':rlist,
+            'title': 'Build a  Channel'}
         return render(request,self.template_name,context)

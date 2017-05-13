@@ -40,8 +40,11 @@ KIND_CHOICES = (
 )
 
 # all choices that are video files
-videos = [MOVIE,MOVIE_3D,MINI_MOVIE,CONCERT,DOCUMENTARY,TV,MINISERIES,
+
+live = [SONG,PICTURE,MOVIE,MOVIE_3D,MINI_MOVIE,CONCERT,DOCUMENTARY,TV,MINISERIES,
     TV_CARTOON,TV_SITCOM,MV_CARTOON]
+videos = live[2:]
+
 
 VIDEO_CHOICES = KIND_CHOICES[2:12]
 VIDEO_CHOICES_FORM = KIND_CHOICES[2:13]
@@ -73,4 +76,18 @@ PREF_CHOICES = (
     (DISLIKE, 'dislike'),
     (INDIFFERENT, 'indifferent')
     )
+
+
+NAME = 'NM'
+NEWEST = 'NN'
+OLDEST = 'OO'
+
+ordering = [NAME,NEWEST,OLDEST]
+
+ORDER_CHOICES = (
+    (NAME, 'By Name'),
+    (NEWEST, 'Newest First'),
+    (OLDEST, 'Oldest First'),
+    )
+
 

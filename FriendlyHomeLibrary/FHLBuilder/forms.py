@@ -66,6 +66,27 @@ class TagForm(forms.ModelForm):
         return new_slug
 
 
+class AllFilesForm(forms.ModelForm):
+    class Meta:
+        model=models.CommonFile
+        fields=[]
+    
+    kind = forms.ChoiceField(choices = choices.LIVE_CHOICES,
+        widget=forms.RadioSelect, label = 'Pick a kind',
+        initial=choices.SONG)    
+
+    order = forms.ChoiceField(choices = choices.ORDER_CHOICES,
+        widget=forms.RadioSelect, label = 'Pick an Order',
+        initial=choices.NAME)    
+
+    def clean_count(self):
+        count=self.cleaned_data['count']
+        if count > 0:
+            return count
+        raise ValidationError(u'please select a count above 0')
+    
+
+
 class BasicCollectionForm(forms.ModelForm):
     class Meta:
         model=models.Collection

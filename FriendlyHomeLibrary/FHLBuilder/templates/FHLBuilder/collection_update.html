@@ -6,8 +6,6 @@
 
 {% block content %}
 
-<h3>Collection Update {{collection.title}}</h3>
-
 {% if perms.FHLBuilder.collection_builder %}
     <form action="" method = "post">
     {% csrf_token %}

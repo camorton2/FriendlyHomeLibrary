@@ -26,6 +26,48 @@ from FHLBuilder import diagnostics
 
 from FHLReader import kodi
 
+def big_collection_view(request,mycache):
+    """
+    Given that a view has setup the generators in the cache
+    experiment to see if I can iterate the big list without
+    repeating the query
+    If the generators are not setup, does nothing
+    """
+    template_name = 'FHLBuilder/collection_detail.html'
+
+    picture = None
+    filename = None
+
+    if mycache.has_generator():
+        print('Ok generator is setup')
+        if 'cNext' in request.GET and request.GET.get('cNext'):
+            print('next')
+            picture,filename = mycache.cache_next()
+        elif 'cPrev' in request.GET and request.GET.get('cPrev'):
+            print('prev')
+            picture,filename = mycache.cach_prev()
+        else:
+            print('start')
+            picture,filename = mycache.cache_next()
+        
+
+    context = {
+        'title':'still to do',
+        'songlist':[],
+        'picture':picture,
+        'pictureCount':0,  # to do
+        'filename': filename,
+        'index': 0, # to do
+        'asPlayList': False,
+        'movielist':[],
+        'update':False,
+        'choices': choices.LIVE_CHOICES,
+        'listkind':choices.PICTURE,
+        'allowChoice': True,
+        'artists': [],
+        'message': ''
+        }
+    return render(request, template_name, context)
 
 
 def collection_view(request, songs, pictures, movies, artists, title, 

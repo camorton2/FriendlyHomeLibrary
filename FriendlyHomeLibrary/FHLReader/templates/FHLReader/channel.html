@@ -5,22 +5,26 @@
 {% endblock %}
 
 {% block content %}
-<h3>Create a random list</h3>
+<h3>{{title}}</h3>
 <div>
 <form action="" method = "post">
     {% csrf_token %}    
     <fieldset>
     <legend>Pick your playlist</legend>    
     {{form.as_p}}
-    <button type="submit">Run Query</button>
-    <button type="submit" name='save-query'>Save to play Results</button>
+        {% if rlist %}
+            <button type="submit">Rerun Query</button>
+            <button type="submit" name='save-query'>Accept results</button>
+        {% else %}
+            <button type="submit">Run Query</button>
+        {% endif %}
     </fieldset>
 </form>
 </div>
 <p>{{message}}</p>
 <div>
 {% for obj in rlist %}
-<li><a href="{{ obj.get_absolute_url }}">{{obj.title|title}}</a></li>
+    <li><a href="{{ obj.get_absolute_url }}">{{obj.title|title}}</a></li>
 {% endfor %}
 </div>
 {% endblock %}

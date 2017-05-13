@@ -9,7 +9,6 @@
 
 {% include 'FHLBuilder/song_play_get.html' %}
 
-
 {% if songlist %}
 <h4>{{listTitle}}</h4>
 
@@ -21,9 +20,9 @@
                 Sorry, your browser does not support HTML5 audio.
             </audio>
             <ul id="playlist">
-            <li class="current-song"><a href="{% static path %}"> {{song.title|title}}</a></li>
+            <li class="current-song"><a href="{% static path %}"> {{song.title|title}}</a> </li>
         {% else %}
-            <li><a href="{% static path %}">{{song.title|title}}</a></li>
+            <li><a href="{% static path %}">{{song.title|title}}</a> {{path}}</li>
         {% endif %}
         {% if forloop.last %}
             </ul>
@@ -34,7 +33,7 @@
 
     <ul id="filelist">
     {% for song,path in songlist %}
-        <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a></li>
+        <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a> </li>
     {% endfor %}
     </ul>
 

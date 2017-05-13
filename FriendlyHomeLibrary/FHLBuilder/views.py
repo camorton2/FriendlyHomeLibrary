@@ -8,7 +8,9 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.text import slugify
+
 from django.views.generic import View
+
 
 from FriendlyHomeLibrary import settings
 
@@ -23,6 +25,8 @@ from FHLBuilder import diagnostics
 import FHLBuilder.view_utility as vu
 
 from FHLReader import kodi
+
+
 
 class HomePage(View):
     """ main homepage """
@@ -138,52 +142,67 @@ class CollectionList(View):
         title = 'Library Collections'
         return vu.view_list(request,clist,title,kind)
 
+class AllFilesView(View):
+    template_name = 'FHLBuilder/all_files.html'
+    form_class=forms.AllFilesForm
+
+    def get(self, request):
+        print("AllFilesView GET")
+        context = {'form':self.form_class(),
+            'title': 'List files'}
+        return render(request,self.template_name,context)
+
+    def post(self, request):
+        print("AllFilesView POST")
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            kind = bound_form.cleaned_data['kind']
+            order = bound_form.cleaned_data['order']
+            print('kind %s order %s' % (kind,order))
+            return redirect(reverse('builder_file_list', args=(kind,order)))
+
+        context = {'form':self.form_class(),
+            'title': 'List files'}
+        return render(request,self.template_name)
 
 class FileList(View):
     """
     Handle the view of all files
     """
-    def get(self,request,myorder):
+    template_name = 'FHLBuilder/collection_basic.html'
+    def get(self,request,kind,myorder):
         """
         setup song, picture, movie lists for the common collection view
         """
 
-        kind = vu.select_kind(request)
         print('GET FileList with myorder %s and kind %s' % (myorder,kind))
         olist = []
 
-        if myorder == 'newest':
+        if myorder == choices.NEWEST:
             ob = '-date_added'
-        elif myorder == 'oldest':
+        elif myorder == choices.OLDEST:
             ob = 'date_added'
         else:
             ob = 'title'
 
-        songs = []
-        pictures=[]
-        movies=[]
-        artists = []
+        alist = []
         if kind == choices.SONG:
-            songs = models.Song.objects.all().order_by(ob)
-            title = ('All Songs %d' % songs.count())
+            alist = models.Song.objects.all().order_by(ob)
+            title = ('All Songs %d' % alist.count())
         elif kind == choices.PICTURE:
-            pictures = models.Picture.objects.all().order_by(ob)
-            print('pictures selected length %d count %d' % (len(pictures),pictures.count()))
-            title = ('All Pictures %d' % pictures.count())
+            alist = models.Picture.objects.all().order_by(ob)
+            title = ('All Pictures %d' % alist.count())
         else:
             olist,title =  vu.movies_bykind(kind)
-            movies = olist.order_by(ob)
+            alist = olist.order_by(ob)
 
-        return vu.collection_view(
-            request=request,
-            songs=songs,
-            pictures=pictures,
-            movies=movies,
-            artists=artists,
-            title=title,
-            allowChoice=True,
-            kind=kind,
-            update=None)
+        flist = utility.link_file_list(alist)
+        context = {
+            'title':title,
+            'alist':flist}
+        return render(request,self.template_name,context)
 
 
 class CollectionMixins:

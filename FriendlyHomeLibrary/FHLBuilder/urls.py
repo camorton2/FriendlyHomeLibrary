@@ -1,18 +1,10 @@
 # urls
 from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 
 from FHLBuilder import views as bv
-
-# used to select person
-people = ['actor','director','musician']
-st = '|'.join(x for x in people)
-artist = unicode(r'^artist/(%s)$' % st)
-
-# used to select list order
-okind = ['byname','newest','oldest']
-ot = '|'.join(x for x in okind)
-sorder = unicode(r'^files/(%s)$' % ot)
+from FHLBuilder.url_utility import sorder, artist
 
 
 urlpatterns = [
@@ -24,7 +16,12 @@ urlpatterns = [
     url(r'^collection/$',
       bv.CollectionList.as_view(),
       name='builder_collection_list'),
-    url(sorder, bv.FileList.as_view(), name='builder_file_list'),
+    url(r'^byfile/$',
+      bv.AllFilesView.as_view(),
+      name='builder_all_list'),
+    url(sorder, 
+        cache_page(60*15)(bv.FileList.as_view()), 
+        name='builder_file_list'),
     url(artist, bv.ArtistList.as_view(), name='artist_list'),
 # Tags
     url(r'^tag/(?P<slug>[\w\-]+)/$',

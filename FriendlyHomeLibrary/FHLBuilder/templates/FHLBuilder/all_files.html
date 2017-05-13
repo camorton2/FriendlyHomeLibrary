@@ -1,0 +1,20 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} All Files
+{% endblock %}
+
+{% block content %}
+<h3>Narrow Down Your Choice</h3>
+<div>
+<form action="" method = "post">
+    {% csrf_token %}    
+    <fieldset>
+    <legend>Pick your filelist</legend>    
+    {{form.as_p}}
+    <button type="submit">Run Query</button>
+    </fieldset>
+</form>
+</div>
+<p>{{message}}</p>
+{% endblock %}
