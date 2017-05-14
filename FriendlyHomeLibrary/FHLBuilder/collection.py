@@ -127,34 +127,13 @@ def add_tag(tName, tSlug):
     return dbobj
 
 
-
 def as_picture(ext):
-    picts = [
-        '.jpg',
-        '.img',
-        '.png',
-        '.thm',
-        '.tiff',
-        '.tif',
-        '.pe4',
-        '.gif'
-        ]
-    if any(k == ext.lower() for k in picts):
+    if any(k == ext.lower() for k in choices.picts):
         return True
     return False
 
 def as_movie(ext):
-    movs = [
-        '.mkv',
-        '.mov',
-        '.mp4',
-        '.avi',
-        '.flv',
-        '.wmv',
-        '.mpg',
-        '.wav'
-        ]
-    if any(k == ext.lower() for k in movs):
+    if any(k == ext.lower() for k in choices.movs):
         return True
     return False
 

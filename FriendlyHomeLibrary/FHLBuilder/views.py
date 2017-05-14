@@ -484,7 +484,6 @@ class MovieDetailView(View):
         movieContext = {
             'movie':movie,
             'playit':playit,
-            'love':love,'like':like,'dislike':dislike,
             'objectForm': self.form_class(instance=movie),
             'vlcPlugin':vlcPlugin,
             'message':message}

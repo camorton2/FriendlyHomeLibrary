@@ -187,6 +187,6 @@ def select_kind(request):
     if 'kind' in request.GET and request.GET.get('kind'):
         kind = request.GET.get('kind')
     else:
-        kind = choices.PICTURE
+        kind = choices.MOVIE
     return kind
 

@@ -145,6 +145,12 @@ class Book(CommonFile):
                      ("book_reader", "book reader"))
 
 
+class Slide_Manager(models.Manager):
+    def get_queryset(self):
+        q1 = Q(fileName__iendswith=choices.picts[7])
+        return super(Slide_Manager,self).get_queryset().exclude(q1)
+
+
 class Picture(CommonFile):
     collection = models.ForeignKey(Collection,
       models.SET_NULL,
@@ -160,6 +166,11 @@ class Picture(CommonFile):
     data3 = models.CharField(max_length=CHAR_LENGTH,blank=True)
     data4 = models.CharField(max_length=CHAR_LENGTH,blank=True)
     data5 = models.CharField(max_length=CHAR_LENGTH,blank=True)
+
+    # default manager
+    objects = models.Manager() 
+    # excludes extensions not wanted in slide shows
+    slide_objects = Slide_Manager()
     
     def get_absolute_url(self):
         return reverse('builder_picture_detail',kwargs={'slug': self.slug})

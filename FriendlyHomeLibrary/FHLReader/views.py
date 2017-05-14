@@ -162,10 +162,9 @@ class RandomList(View):
             rlist = rq.random_select(count,'',tag,kind)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
-        for x in rlist:
-            print(x.title)
+        flist = slist = bu.link_file_list(rlist)
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':rlist,
+        context = {'form':bound_form,'rlist':flist,
             'title': 'Build a Random Channel'
             }
         return render(request,self.template_name,context)
@@ -198,7 +197,8 @@ class RecentList(View):
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':rlist,
+        flist = slist = bu.link_file_list(rlist)
+        context = {'form':bound_form,'rlist':flist,
             'title': 'Build a Recent Channel'}
         return render(request,self.template_name,context)
 
@@ -250,8 +250,9 @@ class SpecialChannel(View):
 
 
         # display the list as files with the form
+        flist = slist = bu.link_file_list(rlist)
         title = ('Build a channel %s' % (select))
-        context = {'form':bound_form,'rlist':rlist,
+        context = {'form':bound_form,'rlist':flist,
             'title': title}
         return render(request,self.template_name,context)
 
@@ -299,9 +300,10 @@ class MovieChannel(View):
                 print(a.title)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
+        flist = slist = bu.link_file_list(rlist)
         title = ('Build a channel %s' % (akind))
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':rlist,
+        context = {'form':bound_form,'rlist':flist,
             'title': title}
         return render(request,self.template_name,context)
 
@@ -343,7 +345,8 @@ class RadioChannel(View):
             cu.cache_list_bykind(rlist,choices.SONG,
                 'special_channel',mycache)
 
+        flist = slist = bu.link_file_list(rlist)
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':rlist,
+        context = {'form':bound_form,'rlist':flist,
             'title': 'Build a  Channel'}
         return render(request,self.template_name,context)

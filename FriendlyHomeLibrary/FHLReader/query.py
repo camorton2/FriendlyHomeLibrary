@@ -49,7 +49,7 @@ def recent_bykind(kind, count):
     if kind == choices.SONG:
         return bmod.Song.objects.all().distinct().order_by(ob)[0:count]
     if kind == choices.PICTURE:
-        return bmod.Picture.objects.all().distinct().order_by(ob)[0:count]
+        return bmod.Picture.slide_objects.all().distinct().order_by(ob)[0:count]
     return bmod.CommonFile.objects.none()
 
 
@@ -62,7 +62,7 @@ def kind_from_all(kind):
     if kind == choices.SONG:
         return bmod.Song.objects.all()
     if kind == choices.PICTURE:
-        return bmod.Picture.objects.all()
+        return bmod.Picture.slide_objects.all()
     return bmod.CommonFile.objects.none()
 
 
@@ -162,7 +162,7 @@ def silly_select(count):
     titles = ['animaniacs','threestooges'
         'faulty','montypython','allinthefamily',
         'getsmart','seinfeld',
-        'carolburnet','evildead','brisco',
+        'carolburnet','evildead','bennyhill',
         'mrbean','muppetshow','snl','thinblue',
         'dirkgently','hitchhiker'
         ]

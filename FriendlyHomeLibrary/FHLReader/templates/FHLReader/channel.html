@@ -23,8 +23,8 @@
 </div>
 <p>{{message}}</p>
 <div>
-{% for obj in rlist %}
-    <li><a href="{{ obj.get_absolute_url }}">{{obj.title|title}}</a></li>
+{% for file,path in rlist %}
+    <li><a href="{{ obj.get_absolute_url }}">{{path|title}}</a></li>
 {% endfor %}
 </div>
 {% endblock %}

@@ -18,6 +18,7 @@ TV_CARTOON = 'TC'
 MV_CARTOON = 'MC'
 TV_SITCOM = 'TS'
 BF_RANDOM = 'BR'
+STANDUP = 'ST'
 
 KIND_CHOICES = (
     (SONG, 'song'),
@@ -32,6 +33,7 @@ KIND_CHOICES = (
     (TV_CARTOON, 'TV-Cartoon'),
     (TV_SITCOM, 'TV-Sitcom'),
     (MINISERIES, 'Mini-series'),
+    (STANDUP, 'Standup-comedy'),
     (BF_RANDOM, 'BF-random'),
     (AUDIO_BOOK, 'audio-book'),
     (EBOOK, 'e-book'),
@@ -42,19 +44,14 @@ KIND_CHOICES = (
 # all choices that are video files
 
 live = [SONG,PICTURE,MOVIE,MOVIE_3D,MINI_MOVIE,CONCERT,DOCUMENTARY,TV,MINISERIES,
-    TV_CARTOON,TV_SITCOM,MV_CARTOON]
+    TV_CARTOON,TV_SITCOM,MV_CARTOON,STANDUP]
 videos = live[2:]
 
 
-VIDEO_CHOICES = KIND_CHOICES[2:12]
-VIDEO_CHOICES_FORM = KIND_CHOICES[2:13]
-SONG_CHOICE = KIND_CHOICES[9]
-PICTURE_CHOICE= KIND_CHOICES[10]
-LIVE_CHOICES = KIND_CHOICES[0:12]
-CARTOON_CHOICE = KIND_CHOICES[6]
-SITCOM_CHOICE = KIND_CHOICES[7]
-MOVIE_CHOICE = KIND_CHOICES[0]
-TV_CHOICE = KIND_CHOICES[4:7]
+VIDEO_CHOICES = KIND_CHOICES[2:13]
+VIDEO_CHOICES_FORM = KIND_CHOICES[2:14]
+LIVE_CHOICES = KIND_CHOICES[0:13]
+
 
 #radio listeners
 
@@ -90,4 +87,27 @@ ORDER_CHOICES = (
     (OLDEST, 'Oldest First'),
     )
 
+# extensions considered pictures
+picts = [
+    '.jpg',
+    '.img',
+    '.png',
+    '.tiff',
+    '.tif',
+    '.pe4',
+    '.gif',
+    '.thm'
+    ]
+
+# extensions considered movies
+movs = [
+    '.mkv',
+    '.mov',
+    '.mp4',
+    '.avi',
+    '.flv',
+    '.wmv',
+    '.mpg',
+    '.wav'
+    ]
 
