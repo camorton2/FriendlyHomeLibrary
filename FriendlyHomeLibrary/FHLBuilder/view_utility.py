@@ -28,47 +28,76 @@ from FHLReader import kodi
 
 
 def generic_collection_view(request, **kwargs):
-    print('generic_collection_view')
-    
+    """
+    Keep view details and playback requests in a single place
+    so all collections view look the same and have the same options
+    """
     template_name = 'FHLBuilder/collection_detail.html'
     
-    # respond to slide show
-    current = 1
-    if 'cNext' in request.GET and request.GET.get('cNext'):
-        current = int(request.GET.get('cNext'))
-        current = current+1
-        if current > count:
-            current = 1
-    if 'cPrev' in request.GET and request.GET.get('cPrev'):
-        current = int(request.GET.get('cPrev'))
-        if current == 1:
-            current = count
-        else:
-            current=current-1
-
     # respond to playlist
-    asPlayList = False;
     if 'playlist' in request.GET:
         asPlayList = True
+    else:
+        asPlayList = False
 
+    # arguments and defaults        
     songs=kwargs.get('songs',[])
     movies=kwargs.get('movies',[])
     pictures=kwargs.get('pictures',[])
     artists=kwargs.get('artists',[])
     title=kwargs.get('title','Collection View')
     allowChoice = kwargs.get('allowChoice',False)
-    kind=kwargs.get('kind',choices.MOVIE)
+    kind=kwargs.get('kind',choices.UNKNOWN)
     update=kwargs.get('update',None)
+    ob=kwargs.get('order_by','title')
+
+    if kind == choices.SONG and not len(songs):
+        # all songs view, can there be a faster option?
+        songs = models.Song.objects.all().order_by(ob)
+        title = ('All Songs %d' % songs.count())
+    if kind in choices.videos and not len(movies):
+        # all movies view, can there be a faster option?
+        olist,title =  movies_bykind(kind)
+        movies = olist.order_by(ob)
     
     songList = utility.link_file_list(songs)
-    count = len(pictures)
-    pictureList = utility.link_file_list(pictures)
+
+    # respond to slide show
+    current_picture = 1
     picture = None
     filename = None
 
-    if count:
-        picture,filename = pictureList[current-1]
+    picture_count = len(pictures)
 
+    use_all = False
+    if not picture_count and kind == choices.PICTURE:
+        # all pictures view
+        picture_count = models.Picture.slide_objects.all().count()
+        use_all = True
+
+    if 'cNext' in request.GET and request.GET.get('cNext'):
+        current_picture = int(request.GET.get('cNext'))
+        current_picture = current_picture+1
+        if current_picture > picture_count:
+            current_picture = 1
+    if 'cPrev' in request.GET and request.GET.get('cPrev'):
+        current_picture = int(request.GET.get('cPrev'))
+        if current_picture == 1:
+            current_picture = picture_count
+        else:
+            current_picture=current_picture-1
+
+    if use_all:
+        # all pictures view
+        picture = models.Picture.slide_objects.all().order_by(ob)[current_picture]
+        title = ('All Pictures %d' % picture_count)
+        filename = utility.object_path(picture)
+    elif picture_count:
+        picture = pictures[current_picture-1]
+        filename = utility.object_path(picture)
+        #pictureList = utility.link_file_list(pictures)
+        #picture,filename = pictureList[current_picture-1]
+        
     # tags all objects
     if 'tq' in request.GET and request.GET['tq']:
         tq = request.GET['tq']
@@ -100,9 +129,9 @@ def generic_collection_view(request, **kwargs):
         'title':title,
         'songlist':songList,
         'picture':picture,
-        'pictureCount':count,
+        'pictureCount':picture_count,
         'filename': filename,
-        'index': current,
+        'index': current_picture,
         'asPlayList': asPlayList,
         'movielist':movies,
         'update':update,

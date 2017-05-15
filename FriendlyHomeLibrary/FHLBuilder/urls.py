@@ -19,6 +19,10 @@ urlpatterns = [
     url(r'^byfile/$',
       bv.AllFilesView.as_view(),
       name='builder_all_list'),
+# uncached is better when debugging
+#    url(sorder, 
+#        bv.FileList.as_view(), 
+#        name='builder_file_list'),
     url(sorder, 
         cache_page(60*15)(bv.FileList.as_view()), 
         name='builder_file_list'),
