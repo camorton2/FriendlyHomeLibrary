@@ -164,7 +164,7 @@ def silly_select(count):
         'getsmart','seinfeld',
         'carolburnet','evildead','bennyhill',
         'mrbean','muppetshow','snl','thinblue',
-        'dirkgently','hitchhiker'
+        'dirkgently','hitchhiker','policesquad'
         ]
 
     return random_count(tv_by_title(titles),count)

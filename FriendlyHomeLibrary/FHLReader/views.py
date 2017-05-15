@@ -67,9 +67,9 @@ class UserSongList(View):
             songs = loved
         else:
             songs = []
-
-        return vu.collection_view(request,
-            songs,[],[],[],'My Songs', False)
+            
+        vargs = {'songs':songs,'title':'My Songs'}
+        return vu.generic_collection_view(request,**vargs)
 
 
 class UserVideoList(View):
@@ -88,9 +88,8 @@ class UserVideoList(View):
             videos = loved
         else:
             videos = []
-
-        return vu.collection_view(request,
-            [],[],videos,[],'My Videos', False)
+        vargs = {'movies': videos, 'title': 'My Videos'}
+        return vu.generic_collection_view(request,**vargs)
 
 
 class UserPictureList(View):
@@ -108,8 +107,8 @@ class UserPictureList(View):
         else:
             pictures = []
 
-        return vu.collection_view(request,
-            [],pictures,[],[],'My Pictures', False)
+        vargs = {'pictures':pictures,'title':'My Pictures'}
+        return vu.generic_collection_view(request,**vargs)
 
 
 class CachedFileList(View):
@@ -127,10 +126,13 @@ class CachedFileList(View):
 
         songs, pictures, videos,channel = mycache.get_query()
 
-        return vu.collection_view(request,
-            songs,pictures,videos,[],
-            'Saved Collection',
-            False)
+        vargs = {
+            'songs': songs,
+            'pictures': pictures,
+            'videos': videos,
+            'title': 'Saved Collection'
+            }
+        return vu.generic_collection_view(request,**vargs)
 
 
 class RandomList(View):

@@ -26,74 +26,19 @@ from FHLBuilder import diagnostics
 
 from FHLReader import kodi
 
-def big_collection_view(request,mycache):
-    """
-    Given that a view has setup the generators in the cache
-    experiment to see if I can iterate the big list without
-    repeating the query
-    If the generators are not setup, does nothing
-    """
-    template_name = 'FHLBuilder/collection_detail.html'
 
-    picture = None
-    filename = None
-
-    if mycache.has_generator():
-        print('Ok generator is setup')
-        if 'cNext' in request.GET and request.GET.get('cNext'):
-            print('next')
-            picture,filename = mycache.cache_next()
-        elif 'cPrev' in request.GET and request.GET.get('cPrev'):
-            print('prev')
-            picture,filename = mycache.cach_prev()
-        else:
-            print('start')
-            picture,filename = mycache.cache_next()
-        
-
-    context = {
-        'title':'still to do',
-        'songlist':[],
-        'picture':picture,
-        'pictureCount':0,  # to do
-        'filename': filename,
-        'index': 0, # to do
-        'asPlayList': False,
-        'movielist':[],
-        'update':False,
-        'choices': choices.LIVE_CHOICES,
-        'listkind':choices.PICTURE,
-        'allowChoice': True,
-        'artists': [],
-        'message': ''
-        }
-    return render(request, template_name, context)
-
-
-def collection_view(request, songs, pictures, movies, artists, title, 
-    allowChoice=False, kind=choices.MOVIE,update=None):
-        
+def generic_collection_view(request, **kwargs):
+    print('generic_collection_view')
+    
     template_name = 'FHLBuilder/collection_detail.html'
     
-    songList = utility.link_file_list(songs)
-    
-    asPlayList = False;
-    if 'playlist' in request.GET:
-        asPlayList = True
-
-    # pictures, setup slideshow        
-    
-    print('pictures sent length %d' % (len(pictures)))
-    count = len(pictures)
-    pictureList = utility.link_file_list(pictures)
-    
+    # respond to slide show
     current = 1
     if 'cNext' in request.GET and request.GET.get('cNext'):
         current = int(request.GET.get('cNext'))
         current = current+1
         if current > count:
             current = 1
-        print('next %d count %d' % (current,count))
     if 'cPrev' in request.GET and request.GET.get('cPrev'):
         current = int(request.GET.get('cPrev'))
         if current == 1:
@@ -101,9 +46,26 @@ def collection_view(request, songs, pictures, movies, artists, title,
         else:
             current=current-1
 
+    # respond to playlist
+    asPlayList = False;
+    if 'playlist' in request.GET:
+        asPlayList = True
+
+    songs=kwargs.get('songs',[])
+    movies=kwargs.get('movies',[])
+    pictures=kwargs.get('pictures',[])
+    artists=kwargs.get('artists',[])
+    title=kwargs.get('title','Collection View')
+    allowChoice = kwargs.get('allowChoice',False)
+    kind=kwargs.get('kind',choices.MOVIE)
+    update=kwargs.get('update',None)
+    
+    songList = utility.link_file_list(songs)
+    count = len(pictures)
+    pictureList = utility.link_file_list(pictures)
     picture = None
     filename = None
-    
+
     if count:
         picture,filename = pictureList[current-1]
 
@@ -112,7 +74,7 @@ def collection_view(request, songs, pictures, movies, artists, title,
         tq = request.GET['tq']
         tqSlug = slugify(unicode(tq))
         new_tag = collection.add_tag(tq,tqSlug)
-            
+
         for obj in songs:
             obj.tags.add(new_tag)
         for obj in pictures:
@@ -121,7 +83,6 @@ def collection_view(request, songs, pictures, movies, artists, title,
             obj.tags.add(new_tag)
 
     # kodi playlist options
-    # TODO collections with more than one?
     message = ''
     try:
         if movies and kodi.playlist_requests(movies,request):
@@ -130,11 +91,10 @@ def collection_view(request, songs, pictures, movies, artists, title,
             message = u'success - songs sent'
         elif pictures and kodi.playlist_requests(pictures,request):
             message = u'success - pictures sent'
-        
+
     except kodi.MyException,ex:
         message = ex.message
         print('Caught %s' % ex.message)
-
 
     context = {
         'title':title,
@@ -153,7 +113,7 @@ def collection_view(request, songs, pictures, movies, artists, title,
         'message': message
         }
     return render(request, template_name, context)
-    
+
 
 def movies_bykind(kind):
     """
@@ -166,7 +126,7 @@ def movies_bykind(kind):
             desc = y
             break
     title = ('%s: %d' % (desc, count))
-    return movies, title    
+    return movies, title
 
 
 def view_list(request,alist,title,kind):
@@ -178,7 +138,7 @@ def view_list(request,alist,title,kind):
         'choices': choices.LIVE_CHOICES
         }
     return render(request,template_name,context)
-    
+
 
 def select_kind(request):
     """

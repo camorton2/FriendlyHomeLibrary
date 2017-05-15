@@ -52,10 +52,14 @@ class TagDetailView(View):
         """
         #print("TagDetailView GET")
         tag=get_object_or_404(models.Tag,slug__iexact=slug)
-        songs = tag.song_tags.all()
-        pictures = tag.picture_tags.all()
-        movies = tag.movie_tags.all()
-        return vu.collection_view(request,songs,pictures,movies,[],tag.name)
+        
+        vargs = {
+            'songs': tag.song_tags.all(),
+            'pictures':tag.picture_tags.all(),
+            'movies': tag.movie_tags.all(),
+            'title': tag.name
+            }
+        return vu.generic_collection_view(request,**vargs)
 
 
 class SongDetailView(View):
@@ -265,7 +269,7 @@ class CollectionMixins:
         return album,artist
 
 
-class CollectionDetailView(View, CollectionMixins):
+class CollectionDetailView(View):
     """
     view for a specific collection
     """
@@ -273,15 +277,19 @@ class CollectionDetailView(View, CollectionMixins):
         """
         collect the information to pass to the common collection view
         """
+        print('HEY HEY CollectionDetailView slug %s' % slug)
         target=get_object_or_404(models.Collection,slug__iexact=slug)
+        
+        vargs = {
+            'songs': target.songs.all(),
+            'pictures': target.pictures.all(),
+            'movies': target.movies.all(),
+            'artists': target.album_musicians.all(),
+            'title': target.title,
+            'update': target
+            }
 
-        songs = target.songs.all()
-        pictures = target.pictures.all()
-        movies = target.movies.all()
-        artists = target.album_musicians.all()
-
-        return vu.collection_view(request, songs, pictures, movies,
-            artists,target.title, False, choices.MOVIE, target)
+        return vu.generic_collection_view(request, **vargs)
 
 
 @require_authenticated_permission('FHLBuilder.collection_builder')
@@ -516,9 +524,12 @@ class ActorDetailView(View):
     def get(self,request,slug):
         """ display movie list using common collection view """
         actor=get_object_or_404(models.Actor,slug__iexact=slug)
-        movies = actor.movies.all()
-        title = ('Movies with actor %s' % actor.fullName)
-        return vu.collection_view(request, [], [], movies,[],title)
+        
+        vargs={
+            'movies': actor.movies.all(),
+            'title': ('Movies with actor %s' % actor.fullName)
+            }
+        return vu.generic_collection_view(request,**vargs)
 
 
 class DirectorDetailView(View):
@@ -526,9 +537,12 @@ class DirectorDetailView(View):
     def get(self,request,slug):
         """ display movie list using common collection view """
         director=get_object_or_404(models.Director,slug__iexact=slug)
-        movies = director.movies.all()
-        title = ('Movies directed by %s' % director.fullName)
-        return vu.collection_view(request, [], [], movies,[],title)
+        
+        vargs={
+            'movies': director.movies.all(),
+            'title': ('Movies directed by %s' % director.fullName)
+            }
+        return vu.generic_collection_view(request,**vargs)
 
 
 class MusicianDetailView(View):

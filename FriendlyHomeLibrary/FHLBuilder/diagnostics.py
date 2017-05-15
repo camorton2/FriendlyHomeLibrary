@@ -6,8 +6,9 @@ import string
 from FriendlyHomeLibrary import settings
 from FHLBuilder import utility
 from FHLBuilder import models
+from FHLBuilder import choices
 
-def play_with_links():
+def play_with_links_old():
     for current in models.Movie.objects.all():
         local_path = utility.object_path_local(current)
         file_exists = os.path.exists(local_path)
@@ -16,7 +17,11 @@ def play_with_links():
         if file_exists and os.path.islink(local_path):
             print('LINK %s' % local_path)
             
-
+def play_with_links():
+    for current in models.Movie.objects.filter(fileName__istartswith='rdm'):
+        print('fixing %s' % current.fileName)
+        current.fileKind = choices.BF_RANDOM
+        current.save()
 
 def verify_list(alist):
     blist = []

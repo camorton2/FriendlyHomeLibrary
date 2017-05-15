@@ -14,49 +14,45 @@
 
 <h2>{{title|title}}</h2>
 
-<section>
-<ul>
-{% if songlist %}
-    {% include "FHLBuilder/song_playlist.html" %}
-{% endif %}
-</ul>
-</section>
+{% if use_all %}
+   
+   <p>Work in progress</p>
 
-<ul>
-{% if movielist %}
-    {% include 'FHLBuilder/movie_playlist.html' %}
-{% endif %}
-</ul>
-</section>
-
-<section>
-<ul>
-{% if picture %}
-    {% include "FHLBuilder/picture_list.html" %}
-{% endif %}
-</ul>
-</section>
-
-{% if perms.FHLBuilder.collection_builder %}
-
-    {% if update %}
-        <br>
-        <a href="{{ update.get_update_url }}">Update Collection (setinfo or rescan)</a>
+{% else }
+    <section>
+    <ul>
+    {% if songlist %}
+        {% include "FHLBuilder/song_playlist.html" %}
     {% endif %}
+    {% if movielist %}
+        {% include 'FHLBuilder/movie_playlist.html' %}
+    {% endif %}
+    {% if picture %}
+        {% include "FHLBuilder/picture_list.html" %}
+    {% endif %}
+    </ul>
+    </section>
 
-{% else %}
+    {% if perms.FHLBuilder.collection_builder %}
 
-    {% if user.is_authenticated %}
-        <section>
-        <form method="get">
-        {% csrf_token %}
-        <fieldset>
-            <legend>Tags (for all members of collection)</legend>    
-            {% include "FHLBuilder/tag_select.html" %}
-        </fieldset>
-        </form>
-        </section>
+        {% if update %}
+            <br>
+            <a href="{{ update.get_update_url }}">Update Collection (setinfo or rescan)</a>
+        {% endif %}
 
+    {% else %}
+
+        {% if user.is_authenticated %}
+            <section>
+            <form method="get">
+            {% csrf_token %}
+            <fieldset>
+                <legend>Tags (for all members of collection)</legend>    
+                {% include "FHLBuilder/tag_select.html" %}
+            </fieldset>
+            </form>
+            </section>
+        {% endif %}
     {% endif %}
 {% endif %}
 
