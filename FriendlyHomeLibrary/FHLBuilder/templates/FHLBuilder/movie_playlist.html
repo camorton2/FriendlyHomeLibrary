@@ -18,7 +18,7 @@
 
 <ul id="filelist">
 {% for mv in movielist %}
-    <li><a href="{{ mv.get_absolute_url }}">{{mv.title|title}}</a></li>
+    <li><a href="{{ mv.get_absolute_url }}">{{mv.title|title}}</a> {{ mv.collection.filePath }}/{{mv.fileName}} </li>
 {% endfor %}
 </ul>
 

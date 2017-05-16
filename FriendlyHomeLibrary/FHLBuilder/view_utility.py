@@ -51,11 +51,15 @@ def generic_collection_view(request, **kwargs):
     update=kwargs.get('update',None)
     ob=kwargs.get('order_by','title')
 
+    allow_tag = True
+    
     if kind == choices.SONG and not len(songs):
+        allow_tag = False
         # all songs view, can there be a faster option?
         songs = models.Song.objects.all().order_by(ob)
         title = ('All Songs %d' % songs.count())
     if kind in choices.videos and not len(movies):
+        allow_tag = False
         # all movies view, can there be a faster option?
         olist,title =  movies_bykind(kind)
         movies = olist.order_by(ob)
@@ -89,14 +93,14 @@ def generic_collection_view(request, **kwargs):
 
     if use_all:
         # all pictures view
+        allow_tag = False
         picture = models.Picture.slide_objects.all().order_by(ob)[current_picture]
         title = ('All Pictures %d' % picture_count)
         filename = utility.object_path(picture)
     elif picture_count:
+        allow_tag = False
         picture = pictures[current_picture-1]
         filename = utility.object_path(picture)
-        #pictureList = utility.link_file_list(pictures)
-        #picture,filename = pictureList[current_picture-1]
         
     # tags all objects
     if 'tq' in request.GET and request.GET['tq']:
@@ -139,7 +143,8 @@ def generic_collection_view(request, **kwargs):
         'listkind':kind,
         'allowChoice': allowChoice,
         'artists': artists,
-        'message': message
+        'message': message,
+        'allow_tag': allow_tag
         }
     return render(request, template_name, context)
 

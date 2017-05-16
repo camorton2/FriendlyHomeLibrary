@@ -37,7 +37,7 @@
 
     {% else %}
 
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and allow_tag %}
             <section>
             <form method="get">
             {% csrf_token %}
