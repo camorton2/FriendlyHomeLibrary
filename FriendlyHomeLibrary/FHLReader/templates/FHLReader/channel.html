@@ -23,8 +23,9 @@
 </div>
 <p>{{message}}</p>
 <div>
-{% for file,path in rlist %}
-    <li><a href="{{ obj.get_absolute_url }}">{{path|title}}</a></li>
-{% endfor %}
+    {% for song,path in rlist %}
+        <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a> 
+            {{ song.collection.filePath }}/{{song.fileName}} </li>
+    {% endfor %}
 </div>
 {% endblock %}

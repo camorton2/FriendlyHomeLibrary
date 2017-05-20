@@ -71,7 +71,8 @@ def random_count(mylist,count):
     given QuerySet mylist, randomly select count
     objects and return them as a list
     """
-    mysize = mylist.count()
+    mysize = len(mylist)
+    
     if mysize <= count:
         return mylist
 
@@ -221,11 +222,16 @@ def sitcom_select(count):
 
 
 def mix(rest,mine,mixit):
-    """mix 2 lists """
+    """
+    mix 2 lists
+    mixit indicates how many from mine list, for example
+    if mixit is 10 every 10th song should come from 2nd list
+    """
     
     result = []
     count = 0
     mycount = len(mine)-1
+    
     for a in rest:
         count = count+1
         if count == mixit:
@@ -233,6 +239,7 @@ def mix(rest,mine,mixit):
                 result.append(mine[mycount])
                 count = 0;
                 mycount = mycount-1
+                
         result.append(a) 
     if mycount == 0:
         result.append(mine[0])
@@ -240,12 +247,14 @@ def mix(rest,mine,mixit):
 
 
 def radio_list(start,count,justme,me):
+    """
+    Get the list of random songs added prefered songs if requested
+    """
     if justme:
         g1 = Q(likes__username=me)
         g2 = Q(loves__username=me)
-        b1 = Q(dislikes__username=me)
-        set1 = start.exclude(b1)
-        set2 = start.filter(g1|g2)
+        
+        set2 = bmod.Song.objects.filter(g1|g2)
         
         if set2.count():
             # take about one tenth of the list from favourites
@@ -253,35 +262,76 @@ def radio_list(start,count,justme,me):
             mixit = 10 if count > 10 else 2
             portion = count//mixit
             mine = random_count(set2,portion)
-            rest = random_count(set1,count-portion)        
+            rest = random_count(start,count-portion)        
             return mix(rest,mine,mixit)
-        return random_count(set1,count)            
-    final = start.filter(dislikes=None)
-    return random_count(final,count)    
+    return random_count(start,count)    
 
 
-def radio_select(count,justme,me):
-    
+def radio_select(count,justme,me,recent):
+    """
+    Select a list of non-Christmas songs
+    """
     b1 = Q(tags__name__icontains='christmas')
     b2 = Q(title__icontains='christmas')
     b3 = Q(tags__name__icontains='seasonal')
-    start = bmod.Song.objects.exclude(b1|b2|b3)
+    
+    ick1 = Q(tags__name__icontains='bagpipe')
+    ick2 = Q(tags__name__icontains='fiddle')
+    ick3 = Q(tags__name__icontains='yuck')
+    
+    big = bmod.Song.objects.exclude(b1|b2|b3|ick1|ick2|ick3)
+    if justme:
+        yuck = Q(dislikes__username=me)
+        start = big.exclude(yuck)
+    else:
+        start = big.filter(dislikes=None)
+
+    if recent:
+        start = start.order_by('-date_added')[:count]
+    
     return radio_list(start,count,justme,me)
 
 
-def radio_select_christmas(count,justme,me):
-    
+def radio_select_christmas(count,justme,me,recent):
+    """
+    select an appropriate mix of Christmas songs
+    """
     b1 = Q(tags__name__icontains='christmas')
     b2 = Q(title__icontains='christmas')
     b3 = Q(tags__name__icontains='seasonal')
+
+    ick1 = Q(tags__name__icontains='bagpipe')
+    ick2 = Q(tags__name__icontains='fiddle')
+    ick3 = Q(tags__name__icontains='yuck')
+
+    # no Christmas part
+    big = bmod.Song.objects.exclude(b1|b2|b3|ick1|ick2|ick3)
+    if justme:
+        yuck = Q(dislikes__username=me)
+        start = big.exclude(yuck)
+    else:
+        start = big.filter(dislikes=None)
     
-    start = bmod.Song.objects.exclude(b1|b2|b3)
+    if recent:
+        start = start.order_by('-date_added')[:count]
+    
     therest = radio_list(start,count,justme,me)
 
-    start = bmod.Song.objects.filter(b1|b2|b3)
+    # Christmas
+    big = bmod.Song.objects.filter(b1|b2|b3).exclude(ick1|ick2|ick3)
+    if justme:
+        yuck = Q(dislikes__username=me)
+        start = big.exclude(yuck)
+    else:
+        start = big.filter(dislikes=None)
+    
+    if recent:
+        start = start.order_by('-date_added')[:count]
+    
     xmas = radio_list(start,count,justme,me)
     
     return christmas(count, therest, xmas)
+
 
 def christmas(count, rest, xmas):
     """

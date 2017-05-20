@@ -27,6 +27,11 @@ class RandomForm(forms.ModelForm):
         widget=forms.RadioSelect, label = 'Pick a kind',
         initial=choices.MOVIE)
     tag = forms.CharField(max_length=models.CHAR_LENGTH,required=False)
+    
+    atitle = forms.CharField(max_length=models.CHAR_LENGTH,
+        required=False,
+        label='title contains')
+    
     count = forms.IntegerField(initial=15, label='How many would you like')
 
     def clean_count(self):
@@ -93,6 +98,9 @@ class RadioForm(forms.ModelForm):
         initial=choices.ALL,label = 'who is listening')
     xmas = forms.BooleanField(label = 'include Christmas', 
         initial=False,required=False)
+    recent = forms.BooleanField(label = 'prefer recent', 
+        initial=True,required=False)
+        
     def clean_count(self):
         count=self.cleaned_data['count']
         if count > 0:

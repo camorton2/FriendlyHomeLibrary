@@ -256,12 +256,18 @@ class CollectionDetailView(View):
         collect the information to pass to the common collection view
         """
         target=get_object_or_404(models.Collection,slug__iexact=slug)
-        
+
+        artists = target.album_musicians.all()
+        if artists.count():
+            songs = target.songs.all().order_by('track')
+        else:
+            songs = target.songs.all()
+            
         vargs = {
-            'songs': target.songs.all(),
+            'songs': songs,
             'pictures': target.pictures.all(),
             'movies': target.movies.all(),
-            'artists': target.album_musicians.all(),
+            'artists': artists,
             'title': target.title,
             'update': target
             }

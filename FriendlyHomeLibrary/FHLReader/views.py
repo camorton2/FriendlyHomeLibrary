@@ -157,11 +157,12 @@ class RandomList(View):
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
             print(' valid form ')
-            count = bound_form.cleaned_data['count'];
-            kind = bound_form.cleaned_data['kind'];
-            tag = bound_form.cleaned_data['tag'];
+            count = bound_form.cleaned_data['count']
+            kind = bound_form.cleaned_data['kind']
+            tag = bound_form.cleaned_data['tag']
+            title = bound_form.cleaned_data['atitle']
             print( kind )
-            rlist = rq.random_select(count,'',tag,kind)
+            rlist = rq.random_select(count,title,tag,kind)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
         flist = slist = bu.link_file_list(rlist)
@@ -336,14 +337,14 @@ class RadioChannel(View):
             count = bound_form.cleaned_data['count']
             kind = bound_form.cleaned_data['kind']
             xmas = bound_form.cleaned_data['xmas']
-
+            recent = bound_form.cleaned_data['recent']
             justme = False
             if kind == choices.ME:
                 justme = True
             if xmas:
-                rlist = rq.radio_select_christmas(count,justme,me)
+                rlist = rq.radio_select_christmas(count,justme,me,recent)
             else:
-                rlist = rq.radio_select(count,justme,me)
+                rlist = rq.radio_select(count,justme,me,recent)
             cu.cache_list_bykind(rlist,choices.SONG,
                 'special_channel',mycache)
 
