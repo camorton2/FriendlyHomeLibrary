@@ -42,12 +42,11 @@ def recent_bykind(kind, count):
     """
     given a kind, find all objects in the database matching that kind
     """
-    print('query recent by kind %s' % kind)
     ob = '-date_added'
     if kind in choices.videos:
         return bmod.Movie.objects.filter(fileKind=kind).distinct().order_by(ob)[0:count]
     if kind == choices.SONG:
-        return bmod.Song.objects.all().distinct().order_by(ob)[0:count]
+        return bmod.Song.newest_objects.all().distinct()[0:count]
     if kind == choices.PICTURE:
         return bmod.Picture.slide_objects.all().distinct().order_by(ob)[0:count]
     return bmod.CommonFile.objects.none()
@@ -68,13 +67,13 @@ def kind_from_all(kind):
 
 def random_count(mylist,count):
     """
-    given QuerySet mylist, randomly select count
+    given a list (not a queryset) mylist, randomly select count
     objects and return them as a list
     """
     mysize = len(mylist)
     
     if mysize <= count:
-        return mylist
+        count = mysize
 
     rand_entities = random.sample( range(mysize), count)
     flist = []
@@ -105,12 +104,11 @@ def random_select(count, kind, tag):
     correspondong to any of the parameters passed in
     tag is optional, count and kind are not    
     """
-    mylist = bmod.CommonFile.objects.none()
     if len(tag):
         mylist = tag_select(kind,tag)
     else:
         mylist = kind_from_all(kind)
-    return random_count(mylist,count)
+    return mylist.order_by('?')[:count]
 
 
 def random_select(count, title, tag, kind):
@@ -119,7 +117,6 @@ def random_select(count, title, tag, kind):
     correspondong to any of the parameters passed in
     title and tag are optional, count and kind are not
     """
-    mylist = bmod.CommonFile.objects.none()
 
     # either tag or full list
     if len(tag):
@@ -132,7 +129,7 @@ def random_select(count, title, tag, kind):
     if len(title):
         mylist = mylist.filter(title__icontains=title)
 
-    return random_count(mylist,count)
+    return mylist.order_by('?')[:count]
 
 
 def tv_by_title(alist):
@@ -152,23 +149,18 @@ def saturday_select(count):
         'scoobydoo','tomandjerry','woodywoodpecker',
         'schoolhouse','thunderbirds','littlerascals',
         'threestooges']
-
-    return random_count(tv_by_title(titles),count)
+    return tv_by_title(titles).order_by('?')[:count]
 
 
 def silly_select(count):
     """
     Speciality query to select Saturday Morning Cartoons
     """
-    titles = ['animaniacs','threestooges'
-        'faulty','montypython','allinthefamily',
-        'getsmart','seinfeld',
-        'carolburnet','evildead','bennyhill',
-        'mrbean','muppetshow','snl','thinblue',
+    titles = ['threestooges','faulty','montypython',
+        'carolburnet','bennyhill','mrbean','muppetshow','snl',
         'dirkgently','hitchhiker','policesquad'
         ]
-
-    return random_count(tv_by_title(titles),count)
+    return tv_by_title(titles).order_by('?')[:count]
 
 
 def drama_select(count):
@@ -181,8 +173,7 @@ def drama_select(count):
         'greysanatomy','rescueme','stelsewhere',
         'weeds','treme','vinyl'
         ]
-
-    return random_count(tv_by_title(titles),count)
+    return tv_by_title(titles).order_by('?')[:count]
 
 
 def scifi_select(count):
@@ -193,8 +184,7 @@ def scifi_select(count):
         'xfiles','supergirl','terminator',
         'twilightzone','legend','stng'
         ]
-
-    return random_count(tv_by_title(titles),count)
+    return tv_by_title(titles).order_by('?')[:count]
 
 
 def scary_select(count):
@@ -205,7 +195,7 @@ def scary_select(count):
         'xfiles','ghoststories','haunting','twilightzone'
         ]
 
-    return random_count(tv_by_title(titles),count)
+    return tv_by_title(titles).order_by('?')[:count]
 
 
 def sitcom_select(count):
@@ -217,8 +207,7 @@ def sitcom_select(count):
     q2 = Q(title__icontains='flintstones')
     q3 = Q(title__icontains='southpark')
     
-    alist = bmod.Movie.tv_objects.filter(q1|q2|q3)
-    return random_count(alist,count)
+    return bmod.Movie.tv_objects.filter(q1|q2|q3).order_by('?')[:count]
 
 
 def mix(rest,mine,mixit):
@@ -246,94 +235,86 @@ def mix(rest,mine,mixit):
     return result
 
 
-def radio_list(start,count,justme,me):
+def radio_list(start,justme,me):
     """
     Get the list of random songs added prefered songs if requested
     """
     if justme:
         g1 = Q(likes__username=me)
         g2 = Q(loves__username=me)
-        
-        set2 = bmod.Song.objects.filter(g1|g2)
-        
+        set2 = bmod.Song.random_objects.filter(g1|g2)        
         if set2.count():
-            # take about one tenth of the list from favourites
-            # or half if length is less than 10
-            mixit = 10 if count > 10 else 2
-            portion = count//mixit
-            mine = random_count(set2,portion)
-            rest = random_count(start,count-portion)        
-            return mix(rest,mine,mixit)
-    return random_count(start,count)    
+            start = mix(start,set2,10)
+    return start
 
 
-def radio_select(count,justme,me,recent):
+def exclude_ick(big):    
+    ick1 = Q(tags__name__icontains='bagpipe')
+    ick2 = Q(tags__name__icontains='fiddle')
+    ick3 = Q(tags__name__icontains='yuck')
+    return big.exclude(ick1|ick2|ick3)
+
+
+def exclude_ick_xmas(big):
+    b1 = Q(tags__name__icontains='christmas')
+    b2 = Q(title__icontains='christmas')
+    b3 = Q(tags__name__icontains='seasonal')
+    
+    return exclude_ick(big.exclude(b1|b2|b3))
+
+
+def only_xmas(big):
+    b1 = Q(tags__name__icontains='christmas')
+    b2 = Q(title__icontains='christmas')
+    b3 = Q(tags__name__icontains='seasonal')
+    
+    return exclude_ick(big.filter(b1|b2|b3))
+
+
+def radio_select(justme,me,target):
     """
     Select a list of non-Christmas songs
     """
-    b1 = Q(tags__name__icontains='christmas')
-    b2 = Q(title__icontains='christmas')
-    b3 = Q(tags__name__icontains='seasonal')
     
-    ick1 = Q(tags__name__icontains='bagpipe')
-    ick2 = Q(tags__name__icontains='fiddle')
-    ick3 = Q(tags__name__icontains='yuck')
-    
-    big = bmod.Song.objects.exclude(b1|b2|b3|ick1|ick2|ick3)
+    big = exclude_ick_xmas(target)
     if justme:
         yuck = Q(dislikes__username=me)
         start = big.exclude(yuck)
     else:
         start = big.filter(dislikes=None)
-
-    if recent:
-        start = start.order_by('-date_added')[:count]
     
-    return radio_list(start,count,justme,me)
+    return radio_list(start,justme,me)
 
 
-def radio_select_christmas(count,justme,me,recent):
+def radio_select_christmas(justme,me,target):
     """
     select an appropriate mix of Christmas songs
     """
-    b1 = Q(tags__name__icontains='christmas')
-    b2 = Q(title__icontains='christmas')
-    b3 = Q(tags__name__icontains='seasonal')
-
-    ick1 = Q(tags__name__icontains='bagpipe')
-    ick2 = Q(tags__name__icontains='fiddle')
-    ick3 = Q(tags__name__icontains='yuck')
-
     # no Christmas part
-    big = bmod.Song.objects.exclude(b1|b2|b3|ick1|ick2|ick3)
+    big = exclude_ick_xmas(target)
     if justme:
         yuck = Q(dislikes__username=me)
         start = big.exclude(yuck)
     else:
         start = big.filter(dislikes=None)
-    
-    if recent:
-        start = start.order_by('-date_added')[:count]
-    
-    therest = radio_list(start,count,justme,me)
+        
+    therest = radio_list(start,justme,me)
 
     # Christmas
-    big = bmod.Song.objects.filter(b1|b2|b3).exclude(ick1|ick2|ick3)
+    big = only_xmas(target)
+    
     if justme:
         yuck = Q(dislikes__username=me)
         start = big.exclude(yuck)
     else:
         start = big.filter(dislikes=None)
+        
+    xmas = radio_list(start,justme,me)
     
-    if recent:
-        start = start.order_by('-date_added')[:count]
-    
-    xmas = radio_list(start,count,justme,me)
-    
-    return christmas(count, therest, xmas)
+    return christmas(therest, xmas)
 
 
-def christmas(count, rest, xmas):
+def christmas(rest, xmas):
     """
     Use today's date to mix Christmas songs
     with the rest of the songs
@@ -357,3 +338,20 @@ def christmas(count, rest, xmas):
             return mix(rest,xmas,5)
             
     return mix(rest,xmas,15)
+
+
+def artist_radio_select(artists,xmas):
+    """
+    passed a queryset containing artists and boolean for xmas
+    returns a list of all songs by artists in that queryset
+    without ick
+    """
+    query = reduce(operator.or_, (Q(musician=item) for item in artists))                           
+    
+    big = bmod.Song.objects.filter(query).order_by('?')
+        
+    if xmas:
+        return exclude_ick(big)
+    else:
+        return exclude_ick_xmas(big)
+    

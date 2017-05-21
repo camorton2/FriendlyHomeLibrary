@@ -98,7 +98,7 @@ class RadioForm(forms.ModelForm):
         initial=choices.ALL,label = 'who is listening')
     xmas = forms.BooleanField(label = 'include Christmas', 
         initial=False,required=False)
-    recent = forms.BooleanField(label = 'prefer recent', 
+    recent = forms.BooleanField(label = 'select only recent', 
         initial=True,required=False)
         
     def clean_count(self):
@@ -107,6 +107,23 @@ class RadioForm(forms.ModelForm):
             return count
         raise ValidationError(u'please select a count above 0')
 
+
+class MusicianRadioForm(forms.ModelForm):
+    """
+    Used for radio stations which pick random songs based on 
+    selected users
+    """
+    class Meta:
+        model=models.Musician
+        fields=[]
+     
+    xmas = forms.BooleanField(label = 'include Christmas', 
+        initial=False,required=False)
+        
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Musician.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick musician(s)')
 
 class MovieChannelForm(forms.ModelForm):
     """

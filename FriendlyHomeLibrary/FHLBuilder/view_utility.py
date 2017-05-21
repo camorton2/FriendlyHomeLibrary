@@ -49,14 +49,20 @@ def generic_collection_view(request, **kwargs):
     allowChoice = kwargs.get('allowChoice',False)
     kind=kwargs.get('kind',choices.UNKNOWN)
     update=kwargs.get('update',None)
-    ob=kwargs.get('order_by','title')
+    ob=kwargs.get('order_by',choices.NAME)
 
     allow_tag = True
     
     if kind == choices.SONG and not len(songs):
-        allow_tag = False
-        # all songs view, can there be a faster option?
-        songs = models.Song.objects.all().order_by(ob)
+        # no tagging everything please
+        allow_tag = False        
+        if ob == choices.NEWEST:
+            songs = models.Song.newest_objects.all()
+        elif ob == choices.OLDEST:
+            songs = models.Song.oldest_objects.all()
+        else:
+            songs = models.Song.objects.all()
+            
         title = ('All Songs %d' % songs.count())
     if kind in choices.videos and not len(movies):
         allow_tag = False

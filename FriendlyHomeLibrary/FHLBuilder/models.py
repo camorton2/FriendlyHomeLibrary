@@ -181,6 +181,25 @@ class Picture(CommonFile):
                      ("picture_reader", "picture reader"))
 
 
+class Newest_Song_Manager(models.Manager):
+    def get_queryset(self):
+        return super(Newest_Song_Manager,self). \
+            get_queryset(). \
+            order_by('-date_added','musician','track')
+
+
+class Oldest_Song_Manager(models.Manager):
+    def get_queryset(self):
+        return super(Oldest_Song_Manager,self). \
+            get_queryset(). \
+            order_by('date_added','musician','track')
+
+
+class Random_Song_Manager(models.Manager):
+    def get_queryset(self):
+        return super(Random_Song_Manager,self).get_queryset().order_by('?')
+
+
 class Song(CommonFile):
     collection = models.ForeignKey(Collection,
       models.SET_NULL,
@@ -191,6 +210,15 @@ class Song(CommonFile):
     likes = models.ManyToManyField(User, blank=True, related_name='song_likes')
     loves = models.ManyToManyField(User, blank=True, related_name='song_loves')
     dislikes = models.ManyToManyField(User, blank=True, related_name='song_dislikes')
+
+    # default manager
+    objects = models.Manager() 
+    # sets up order for recent
+    newest_objects = Newest_Song_Manager()
+    # sets up order for old
+    oldest_objects = Oldest_Song_Manager()    
+    # setups up order for random
+    random_objects = Random_Song_Manager()
 
     def get_absolute_url(self):
         return reverse('builder_song_detail',kwargs={'slug': self.slug})

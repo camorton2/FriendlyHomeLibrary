@@ -188,9 +188,6 @@ class RecentList(View):
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
 
-        if 'save-query' in request.POST:
-            return redirect(reverse('cached_list'))
-
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
@@ -198,7 +195,7 @@ class RecentList(View):
             kind = bound_form.cleaned_data['kind'];
             rlist = rq.recent_bykind(kind,count)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
-
+            return redirect(reverse('cached_list'))
         # display the list as files with the form
         flist = slist = bu.link_file_list(rlist)
         context = {'form':bound_form,'rlist':flist,
@@ -312,6 +309,9 @@ class MovieChannel(View):
 
 
 class RadioChannel(View):
+    """
+    Allow the user to create a radio channel based on form
+    """
     template_name = 'FHLReader/channel.html'
     form_class=forms.RadioForm
 
@@ -330,7 +330,6 @@ class RadioChannel(View):
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
 
-
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
@@ -338,15 +337,66 @@ class RadioChannel(View):
             kind = bound_form.cleaned_data['kind']
             xmas = bound_form.cleaned_data['xmas']
             recent = bound_form.cleaned_data['recent']
+
             justme = False
             if kind == choices.ME:
                 justme = True
-            if xmas:
-                rlist = rq.radio_select_christmas(count,justme,me,recent)
+
+            if recent:
+                target = Song.newest_objects.all()
             else:
-                rlist = rq.radio_select(count,justme,me,recent)
-            cu.cache_list_bykind(rlist,choices.SONG,
-                'special_channel',mycache)
+                target = Song.random_objects.all()
+                
+            if xmas:
+                alist = rq.radio_select_christmas(justme,me,target)
+            else:
+                alist = rq.radio_select(justme,me,target)
+            
+            rlist = alist[:count]
+            if recent:
+                rlist = rq.random_count(rlist,count)
+                
+            cu.cache_list_bykind(rlist,choices.SONG,'special_channel',
+                mycache)
+            if recent:
+                # recent case simply move to cached list
+                return redirect(reverse('cached_list'))
+
+        flist = slist = bu.link_file_list(rlist)
+        # display the list as files with the form
+        context = {'form':bound_form,'rlist':flist,
+            'title': 'Build a  Channel'}
+        return render(request,self.template_name,context)
+
+
+class MusicianRadioChannel(View):
+    """
+    Allow user to select a radio channel based on the form
+    in this case selecting by artist
+    """
+    template_name = 'FHLReader/channel.html'
+    form_class=forms.MusicianRadioForm
+
+    def get(self, request):
+        print("RandomList GET")
+        context = {'form':self.form_class(),
+            'title': 'Build a Musician Radio Channel'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+        print("RandomList POST")
+        me = User.objects.get(username=request.user)
+        mycache = cu.MyCache(me)
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            xmas = bound_form.cleaned_data['xmas']
+            artists = bound_form.cleaned_data['choices']
+            rlist = rq.artist_radio_select(artists,xmas)
+            cu.cache_list_bykind(rlist,choices.SONG,'special_channel',mycache)
+            return redirect(reverse('cached_list'))
 
         flist = slist = bu.link_file_list(rlist)
         # display the list as files with the form
