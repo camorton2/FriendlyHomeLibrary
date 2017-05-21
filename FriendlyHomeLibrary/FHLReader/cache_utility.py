@@ -34,6 +34,7 @@ class MyCache:
         """
         cache the results of a given query
         """
+
         cache.set(self.songs, songs)
         cache.set(self.pictures, pictures)
         cache.set(self.videos, videos)
@@ -54,6 +55,8 @@ class MyCache:
             pictures = cache.get(self.pictures)
         if self.channel in cache:
             channel = cache.get(self.channel)
+            
+        print('cache get songs %s videos %d pictures %d' % (len(songs),len(videos),len(pictures)))
         return songs,pictures,videos,channel
 
 
@@ -63,16 +66,6 @@ class MyCache:
         cache.set(self.videos,[])
         cache.set(self.pictures,[])
         cache.set(self.channel,[])
-
-
-    def clear_me(self):
-        """ clear the liked/loved queries from the cache """
-        cache.set(self.likedS,[])
-        cache.set(self.lovedS,[])
-        cache.set(self.likedV,[])
-        cache.set(self.lovedV,[])
-        cache.set(self.lovedP,[])
-        cache.set(self.likedP,[])
 
 
 def cache_list_bykind(rlist,kind,channel,mycache):

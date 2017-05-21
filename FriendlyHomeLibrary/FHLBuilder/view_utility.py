@@ -34,6 +34,8 @@ def generic_collection_view(request, **kwargs):
     """
     template_name = 'FHLBuilder/collection_detail.html'
     
+    
+    
     # respond to playlist
     if 'playlist' in request.GET:
         asPlayList = True
@@ -64,6 +66,7 @@ def generic_collection_view(request, **kwargs):
             songs = models.Song.objects.all()
             
         title = ('All Songs %d' % songs.count())
+        
     if kind in choices.videos and not len(movies):
         allow_tag = False
         # all movies view, can there be a faster option?

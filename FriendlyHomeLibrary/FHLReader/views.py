@@ -146,7 +146,7 @@ class CachedFileList(View):
         vargs = {
             'songs': songs,
             'pictures': pictures,
-            'videos': videos,
+            'movies': videos,
             'title': 'Saved Collection'
             }
         return vu.generic_collection_view(request,**vargs)
@@ -299,7 +299,6 @@ class MovieChannel(View):
     def post(self, request, akind):
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
-
 
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
