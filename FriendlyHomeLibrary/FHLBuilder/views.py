@@ -177,13 +177,7 @@ class FileList(View):
         """
         passes kind and ordering to the common collection view
         """
-        #if myorder == choices.NEWEST:
-        #    ob = '-date_added'
-        #elif myorder == choices.OLDEST:
-        #    ob = 'date_added'
-        #else:
-        #    ob = 'title'
-        vargs = {'kind': kind, 'order_by': myorder}
+        vargs = {'kind': kind, 'myorder':myorder}
         return vu.generic_collection_view(request, **vargs)
 
 

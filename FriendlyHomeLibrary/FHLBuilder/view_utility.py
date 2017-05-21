@@ -34,8 +34,6 @@ def generic_collection_view(request, **kwargs):
     """
     template_name = 'FHLBuilder/collection_detail.html'
     
-    
-    
     # respond to playlist
     if 'playlist' in request.GET:
         asPlayList = True
@@ -50,22 +48,30 @@ def generic_collection_view(request, **kwargs):
     title=kwargs.get('title','Collection View')
     allowChoice = kwargs.get('allowChoice',False)
     kind=kwargs.get('kind',choices.UNKNOWN)
-    update=kwargs.get('update',None)
-    ob=kwargs.get('order_by',choices.NAME)
+    update=kwargs.get('update',None)    
+    sorder=kwargs.get('myorder',choices.NAME)
 
     allow_tag = True
     
     if kind == choices.SONG and not len(songs):
         # no tagging everything please
         allow_tag = False        
-        if ob == choices.NEWEST:
+        if sorder == choices.NEWEST:
             songs = models.Song.newest_objects.all()
-        elif ob == choices.OLDEST:
+        elif sorder == choices.OLDEST:
             songs = models.Song.oldest_objects.all()
         else:
             songs = models.Song.objects.all()
             
         title = ('All Songs %d' % songs.count())
+
+    if sorder == choices.NEWEST:
+        ob = '-date_added'
+    elif sorder == choices.OLDEST:
+        ob = 'date_added'
+    else:
+        ob = 'title'
+
         
     if kind in choices.videos and not len(movies):
         allow_tag = False
