@@ -18,12 +18,12 @@ sorder = unicode(r'^files/(%s)/(%s)$' % (lv,ot))
 
 liked = 'liked'
 loved = 'loved'
+both = 'both'
+random = 'random'
 
 # used to select by video kind
 v = '|'.join(x for x in choices.videos)
 vchannel = unicode(r'^channel/(%s)$' % v)
-
-
 
 # used to select channel
 special = ['sitcom','saturday-morning','silly','scifi','drama','scary']

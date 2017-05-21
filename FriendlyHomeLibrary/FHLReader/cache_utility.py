@@ -28,12 +28,6 @@ class MyCache:
         self.videos = ('videos-%s' % self.me)
         self.pictures = ('pictures-%s' % self.me)
         self.channel = ('channel-%s' % self.me)
-        self.likedS = ('likedS-%s' % self.me)
-        self.lovedS = ('lovedS-%s' % self.me)
-        self.likedV = ('likedV-%s' % self.me)
-        self.lovedV = ('lovedV-%s' % self.me)
-        self.likedP = ('likedP-%s' % self.me)
-        self.lovedP = ('lovedP-%s' % self.me)
         
 
     def cache_query(self,songs,pictures,videos,channel):
@@ -45,66 +39,6 @@ class MyCache:
         cache.set(self.videos, videos)
         cache.set(self.channel, channel)
 
-
-    def cache_my_songs(self,liked, loved):
-        """ cache the results of the liked/loved songs query """
-        cache.set(self.likedS, liked)
-        cache.set(self.lovedS, loved)
-
-
-    def cache_my_videos(self,liked, loved):
-        """ cache the results of the liked/loved videos query """
-        cache.set(self.likedV, liked)
-        cache.set(self.lovedV, loved)
-
-
-    def cache_my_pictures(self,liked, loved):
-        """ cache the results of the liked/loved pictures query """
-        cache.set(self.likedP, liked)
-        cache.set(self.lovedP, loved)
-
-    def has_my_songs(self):
-        """ determine if the liked/loved songs query is in cache """
-        return self.likedS in cache or self.lovedS in cache
-
-    def has_my_videos(self):
-        """ determine if the liked/loved videos query is in the cache """
-        return self.likedV in cache or self.lovedV in cache
-
-    def has_my_pictures(self):
-        """ determine if the liked/loved pictures query is in the cache """
-        return self.likedP in cache or self.lovedP in cache
-
-
-    def get_my_songs(self):
-        """ return the cached result from the liked/loved songs query """
-        liked = []
-        loved = []
-        if self.likedS in cache:
-            liked = cache.get(self.likedS)
-        if self.lovedS in cache:
-            loved = cache.get(self.lovedS)
-        return liked,loved
-
-    def get_my_videos(self):
-        """ return the cached result of the liked/loved videos query """
-        liked = []
-        loved = []
-        if self.likedV in cache:
-            liked = cache.get(self.likedV)
-        if self.lovedV in cache:
-            loved = cache.get(self.lovedV)
-        return liked,loved
-
-    def get_my_pictures(self):
-        """ return the cached result of the liked/loved pictures query """
-        liked = []
-        loved = []
-        if self.likedP in cache:
-            liked = cache.get(self.likedP)
-        if self.lovedP in cache:
-            loved = cache.get(self.lovedP)
-        return liked,loved
 
     def get_query(self):
         """ get the cached result of the most recent query """
@@ -164,7 +98,6 @@ def cache_list_bykind(rlist,kind,channel,mycache):
         print('ERROR no kind selected %s' % kind)
 
     mycache.cache_query(songs,pictures,videos,channel)
-    #return redirect(reverse('cached_list'))
 
 
 def cache_list(rlist,channel,mycache):
@@ -187,5 +120,4 @@ def cache_list(rlist,channel,mycache):
             videos.append(obj)
 
     mycache.cache_query(songs,pictures,videos,channel)
-    #return redirect(reverse('cached_list'))
 

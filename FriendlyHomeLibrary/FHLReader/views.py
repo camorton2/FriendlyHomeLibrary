@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.models import User
-from django.views.generic import View
 from django.core.urlresolvers import reverse
 from django.core.cache import cache
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, render, redirect
+from django.views.generic import View
 
 from FHLBuilder import choices
 from FHLBuilder.models import Song, Movie, Picture
@@ -29,23 +30,9 @@ class UserDetail(View):
     def get(self, request):
         # print("UserDetail GET")
         me = User.objects.get(username=request.user)
-        mycache = cu.MyCache(me)
-
-        if 'my-songs' in request.GET:
-            likedS,lovedS = rq.find_objects(me, Song.objects.all())
-            mycache.cache_my_songs(likedS,lovedS)
-        if 'my-videos' in request.GET:
-            likedV,lovedV = rq.find_objects(me, Movie.objects.all())
-            mycache.cache_my_videos(likedV,lovedV)
-        if 'my-pictures' in request.GET:
-            likedP,lovedP = rq.find_objects(me, Picture.objects.all())
-            mycache.cache_my_pictures(likedP,lovedP)
 
         context = {
             'me': me,
-            'mySongs': mycache.has_my_songs(),
-            'myVideos': mycache.has_my_videos(),
-            'myPictures': mycache.has_my_pictures(),
             'choices': choices.VIDEO_CHOICES
             }
         return render(request,self.template_name,context)
@@ -57,18 +44,28 @@ class UserSongList(View):
     """
     def get(self,request,pref):
         me = User.objects.get(username=request.user)
-        mycache = cu.MyCache(me)
 
-        liked, loved = mycache.get_my_songs()
+        lk = Q(likes__username=me)
+        lv = Q(loves__username=me)
 
         if pref == 'liked':
-            songs = liked
+            songs = Song.objects.filter(lk)
+            title = 'Songs I like'
         elif pref == 'loved':
-            songs = loved
+            songs = Song.objects.filter(lv)
+            title = 'Songs I love'
+        elif pref == 'both':
+            songs = Song.objects.filter(lv|lk)
+            title = 'All my Songs'
+        elif pref == 'random':
+            songs = Song.objects.filter(lv|lk).order_by('?')
+            title = 'My Songs Radio'            
         else:
+            # should not happen
             songs = []
+            title = 'Error - no song preference'
             
-        vargs = {'songs':songs,'title':'My Songs'}
+        vargs = {'songs':songs,'title':title}
         return vu.generic_collection_view(request,**vargs)
 
 
@@ -78,17 +75,27 @@ class UserVideoList(View):
     """
     def get(self,request,pref):
         me = User.objects.get(username=request.user)
-        mycache = cu.MyCache(me)
-
-        liked, loved = mycache.get_my_videos()
+        lk = Q(likes__username=me)
+        lv = Q(loves__username=me)
 
         if pref == 'liked':
-            videos = liked
+            videos = Movie.objects.filter(lk)
+            title = 'Videos I like'
         elif pref == 'loved':
-            videos = loved
+            videos = Movie.objects.filter(lv)
+            title = 'Videos I love'
+        elif pref == 'both':
+            videos = Movie.objects.filter(lk|lv)
+            title = 'All My Videos'
+        elif pref == 'random':
+            videos = Movie.objects.filter(lk|lv).order_by('?')
+            title = 'All My Videos'            
         else:
+            # should not happen
             videos = []
-        vargs = {'movies': videos, 'title': 'My Videos'}
+            title = 'Error - no video preference'
+            
+        vargs = {'movies': videos, 'title': title}
         return vu.generic_collection_view(request,**vargs)
 
 
@@ -96,18 +103,28 @@ class UserPictureList(View):
     """ selection of liked loved pictures by user """
     def get(self,request, pref):
         me = User.objects.get(username=request.user)
-        mycache = cu.MyCache(me)
-
-        liked, loved = mycache.get_my_pictures()
+        lk = Q(likes__username=me)
+        lv = Q(loves__username=me)
 
         if pref == 'liked':
-            pictures = liked
+            pictures = Picture.objects.filter(lk)
+            title = 'Pictures I Like'
         elif pref == 'loved':
-            pictures = loved
+            pictures = Picture.objects.filter(lv)
+            title = 'Pictures I Love'
+        elif pref == 'both':
+            pictures = Picture.objects.filter(lk|lv)
+            title = 'All My Pictures'
+        elif pref == 'random':
+            pictures = Picture.objects.filter(lk|lv).order_by('?')
+            title = 'All My Pictures'
+            
         else:
-            pictures = []
+            # should not happen
+            videos = []
+            title = 'Error - no picture preference'
 
-        vargs = {'pictures':pictures,'title':'My Pictures'}
+        vargs = {'pictures':pictures,'title':title}
         return vu.generic_collection_view(request,**vargs)
 
 
@@ -294,10 +311,9 @@ class MovieChannel(View):
             count = bound_form.cleaned_data['count']
             title = bound_form.cleaned_data['atitle']
             tag = bound_form.cleaned_data['atag']
-            print('Valid form count %d title %s tag %s' % (count,title,tag))
-            rlist = rq.random_select(count,title,tag,kind)
-            for a in rlist:
-                print(a.title)
+            random = bound_form.cleaned_data['random']
+
+            rlist = rq.random_select(count,title,tag,kind,random)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
         flist = slist = bu.link_file_list(rlist)

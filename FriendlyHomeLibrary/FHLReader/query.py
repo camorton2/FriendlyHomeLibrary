@@ -98,7 +98,7 @@ def tag_select(kind,tag):
     return mylist
     
 
-def random_select(count, kind, tag):
+def random_select(count, kind, tag,random=True):
     """
     return QuerySet of count random objects
     correspondong to any of the parameters passed in
@@ -108,10 +108,12 @@ def random_select(count, kind, tag):
         mylist = tag_select(kind,tag)
     else:
         mylist = kind_from_all(kind)
-    return mylist.order_by('?')[:count]
+    if random:
+        return mylist.order_by('?')[:count]
+    return mylist[:count]
 
 
-def random_select(count, title, tag, kind):
+def random_select(count, title, tag, kind,random=True):
     """
     return QuerySet of count random objects
     correspondong to any of the parameters passed in
@@ -129,7 +131,9 @@ def random_select(count, title, tag, kind):
     if len(title):
         mylist = mylist.filter(title__icontains=title)
 
-    return mylist.order_by('?')[:count]
+    if random:
+        return mylist.order_by('?')[:count]
+    return mylist[:count]
 
 
 def tv_by_title(alist):

@@ -141,6 +141,10 @@ class MovieChannelForm(forms.ModelForm):
         label='with tag')
     count = forms.IntegerField(initial=15)
 
+    random = forms.BooleanField(label = 'random? ', 
+        initial=False,required=False)
+
+
     def clean_count(self):
         count=self.cleaned_data['count']
         if count > 0:
