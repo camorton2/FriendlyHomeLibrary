@@ -148,7 +148,8 @@ class Book(CommonFile):
 class Slide_Manager(models.Manager):
     def get_queryset(self):
         q1 = Q(fileName__iendswith=choices.picts[7])
-        return super(Slide_Manager,self).get_queryset().exclude(q1)
+        q2 = Q(collection__filePath__icontains='smut')
+        return super(Slide_Manager,self).get_queryset().exclude(q1 | q2)
 
 
 class Picture(CommonFile):

@@ -33,6 +33,7 @@ def generic_collection_view(request, **kwargs):
     so all collections view look the same and have the same options
     """
     template_name = 'FHLBuilder/collection_detail.html'
+    slideshow = False
     
     # respond to playlist
     if 'playlist' in request.GET:
@@ -94,6 +95,17 @@ def generic_collection_view(request, **kwargs):
         picture_count = models.Picture.slide_objects.all().count()
         use_all = True
 
+    if 'slideshow' in request.GET:
+        slideshow = True
+    if 'stopshow' in request.GET:
+        slideshow = False
+
+    if 'sNext' in request.GET and request.GET.get('sNext'):
+        current_picture = int(request.GET.get('sNext'))
+        slideshow = True
+        current_picture = current_picture+1
+        if current_picture > picture_count:
+            current_picture = 1
     if 'cNext' in request.GET and request.GET.get('cNext'):
         current_picture = int(request.GET.get('cNext'))
         current_picture = current_picture+1
@@ -159,7 +171,8 @@ def generic_collection_view(request, **kwargs):
         'allowChoice': allowChoice,
         'artists': artists,
         'message': message,
-        'allow_tag': allow_tag
+        'allow_tag': allow_tag,
+        'slideshow': slideshow
         }
     return render(request, template_name, context)
 

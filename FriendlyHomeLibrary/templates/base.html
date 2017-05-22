@@ -29,6 +29,7 @@ body{
 
 <body>
     <div>
+    {% if not slideshow %}
     <header>
         <h1>Friendly Home Library</h1>
         <div>{% include "nav.html" %}</div>
@@ -47,6 +48,7 @@ body{
             {% endif %}
         </div>
     </header>
+    {% endif %}
     <main>
         {% block content %}
         <br>Welcome to the Friendly Home Library
@@ -71,12 +73,13 @@ body{
     {% block tag %}
     {% endblock %}
     </div>
-
+    {% if not slideshow %}
     <footer>
     <br>    
     <div>{% include "nav.html" %}    </div>
     <p>&copy;2017 Catherine Morton</p>
     </footer>
+    {% endif %}
 </body>
 
 </html>

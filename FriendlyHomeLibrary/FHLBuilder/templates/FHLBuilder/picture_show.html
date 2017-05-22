@@ -1,0 +1,24 @@
+
+
+<form action="" method = "get">
+{% csrf_token %}
+<button id='nextone' type="submit" name='sNext' value={{index}} hidden>Next</button>
+<button id='Stop' type="submit" name='stopshow' value={{index}}>Stop</button>
+</form>
+<span style="float:left;">{{index}} / {{pictureCount}}</span>  
+<span style="float:right;">{{filename}}</span>
+
+{% load static %}
+    <img onload="myFunction()" src="{% static filename %}" style="width:100%">
+
+</section>
+
+<script>
+function myFunction(){
+    setInterval( function(){ clickIt(); },4000 )
+}    
+function clickIt(){ 
+    var nc = document.getElementById('nextone');
+    nc.click();
+    }
+</script>

@@ -6,6 +6,8 @@
 
 {% block content %}
 
+{% if not slideshow %}
+
 {% if allowChoice %}
 <div>
     {% include "FHLBuilder/collection_select.html" %}
@@ -13,6 +15,8 @@
 {% endif %}
 
 <h2>{{title|title}}</h2>
+
+{% endif %}
 
     <section>
     <ul>
@@ -23,7 +27,12 @@
         {% include 'FHLBuilder/movie_playlist.html' %}
     {% endif %}
     {% if picture %}
-        {% include "FHLBuilder/picture_list.html" %}
+        {% if slideshow %}
+            {% include "FHLBuilder/picture_show.html" %}
+        {% else %}
+            {% include "FHLBuilder/picture_list.html" %}
+        {% endif %}
+        
     {% endif %}
     </ul>
     </section>

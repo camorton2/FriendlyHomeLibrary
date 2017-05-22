@@ -107,16 +107,16 @@ class UserPictureList(View):
         lv = Q(loves__username=me)
 
         if pref == 'liked':
-            pictures = Picture.objects.filter(lk)
+            pictures = Picture.slide_objects.filter(lk)
             title = 'Pictures I Like'
         elif pref == 'loved':
-            pictures = Picture.objects.filter(lv)
+            pictures = Picture.slide_objects.filter(lv)
             title = 'Pictures I Love'
         elif pref == 'both':
-            pictures = Picture.objects.filter(lk|lv)
+            pictures = Picture.slide_objects.filter(lk|lv)
             title = 'All My Pictures'
         elif pref == 'random':
-            pictures = Picture.objects.filter(lk|lv).order_by('?')
+            pictures = Picture.slide_objects.filter(lk|lv).order_by('?')
             title = 'All My Pictures'
             
         else:
