@@ -24,7 +24,7 @@ from FHLBuilder import utility
 from FHLBuilder import query
 from FHLBuilder import diagnostics
 
-from FHLReader import kodi
+from FHLReader import kodi,chromecast
 
 
 def generic_collection_view(request, **kwargs):
@@ -99,6 +99,13 @@ def generic_collection_view(request, **kwargs):
         slideshow = True
     if 'stopshow' in request.GET:
         slideshow = False
+    if 'kslideshow' in request.GET:
+        try:
+            me = models.User.objects.get(username=request.user)
+            kodi.kodi_slideshow(pictures,me)
+        except kodi.MyException,ex:
+            message = ex.message
+            print('Caught %s' % ex.message)
 
     if 'sNext' in request.GET and request.GET.get('sNext'):
         current_picture = int(request.GET.get('sNext'))
@@ -117,6 +124,18 @@ def generic_collection_view(request, **kwargs):
             current_picture = picture_count
         else:
             current_picture=current_picture-1
+
+    ccasts = chromecast.find_chrome_casts()
+    if 'cast' in request.GET and request.GET.get('cast'):
+        cc = request.GET.get('cast')
+        print(cc)
+        chromecast.cast_slides(cc,pictures)
+    if 'CastAll' in request.GET:
+        print('CastAll')
+        chromecast.cast_slides_all(pictures)
+        #for cc in ccasts:
+        #    chromecast.cast_slides(ccasts.index(cc),pictures)
+
 
     if use_all:
         # all pictures view
@@ -156,6 +175,7 @@ def generic_collection_view(request, **kwargs):
         message = ex.message
         print('Caught %s' % ex.message)
 
+    #ccasts = chromecast.find_chrome_casts()
     context = {
         'title':title,
         'songlist':songList,
@@ -172,7 +192,8 @@ def generic_collection_view(request, **kwargs):
         'artists': artists,
         'message': message,
         'allow_tag': allow_tag,
-        'slideshow': slideshow
+        'slideshow': slideshow,
+        'ccasts':ccasts
         }
     return render(request, template_name, context)
 

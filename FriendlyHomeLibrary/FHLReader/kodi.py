@@ -222,6 +222,52 @@ def playlist_requests(playlist,request):
         return True
     return False
 
+
+def kodi_slideshow(playlist,me):
+    
+    try:
+        my_dir = (u'FHL/slides-%s' % me.username)
+        #my_path = os.path.join(settings.DRIVES[1], my_dir)
+        my_path = os.path.join('/home/catherine/sl', my_dir)
+        print('my_dir %s' % (my_path))
+    
+        if os.path.exists(my_path):
+            print('exists')
+            # remove the existing symlinks
+            for x in os.listdir(my_path):
+                if os.path.islink(x):
+                    print('link %s' % x)
+                else:
+                    print('real %s' % x)
+                #os.unlink(x)
+        else:
+            print('not there')
+            os.mkdir(my_path)
+            
+        for ob in playlist:
+            thefile = utils.object_path_samba(ob)
+            #print('the file %s' % ob.fileName)
+            fn = os.path.join(my_path,ob.fileName)
+            #print(fn)
+            lname = os.path.join(my_path,fn)
+            #print(lname)
+            #print('would link %s to %s' % (thefile,lname))
+            #os.symlink(thefile,lname)
+            
+
+    except Exception as ex:
+            # in this case I want to see what the exception is
+            # but there's no way to handle it, just give back message
+            message = unicode('Cannot create/link kodi directory %s' % (type(ex).__name__))
+            print (message)
+            raise MyException(message)
+
+    
+    #for current in playlist:
+        
+    #    file_exists = os.path.exists(local_path)
+    
+
 ############## vlc ################
 def stream_to_vlc(movie,request):
     """ instruct vlc to stream the movie using host/client from

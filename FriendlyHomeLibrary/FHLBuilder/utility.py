@@ -76,6 +76,25 @@ def object_path_with_static(obj):
     return unicode(thePath)
 
 
+def object_path_no_static(obj):
+    """ return the path from static/links django's static path """
+    drive=unicode(u'drive') + unicode(obj.collection.drive)
+    thePath = os.path.join(u'links/', drive)
+    thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName)
+    return unicode(thePath)
+
+
+def object_path_web(obj):
+    """ return the path from static/links django's static path """
+    #drive=using path+unicode(u'drive') + unicode(obj.collection.drive)
+    drive = get_drive_slink(obj.collection.drive)
+    thePath = os.path.join(u'links/', drive)
+    thePath = os.path.join(settings.HTTP_PREFIX,thePath)
+    thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName)
+    return unicode(thePath)
+
+
+
 def object_path_local(obj):
     """ real path to object using local samba link """
     thePath = get_drive(obj.collection.drive)

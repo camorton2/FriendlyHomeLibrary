@@ -10,18 +10,26 @@ from django.utils.text import slugify
 
 from FHLBuilder import models, choices, utility
 from FriendlyHomeLibrary import settings
-
+from FHLReader import chromecast
 
 class CommonFileForm(forms.ModelForm):
+
+
     class Meta:
         model=models.CommonFile
         fields='__all__'
+
+    cast = forms.ChoiceField(choices = chromecast.find_chrome_casts(),
+        widget=forms.RadioSelect, label = 'Send to ChromeCast',
+        required=False)                
     pref = forms.ChoiceField(choices = choices.PREF_CHOICES,
         widget=forms.RadioSelect,
         initial=choices.INDIFFERENT)
     tag = forms.CharField(max_length=models.CHAR_LENGTH,
         required=False,
         label='add tag')
+
+
 
 class SongForm(CommonFileForm):
     class Meta:

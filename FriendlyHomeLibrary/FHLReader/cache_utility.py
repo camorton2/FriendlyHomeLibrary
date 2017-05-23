@@ -17,7 +17,6 @@ from FHLBuilder import choices
 from FHLBuilder import utility
 from FHLBuilder import query
 
-
 class MyCache:
     """
     class holds all interaction with the cache
@@ -28,7 +27,7 @@ class MyCache:
         self.videos = ('videos-%s' % self.me)
         self.pictures = ('pictures-%s' % self.me)
         self.channel = ('channel-%s' % self.me)
-        
+
 
     def cache_query(self,songs,pictures,videos,channel):
         """

@@ -3,7 +3,6 @@
 {% if picture.year %}
     <li>Year: {{ picture.year }}</li>
 {% endif %}
-<li>Filename: {{filename}}</li>
 <li>Date added: {{picture.date_added}}</li>
 {% if picture.data1 %}
     <li> {{ picture.data1}}</li>
@@ -24,10 +23,26 @@
 {% csrf_token %}
 <button type="submit" name='cPrev' value={{index}}>Previous</button>
 <button type="submit" name='cNext' value={{index}}>Next</button>
-<button type="submit" name='slideshow' value={{index}}>SlideShow</button>
+<button type="submit" name='slideshow' value={{index}}>Slideshow</button>
+<button type="submit" name='kslideshow' value={{index}}>Kodi Slideshow - not active</button>
+<button type="submit" name='CastAll' value={{index}}>Cast All</button>
 </form>
 
-<div>{{index}} / {{pictureCount}}</div>
+<form action="" method = "get">
+<fieldset>
+    <legend>Chrome Cast</legend>    
+    {% csrf_token %}
+    {% for cc in ccasts %}
+        <input type="radio" name="cast" value="{{forloop.counter0}}">{{cc}} 
+    {% endfor %}
+    <p><input type="submit" value="Cast"></p>
+</fieldset>    
+</form>
+
+<span style="float:left;">{{index}} / {{pictureCount}}</span>  
+<span style="float:right;">{{filename}}</span>
+<div style="text-align: centre;">
 {% load static %}
-    <img src="{% static filename %}" style="width:100%">
+    <img src="{% static filename %}" style="max-width:70%" style="max-height:60%">
+</div>
 <br>

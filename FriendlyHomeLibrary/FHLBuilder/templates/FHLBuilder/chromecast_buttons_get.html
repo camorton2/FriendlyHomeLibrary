@@ -1,0 +1,21 @@
+
+<section>
+<form action="" method = "get">
+{% csrf_token %}
+<fieldset>
+    <legend>ChromeCast Options</legend>
+    
+    {% if ccasts %}
+        {% for cc in ccasts %}
+            <button type="submit" name="{{cc.device.friendly_name}}">{{cc.device.friendly_name}}</button>
+        {% endfor %}
+        <button type="submit" name="FindChromeCast">Refind Chrome Casts</button>
+    {% else %}
+        <button type="submit" name="FindChromeCast">Find Chrome Casts</button>
+    {% endif %}
+    
+</fieldset>
+</form>
+</section>
+
+<p>{{message}}</p>

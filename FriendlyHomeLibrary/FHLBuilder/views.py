@@ -24,8 +24,7 @@ from FHLBuilder import query
 from FHLBuilder import diagnostics
 import FHLBuilder.view_utility as vu
 
-from FHLReader import kodi
-
+from FHLReader import kodi, chromecast
 
 
 class HomePage(View):
@@ -389,7 +388,7 @@ class MovieDetailView(View):
 
         # real path required for playback
         playit = utility.object_path(movie)
-
+                
         myform = self.form_class(instance=movie,
             initial = query.my_preference_dict(movie,request.user))
         context = {'movie':movie,
@@ -416,6 +415,17 @@ class MovieDetailView(View):
                 new_movie = bound_form.save()
                 movie.title=new_movie.title
                 movie.year=new_movie.year
+
+                cast = bound_form.cleaned_data['cast']
+                if len(cast):
+                    print('cast %s' % cast)
+                    try:
+                        message = u'success'
+                        print('view calls cast_movie')
+                        chromecast.cast_movie(cast,movie)
+                    except kodi.MyException,ex:
+                        message = ex.message
+                        print('Caught %s' % ex.message)                        
 
                 # tag
                 tq = bound_form.cleaned_data['tag']
@@ -590,6 +600,17 @@ class PictureDetailView(View):
                 new_picture = bound_form.save()
                 picture.title=new_picture.title
                 picture.year=new_picture.year
+
+                cast = bound_form.cleaned_data['cast']
+                if len(cast):
+                    print('cast %s' % cast)
+                    try:
+                        message = u'success'
+                        print('view calls cast_picture')
+                        chromecast.cast_picture(cast,picture)
+                    except kodi.MyException,ex:
+                        message = ex.message
+                        print('Caught %s' % ex.message)                        
 
                 # tag
                 tq = bound_form.cleaned_data['tag']
