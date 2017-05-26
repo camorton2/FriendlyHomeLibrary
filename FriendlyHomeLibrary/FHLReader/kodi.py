@@ -18,6 +18,7 @@ from xbmcjson import XBMC
 class MyException(Exception):
     """ simple exception takes message """
     def __init__(self, msg):
+        Exception.__init__(self)
         print('CTOR MyException %s' % msg)
         self.message = msg
 
@@ -120,7 +121,7 @@ def playback_requests(ob,request):
         vlc plugin simple sets a flag to add the plugin to html
     """
     if 'StreamMovie' in request.POST:
-        stream_to_vlc(obj,request)
+        stream_to_vlc(ob,request)
     elif 'kodi_local' in request.POST:
         try:
             clientip = request.META['REMOTE_ADDR']
@@ -224,7 +225,7 @@ def playlist_requests(playlist,request):
 
 
 def kodi_slideshow(playlist,me):
-    
+    ''' not used '''    
     try:
         my_dir = (u'FHL/slides-%s' % me.username)
         #my_path = os.path.join(settings.DRIVES[1], my_dir)
@@ -244,23 +245,24 @@ def kodi_slideshow(playlist,me):
             print('not there')
             os.mkdir(my_path)
             
-        for ob in playlist:
-            thefile = utils.object_path_samba(ob)
+        #for ob in playlist:
+            #thefile = utils.object_path_samba(ob)
             #print('the file %s' % ob.fileName)
-            fn = os.path.join(my_path,ob.fileName)
+            #fn = os.path.join(my_path,ob.fileName)
             #print(fn)
-            lname = os.path.join(my_path,fn)
+            #lname = os.path.join(my_path,fn)
             #print(lname)
             #print('would link %s to %s' % (thefile,lname))
             #os.symlink(thefile,lname)
             
 
     except Exception as ex:
-            # in this case I want to see what the exception is
-            # but there's no way to handle it, just give back message
-            message = unicode('Cannot create/link kodi directory %s' % (type(ex).__name__))
-            print (message)
-            raise MyException(message)
+        # in this case I want to see what the exception is
+        # but there's no way to handle it, just give back message
+        message = unicode('Cannot create/link kodi directory %s' % (type(ex).__name__))
+        print (message)
+        print (playlist)
+        raise MyException(message)
 
     
     #for current in playlist:

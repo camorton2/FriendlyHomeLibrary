@@ -4,9 +4,7 @@ from __future__ import unicode_literals
 import os
 
 from django import forms
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.utils.text import slugify
 
 from FHLBuilder import models, choices, utility
 from FriendlyHomeLibrary import settings
@@ -137,7 +135,7 @@ class CollectionForm(forms.ModelForm):
             if len(last):
                 return utility.to_str(new_path)
             # remove final /
-            return to_str(new_path[:-1])
+            return unicode(new_path[:-1])
         utility.log("DOES NOT EXIST")
         raise ValidationError(u'Path does not exist '+new_path,code=u'invalid')
 

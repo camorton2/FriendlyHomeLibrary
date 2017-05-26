@@ -8,12 +8,8 @@ import random, operator
 from django.db.models import Q
 from django.utils.text import slugify
 
-
 from FHLBuilder import models as bmod
 from FHLBuilder import choices
-
-from FriendlyHomeLibrary import settings
-
 
 def find_objects(me, target):
     """
@@ -35,7 +31,7 @@ def kind_from_tag(kind, tagobj):
         return tagobj.song_tags.all()
     if kind == choices.PICTURE:
         return tagobj.picture_tags.all()
-    return CommonFile.objects.none()
+    return bmod.CommonFile.objects.none()
 
 
 def recent_bykind(kind, count):
@@ -75,7 +71,7 @@ def random_count(mylist,count):
     if mysize <= count:
         count = mysize
 
-    rand_entities = random.sample( range(mysize), count)
+    rand_entities = random.sample( xrange(mysize), count)
     flist = []
     for ind in rand_entities:
         flist.append(mylist[ind])
@@ -98,7 +94,7 @@ def tag_select(kind,tag):
     return mylist
     
 
-def random_select(count, kind, tag,random=True):
+def random_select_unused(count, kind, tag,o_random=True):
     """
     return QuerySet of count random objects
     correspondong to any of the parameters passed in
@@ -108,12 +104,12 @@ def random_select(count, kind, tag,random=True):
         mylist = tag_select(kind,tag)
     else:
         mylist = kind_from_all(kind)
-    if random:
+    if o_random:
         return mylist.order_by('?')[:count]
     return mylist[:count]
 
 
-def random_select(count, title, tag, kind,random=True):
+def random_select(count, title, tag, kind,o_random=True):
     """
     return QuerySet of count random objects
     correspondong to any of the parameters passed in
@@ -131,7 +127,7 @@ def random_select(count, title, tag, kind,random=True):
     if len(title):
         mylist = mylist.filter(title__icontains=title)
 
-    if random:
+    if o_random:
         return mylist.order_by('?')[:count]
     return mylist[:count]
 
@@ -230,7 +226,7 @@ def mix(rest,mine,mixit):
         if count == mixit:
             if mycount >= 0:
                 result.append(mine[mycount])
-                count = 0;
+                count = 0
                 mycount = mycount-1
                 
         result.append(a) 

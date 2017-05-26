@@ -1,16 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
-
 from django import forms
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.utils.text import slugify
 
-from FHLBuilder import models, choices, utility
-from FriendlyHomeLibrary import settings
-
+from FHLBuilder import models, choices
 
 class RandomForm(forms.ModelForm):
     """

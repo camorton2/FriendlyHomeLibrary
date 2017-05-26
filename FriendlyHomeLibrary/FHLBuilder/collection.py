@@ -3,12 +3,11 @@ from __future__ import unicode_literals
 
 import os
 from eyed3 import mp3,id3
-import enzyme
+#import enzyme
 import exifread
 import time
 
 from django.utils.text import slugify
-from django.db import models
 
 from FHLBuilder import utility,choices
 from FHLBuilder import models as bmodels
@@ -176,7 +175,7 @@ def fix_song(song,theFile,collection):
         else:
             collection.title = album
             
-    t1, t2 = tag.track_num
+    t1, _ = tag.track_num
     if t1 is None:
         t1=0
     song.track = t1
@@ -292,7 +291,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                             value = itags[tag]
                             picture.data1 = value
                             try:
-                                picture.year = int(astr[:4])
+                                picture.year = int(value[:4])
                             except ValueError:
                                 # if its not a number just
                                 # don't set the year

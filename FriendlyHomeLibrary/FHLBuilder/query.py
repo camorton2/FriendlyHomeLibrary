@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from FHLBuilder.models import Song, Movie, Collection
+from FHLBuilder.models import Collection
 from FHLBuilder import choices
 
 from FriendlyHomeLibrary import settings
@@ -34,14 +34,11 @@ def my_preference_dict(obj,me):
 
 
 def handle_pref(obj,pref,me):
-    love,like,dislike = my_preference(obj,me)
     if pref == choices.LIKE:
-        print('like')
         obj.likes.add(me)
         obj.loves.remove(me)
         obj.dislikes.remove(me)
     elif pref == choices.LOVE:
-        print('love')
         obj.loves.add(me)
         obj.likes.remove(me)
         obj.dislikes.remove(me)

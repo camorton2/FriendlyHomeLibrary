@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import os
-import string
 from FriendlyHomeLibrary import settings
 from FHLBuilder import utility
 from FHLBuilder import models

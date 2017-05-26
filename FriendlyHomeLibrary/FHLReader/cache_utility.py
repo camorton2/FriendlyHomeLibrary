@@ -1,21 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
-import string
-
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.shortcuts import redirect
 from django.core.cache import cache
 
-from FriendlyHomeLibrary import settings
-
-from FHLBuilder import models
-from FHLBuilder import collection
 from FHLBuilder import choices
-from FHLBuilder import utility
-from FHLBuilder import query
 
 class MyCache:
     """

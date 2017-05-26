@@ -1,28 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
-import string
-
-from django.contrib.auth.models import User
-from django.core.urlresolvers import reverse
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render
 from django.utils.text import slugify
-from django.template import RequestContext,loader
-from django.views.generic import View
-from django.core.cache import cache
-
-from FriendlyHomeLibrary import settings
-
-from FHLUser.decorators import require_authenticated_permission
 
 from FHLBuilder import models
 from FHLBuilder import collection
 from FHLBuilder import choices
 from FHLBuilder import utility
-from FHLBuilder import query
-from FHLBuilder import diagnostics
 
 from FHLReader import kodi,chromecast
 

@@ -2,9 +2,7 @@
 from __future__ import unicode_literals
 
 import os
-import string
 
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.text import slugify
@@ -18,7 +16,6 @@ from FHLUser.decorators import require_authenticated_permission
 
 from FHLBuilder import models, forms
 from FHLBuilder import collection
-from FHLBuilder import choices
 from FHLBuilder import utility
 from FHLBuilder import query
 from FHLBuilder import diagnostics
@@ -165,7 +162,7 @@ class AllFilesView(View):
             return redirect(reverse('builder_file_list', args=(kind,order)))
 
         context = {'form':self.form_class(),'title': 'List files'}
-        return render(request,self.template_name)
+        return render(request,self.template_name,context)
 
 
 class FileList(View):
@@ -184,7 +181,10 @@ class CollectionMixins:
     """
     utilities common to working with the creation of collections
     """
-    def handle_collection(self,path,drive,kind,tag):
+    def __init__(self):
+        pass
+        
+    def handle_collection(self,path,drive):
         """
         handle the creation or selection of the appropriate collection
         """
@@ -215,11 +215,11 @@ class CollectionMixins:
             message = ('ERROR path does not exist check drive setup %s' % scanPath)
             utility.log(message)
             raise kodi.MyException(message)
-        for root, dirs, files in os.walk(scanPath):
+        for root, _, files in os.walk(scanPath):
             try:
                 myroot = unicode(root[len(setPath):])
                 if knownCollection is None:
-                    album = self.handle_collection(myroot,drive,kind,tag)
+                    album = self.handle_collection(myroot,drive)
                 else:
                     album = knownCollection
                 for obj in files:
@@ -633,7 +633,8 @@ class PictureDetailView(View):
                 formContext = {
                     'picture':picture,
                     'playit':playit,
-                    'objectForm':bound_form}
+                    'objectForm':bound_form,
+                    'message':message}
                 return render(request,self.template_name, formContext)
 
         pictureContext = {

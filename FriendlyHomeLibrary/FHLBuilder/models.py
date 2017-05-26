@@ -5,11 +5,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Q
-from django.utils.encoding import python_2_unicode_compatible
-
 from django.utils.timezone import now
-
-from FriendlyHomeLibrary import settings
 
 from FHLBuilder import choices
 

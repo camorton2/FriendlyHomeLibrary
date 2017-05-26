@@ -19,7 +19,7 @@ Runs Exif tag extraction in command line.
 
 import sys
 import getopt
-import logging
+#import logging
 import timeit
 from exifread.tags import DEFAULT_STOP_TAG, FIELD_TYPES
 from exifread import process_file, exif_log, __version__

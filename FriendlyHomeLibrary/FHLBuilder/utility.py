@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 import os
-import string
 import datetime
 
 from FriendlyHomeLibrary import settings
@@ -12,8 +11,8 @@ from FriendlyHomeLibrary import settings
 
 def log(msg):
     try:
-        log = unicode('%s/log%s' % (settings.LOG_PATH,datetime.date.today()))
-        with open(log,'a+') as f:
+        my_log = unicode('%s/log%s' % (settings.LOG_PATH,datetime.date.today()))
+        with open(my_log,'a+') as f:
             f.write(msg)
             f.write('\n')
             f.close()
@@ -25,7 +24,7 @@ def log(msg):
         f.close()
 
 
-def to_str(unicode_or_string):
+def to_str_unused(unicode_or_string):
     try:
         if isinstance(unicode_or_string,unicode):
             value = unicode_or_string.encode('utf-8')
@@ -39,9 +38,9 @@ def to_str(unicode_or_string):
         
 
 def slugCompare(s1,s2):
-    remove = to_str('-_')
-    c1 = to_str(s1).translate(None,remove)
-    c2 = to_str(s2).translate(None,remove)
+    remove = u'-_'
+    c1 = unicode(s1).translate(None,remove)
+    c2 = unicode(s2).translate(None,remove)
     return c1==c2
 
 def get_drive(driveNo):

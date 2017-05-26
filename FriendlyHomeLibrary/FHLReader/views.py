@@ -3,16 +3,14 @@ from __future__ import unicode_literals
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.core.cache import cache
 from django.db.models import Q
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import render, redirect
 from django.views.generic import View
 
 from FHLBuilder import choices
 from FHLBuilder.models import Song, Movie, Picture
 
 import FHLBuilder.view_utility as vu
-import FHLBuilder.query as bq
 import FHLBuilder.utility as bu
 
 from FHLReader import forms
@@ -121,7 +119,7 @@ class UserPictureList(View):
             
         else:
             # should not happen
-            videos = []
+            pictures = []
             title = 'Error - no picture preference'
 
         vargs = {'pictures':pictures,'title':title}
@@ -141,7 +139,7 @@ class CachedFileList(View):
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
 
-        songs, pictures, videos,channel = mycache.get_query()
+        songs, pictures, videos,_ = mycache.get_query()
 
         vargs = {
             'songs': songs,
@@ -182,7 +180,7 @@ class RandomList(View):
             rlist = rq.random_select(count,title,tag,kind)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
-        flist = slist = bu.link_file_list(rlist)
+        flist = bu.link_file_list(rlist)
         # display the list as files with the form
         context = {'form':bound_form,'rlist':flist,
             'title': 'Build a Random Channel'
@@ -208,13 +206,13 @@ class RecentList(View):
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
-            count = bound_form.cleaned_data['count'];
-            kind = bound_form.cleaned_data['kind'];
+            count = bound_form.cleaned_data['count']
+            kind = bound_form.cleaned_data['kind']
             rlist = rq.recent_bykind(kind,count)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
             return redirect(reverse('cached_list'))
         # display the list as files with the form
-        flist = slist = bu.link_file_list(rlist)
+        flist = bu.link_file_list(rlist)
         context = {'form':bound_form,'rlist':flist,
             'title': 'Build a Recent Channel'}
         return render(request,self.template_name,context)
@@ -247,7 +245,7 @@ class SpecialChannel(View):
         bound_form = self.form_class(request.POST)
 
         if bound_form.is_valid():
-            count = bound_form.cleaned_data['count'];
+            count = bound_form.cleaned_data['count']
 
             if select == 'saturday-morning':
                 rlist = rq.saturday_select(count)
@@ -267,7 +265,7 @@ class SpecialChannel(View):
 
 
         # display the list as files with the form
-        flist = slist = bu.link_file_list(rlist)
+        flist = bu.link_file_list(rlist)
         title = ('Build a channel %s' % (select))
         context = {'form':bound_form,'rlist':flist,
             'title': title}
@@ -315,7 +313,7 @@ class MovieChannel(View):
             rlist = rq.random_select(count,title,tag,kind,random)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
-        flist = slist = bu.link_file_list(rlist)
+        flist = bu.link_file_list(rlist)
         title = ('Build a channel %s' % (akind))
         # display the list as files with the form
         context = {'form':bound_form,'rlist':flist,
@@ -377,7 +375,7 @@ class RadioChannel(View):
                 # recent case simply move to cached list
                 return redirect(reverse('cached_list'))
 
-        flist = slist = bu.link_file_list(rlist)
+        flist = bu.link_file_list(rlist)
         # display the list as files with the form
         context = {'form':bound_form,'rlist':flist,
             'title': 'Build a  Channel'}
@@ -413,7 +411,7 @@ class MusicianRadioChannel(View):
             cu.cache_list_bykind(rlist,choices.SONG,'special_channel',mycache)
             return redirect(reverse('cached_list'))
 
-        flist = slist = bu.link_file_list(rlist)
+        flist = bu.link_file_list(rlist)
         # display the list as files with the form
         context = {'form':bound_form,'rlist':flist,
             'title': 'Build a  Channel'}

@@ -5,7 +5,7 @@ import time
 import pychromecast
 from FHLReader.kodi import MyException
 import FHLBuilder.utility as utils
-from FriendlyHomeLibrary import settings
+#from FriendlyHomeLibrary import settings
 
 def find_chrome_casts():
     try:
@@ -13,7 +13,7 @@ def find_chrome_casts():
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just pass it back for display
-        message = unicode('Chromecast fail' % (host,type(ex).__name__))
+        message = unicode('Chromecast fail' % (type(ex).__name__))
         print (message)
         raise MyException(message)
 
