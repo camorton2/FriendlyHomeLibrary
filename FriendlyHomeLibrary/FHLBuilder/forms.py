@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 
 from FHLBuilder import models, choices, utility
 from FriendlyHomeLibrary import settings
-from FHLReader import chromecast
+#from FHLReader import chromecast
 
 class CommonFileForm(forms.ModelForm):
 
@@ -16,10 +16,10 @@ class CommonFileForm(forms.ModelForm):
     class Meta:
         model=models.CommonFile
         fields='__all__'
-
-    cast = forms.ChoiceField(choices = chromecast.find_chrome_casts(),
-        widget=forms.RadioSelect, label = 'Send to ChromeCast',
-        required=False)                
+# seems like a good idea, but finding the list is painfully show
+#    cast = forms.ChoiceField(choices = chromecast.find_chrome_casts(),
+#        widget=forms.RadioSelect, label = 'Send to ChromeCast',
+#        required=False)                
     pref = forms.ChoiceField(choices = choices.PREF_CHOICES,
         widget=forms.RadioSelect,
         initial=choices.INDIFFERENT)

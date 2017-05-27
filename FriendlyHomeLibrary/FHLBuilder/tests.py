@@ -5,7 +5,7 @@ from django.test import TestCase
 
 # Create your tests here.
 
-from FHLBuilder.models import Song, Collection, Musician, Movie, Picture
+from FHLBuilder.models import Song, Collection, Movie, Picture
 from FHLBuilder.views import CollectionMixins
 from FHLBuilder import choices
 

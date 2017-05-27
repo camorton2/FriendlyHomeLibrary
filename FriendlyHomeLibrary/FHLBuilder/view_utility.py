@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.shortcuts import render
+from django.core.urlresolvers import reverse
+from django.shortcuts import render,redirect
 from django.utils.text import slugify
+
 
 from FHLBuilder import models
 from FHLBuilder import collection
@@ -17,6 +19,11 @@ def generic_collection_view(request, **kwargs):
     Keep view details and playback requests in a single place
     so all collections view look the same and have the same options
     """
+
+    if 'stopshow' in request.GET:
+        slideshow = False
+        return redirect(reverse('user_page'))
+        
     template_name = 'FHLBuilder/collection_detail.html'
     slideshow = False
     
@@ -58,7 +65,6 @@ def generic_collection_view(request, **kwargs):
     else:
         ob = 'title'
 
-        
     if kind in choices.videos and not len(movies):
         allow_tag = False
         # all movies view, can there be a faster option?
@@ -80,47 +86,45 @@ def generic_collection_view(request, **kwargs):
         picture_count = models.Picture.slide_objects.all().count()
         use_all = True
 
+#    if 'kslideshow' in request.GET:
+#        print('kslideshow, not ready')
+#        try:
+#            me = models.User.objects.get(username=request.user)
+#            kodi.kodi_slideshow(pictures,me)
+#        except kodi.MyException,ex:
+#            message = ex.message
+#            print('Caught %s' % ex.message)
     if 'slideshow' in request.GET:
+        print('html slideshow')
         slideshow = True
-    if 'stopshow' in request.GET:
-        slideshow = False
-    if 'kslideshow' in request.GET:
-        try:
-            me = models.User.objects.get(username=request.user)
-            kodi.kodi_slideshow(pictures,me)
-        except kodi.MyException,ex:
-            message = ex.message
-            print('Caught %s' % ex.message)
-
-    if 'sNext' in request.GET and request.GET.get('sNext'):
+    elif 'sNext' in request.GET and request.GET.get('sNext'):
         current_picture = int(request.GET.get('sNext'))
         slideshow = True
         current_picture = current_picture+1
         if current_picture > picture_count:
             current_picture = 1
-    if 'cNext' in request.GET and request.GET.get('cNext'):
+    elif 'cNext' in request.GET and request.GET.get('cNext'):
         current_picture = int(request.GET.get('cNext'))
         current_picture = current_picture+1
         if current_picture > picture_count:
             current_picture = 1
-    if 'cPrev' in request.GET and request.GET.get('cPrev'):
+    elif 'cPrev' in request.GET and request.GET.get('cPrev'):
         current_picture = int(request.GET.get('cPrev'))
         if current_picture == 1:
             current_picture = picture_count
         else:
             current_picture=current_picture-1
 
-    ccasts = chromecast.find_chrome_casts()
+    ccasts = []
+    if picture_count and not slideshow:
+        # slow 
+        ccasts = chromecast.find_chrome_casts()
     if 'cast' in request.GET and request.GET.get('cast'):
         cc = request.GET.get('cast')
-        print(cc)
         chromecast.cast_slides(cc,pictures)
     if 'CastAll' in request.GET:
         print('CastAll')
         chromecast.cast_slides_all(pictures)
-        #for cc in ccasts:
-        #    chromecast.cast_slides(ccasts.index(cc),pictures)
-
 
     if use_all:
         # all pictures view
@@ -160,7 +164,6 @@ def generic_collection_view(request, **kwargs):
         message = ex.message
         print('Caught %s' % ex.message)
 
-    #ccasts = chromecast.find_chrome_casts()
     context = {
         'title':title,
         'songlist':songList,

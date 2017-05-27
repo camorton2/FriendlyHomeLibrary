@@ -24,7 +24,6 @@
 <button type="submit" name='cPrev' value={{index}}>Previous</button>
 <button type="submit" name='cNext' value={{index}}>Next</button>
 <button type="submit" name='slideshow' value={{index}}>Slideshow</button>
-<button type="submit" name='kslideshow' value={{index}}>Kodi Slideshow - not active</button>
 <button type="submit" name='CastAll' value={{index}}>Cast All</button>
 </form>
 
@@ -32,8 +31,8 @@
 <fieldset>
     <legend>Chrome Cast</legend>    
     {% csrf_token %}
-    {% for cc in ccasts %}
-        <input type="radio" name="cast" value="{{forloop.counter0}}">{{cc}} 
+    {% for a,b in ccasts %}
+        <input type="radio" name="cast" value="{{forloop.counter0}}">{{b}} 
     {% endfor %}
     <p><input type="submit" value="Cast"></p>
 </fieldset>    
