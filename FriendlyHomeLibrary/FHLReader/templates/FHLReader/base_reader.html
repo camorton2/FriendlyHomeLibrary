@@ -31,7 +31,7 @@ body{
 <body>
     <div>
     <header>
-        <h1>Friendly Home Library</h1>
+        <h1>Friendly Home Library {{settings.TEST_ONLY_WARNING}}</h1>
         <div>{% include "nav.html" %}</div>
         <div>
             {% if user.is_authenticated %}

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import time
+
 from django.core.urlresolvers import reverse
 from django.shortcuts import render,redirect
 from django.utils.text import slugify
@@ -12,7 +14,20 @@ from FHLBuilder import choices
 from FHLBuilder import utility
 
 from FHLReader import kodi,chromecast
+from FHLReader import utility as rutils
 
+def run_slideshow(pictures):
+    #length = len(pictures)
+    #count = 0
+    #for p in pictures:
+    #    count = count+1
+    #    print('redirect %s' % (p.slug))
+    #    gohere = reverse('builder_picture_detail', 
+    #        kwargs = { 'slug':p.slug })
+    #    print('gohere %s' % gohere)
+    #    redirect(gohere)
+    #    time.sleep(30)
+    pass
 
 def generic_collection_view(request, **kwargs):
     """
@@ -85,25 +100,19 @@ def generic_collection_view(request, **kwargs):
         # all pictures view
         picture_count = models.Picture.slide_objects.all().count()
         use_all = True
+    me = models.User.objects.get(username=request.user)
 
-#    if 'kslideshow' in request.GET:
-#        print('kslideshow, not ready')
-#        try:
-#            me = models.User.objects.get(username=request.user)
-#            kodi.kodi_slideshow(pictures,me)
-#        except kodi.MyException,ex:
-#            message = ex.message
-#            print('Caught %s' % ex.message)
     if 'slideshow' in request.GET:
-        print('html slideshow')
         slideshow = True
+#        print('html slideshow')
+#        run_slideshow(pictures)
     elif 'sNext' in request.GET and request.GET.get('sNext'):
         current_picture = int(request.GET.get('sNext'))
         slideshow = True
         current_picture = current_picture+1
         if current_picture > picture_count:
             current_picture = 1
-    elif 'cNext' in request.GET and request.GET.get('cNext'):
+    if 'cNext' in request.GET and request.GET.get('cNext'):
         current_picture = int(request.GET.get('cNext'))
         current_picture = current_picture+1
         if current_picture > picture_count:
@@ -116,15 +125,16 @@ def generic_collection_view(request, **kwargs):
             current_picture=current_picture-1
 
     ccasts = []
+    
     if picture_count and not slideshow:
         # slow 
         ccasts = chromecast.find_chrome_casts()
     if 'cast' in request.GET and request.GET.get('cast'):
         cc = request.GET.get('cast')
-        chromecast.cast_slides(cc,pictures)
+        chromecast.cast_slides(cc,pictures,me)
     if 'CastAll' in request.GET:
         print('CastAll')
-        chromecast.cast_slides_all(pictures)
+        chromecast.cast_slides_all(pictures,me)
 
     if use_all:
         # all pictures view
@@ -136,7 +146,7 @@ def generic_collection_view(request, **kwargs):
         allow_tag = False
         picture = pictures[current_picture-1]
         filename = utility.object_path(picture)
-        
+    
     # tags all objects
     if 'tq' in request.GET and request.GET['tq']:
         tq = request.GET['tq']
@@ -160,7 +170,7 @@ def generic_collection_view(request, **kwargs):
         elif pictures and kodi.playlist_requests(pictures,request):
             message = u'success - pictures sent'
 
-    except kodi.MyException,ex:
+    except rutils.MyException,ex:
         message = ex.message
         print('Caught %s' % ex.message)
 
@@ -181,7 +191,8 @@ def generic_collection_view(request, **kwargs):
         'message': message,
         'allow_tag': allow_tag,
         'slideshow': slideshow,
-        'ccasts':ccasts
+        'ccasts':ccasts,
+        'use_all':use_all
         }
     return render(request, template_name, context)
 

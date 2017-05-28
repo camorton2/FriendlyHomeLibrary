@@ -9,7 +9,6 @@ from django.utils.text import slugify
 
 from django.views.generic import View
 
-
 from FriendlyHomeLibrary import settings
 
 from FHLUser.decorators import require_authenticated_permission
@@ -22,6 +21,7 @@ from FHLBuilder import diagnostics
 import FHLBuilder.view_utility as vu
 
 from FHLReader import kodi, chromecast
+from FHLReader import utility as rutils
 
 
 class HomePage(View):
@@ -214,7 +214,7 @@ class CollectionMixins:
         if not goodPath:
             message = ('ERROR path does not exist check drive setup %s' % scanPath)
             utility.log(message)
-            raise kodi.MyException(message)
+            raise rutils.MyException(message)
         for root, _, files in os.walk(scanPath):
             try:
                 myroot = unicode(root[len(setPath):])
@@ -353,7 +353,7 @@ class CollectionUpdate(View,CollectionMixins):
                     bound_form.cleaned_data['tag'],
                     target
                     )
-            except kodi.MyException,ex:
+            except rutils.MyException,ex:
                 message = ex.message
                 context = {'form':bound_form,'message':message}
                 return render(request,self.template_name,context)
@@ -423,7 +423,7 @@ class MovieDetailView(View):
                         message = u'success'
                         print('view calls cast_movie')
                         chromecast.cast_movie(cast,movie)
-                    except kodi.MyException,ex:
+                    except rutils.MyException,ex:
                         message = ex.message
                         print('Caught %s' % ex.message)                        
 
@@ -471,7 +471,7 @@ class MovieDetailView(View):
         try:
             message = u'success'
             vlcPlugin = kodi.playback_requests(movie,request)
-        except kodi.MyException,ex:
+        except rutils.MyException,ex:
             message = ex.message
             print('Caught %s' % ex.message)
             vlcPlugin=False
@@ -553,7 +553,7 @@ class MusicianDetailView(View):
         try:
             if songs and kodi.playlist_requests(songs,request):
                 message = u'success - songs sent'
-        except kodi.MyException,ex:
+        except rutils.MyException,ex:
             message = ex.message
             print('Caught %s' % ex.message)
 
@@ -563,6 +563,21 @@ class MusicianDetailView(View):
             'asPlayList':asPlayList,
             'message':message}
         return render(request,self.template_name,context)
+
+
+class PictureShowView(View):
+    """ slide show attempt details of a picture """
+    template_name = 'FHLBuilder/picture_show.html'
+    def get(self,request,
+        slug='picturesbackup-scans-mortonfamily-provincialparksarchie1-pict',
+        index='1',
+        pictureCount='1'):
+        picture=get_object_or_404(models.Picture,slug__iexact=slug)
+        filename = utility.object_path(picture)
+        context = {
+            'index':index,'pictureCount':pictureCount,
+            'filename':filename}
+        return render(request, self.template_name,context)
 
 
 class PictureDetailView(View):
@@ -608,7 +623,7 @@ class PictureDetailView(View):
                         message = u'success'
                         print('view calls cast_picture')
                         chromecast.cast_picture(cast,picture)
-                    except kodi.MyException,ex:
+                    except rutils.MyException,ex:
                         message = ex.message
                         print('Caught %s' % ex.message)                        
 

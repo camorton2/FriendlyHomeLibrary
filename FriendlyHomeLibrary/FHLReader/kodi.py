@@ -4,7 +4,9 @@ from __future__ import unicode_literals
 import os
 import time
 
+from FHLBuilder import models,choices
 import FHLBuilder.utility as utils
+import FHLReader.utility as rutils
 
 from FriendlyHomeLibrary import settings
 
@@ -15,12 +17,6 @@ from xbmcjson import XBMC
 # https://github.com/jcsaaddupuy/xbmc-client/blob/master/src/xbmc_client/xbmc_client.py
 ##
 
-class MyException(Exception):
-    """ simple exception takes message """
-    def __init__(self, msg):
-        Exception.__init__(self)
-        print('CTOR MyException %s' % msg)
-        self.message = msg
 
 
 def get_json_rpc(host):
@@ -56,11 +52,11 @@ def look_at_res(msg, res):
         elif "error" in res and "message" in res["error"]:
             message = (res["error"]["message"])
             amsg = ('msg %s %s' % (msg,message))
-            raise MyException(amsg)
+            raise rutils.MyException(amsg)
         else:
             message = ("Kodi Unknown error : '%s'" % (res))
             amsg = ('msg %s %s' % (msg,message))
-            raise MyException(amsg)
+            raise rutils.MyException(amsg)
         if success:
             print("Success.")
     return success
@@ -86,7 +82,7 @@ def to_kodi(thefile,host,xbmc_i):
         look_at_res('Player.Open', result)
     else:
         message = unicode('Error unable to ping kodi at host %s' % host)
-        raise MyException(message)
+        raise rutils.MyException(message)
 
 
 def send_to_kodi(ob,ip,local=False):
@@ -109,7 +105,7 @@ def send_to_kodi(ob,ip,local=False):
         # but there's no way to handle it, just pass it back for display
         message = unicode('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
         print (message)
-        raise MyException(message)
+        raise rutils.MyException(message)
 
 
 def playback_requests(ob,request):
@@ -128,7 +124,7 @@ def playback_requests(ob,request):
         except KeyError:
             message = unicode('ERROR could not get client ip from request')
             print(message)
-            raise MyException(message)
+            raise rutils.MyException(message)
         time.sleep(5)
         send_to_kodi(ob,clientip)
     elif 'kodi_lf' in request.POST:
@@ -177,25 +173,28 @@ def play_kodi(playlist,host,xbmc_i):
         look_at_res('playlist open', result)
     else:
         message = unicode('Error unable to ping kodi at host %s' % host)
-        raise MyException(message)
+        raise rutils.MyException(message)
 
 
-def play_to_kodi(playlist,ip):
+def play_to_kodi(playlist,ip,me):
     """ send the playlist to kodi for playback
         where ob is the object, ip is the ip address
         of kodi where playback is requested
     """
     host = ip + settings.KODI_PORT
-
+    print('play_to_kodi host %s' % host)
     try:
         xbmc_i = init_xbmc(host)
-        play_kodi(playlist,host,xbmc_i)
+        if playlist[0] and playlist[0].fileKind == choices.PICTURE:
+            slideshow_kodi(playlist,host,xbmc_i,me)
+        else:
+            play_kodi(playlist,host,xbmc_i)
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just give back message
         message = unicode('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
         print (message)
-        raise MyException(message)
+        raise rutils.MyException(message)
 
 
 def playlist_requests(playlist,request):
@@ -204,6 +203,7 @@ def playlist_requests(playlist,request):
         caller should catch MyException which is used for all
         errors in kodi playback
     """
+    me = models.User.objects.get(username=request.user)
     print('playlist_request')
     if 'kodi_local' in request.GET:
         try:
@@ -211,50 +211,43 @@ def playlist_requests(playlist,request):
         except KeyError:
             message = unicode('ERROR could not get client ip from request')
             print(message)
-            raise MyException(message)
+            raise rutils.MyException(message)
         time.sleep(5)
-        play_to_kodi(playlist,clientip)
+        play_to_kodi(playlist,clientip,me)
         return True
     elif 'kodi_lf' in request.GET:
-        play_to_kodi(playlist,settings.HOST_LF)
+        play_to_kodi(playlist,settings.HOST_LF,me)
         return True
     elif 'kodi_bf' in request.GET:
-        play_to_kodi(playlist,settings.HOST_BF)
+        time.sleep(5)
+        play_to_kodi(playlist,settings.HOST_BF,me)
         return True
     return False
 
 
-def kodi_slideshow(playlist,me):
-    ''' not used '''    
-    try:
-        my_dir = (u'FHL/slides-%s' % me.username)
-        #my_path = os.path.join(settings.DRIVES[1], my_dir)
-        my_path = os.path.join('/home/catherine/sl', my_dir)
-        print('my_dir %s' % (my_path))
+def slideshow_kodi(playlist,host,xbmc_i, me):
+    """ in progress """    
     
-        if os.path.exists(my_path):
-            print('exists')
-            # remove the existing symlinks
-            for x in os.listdir(my_path):
-                if os.path.islink(x):
-                    print('link %s' % x)
-                else:
-                    print('real %s' % x)
-                #os.unlink(x)
+    print("picturelist to kodi")
+    try:
+        file_path,_,smb_path = rutils.my_private_directory(me)
+        # put all the pictures in the directory
+        for picture in playlist:
+            rutils.annotate(picture,me)
+
+        ping_result = xbmc_i.JSONRPC.Ping()
+        look_at_res('ping',ping_result)
+        if ping_result:
+            print('after ping with file_path %s' % smb_path)
+            path_context = { 'directory': smb_path}
+            open_context = {'item':path_context}
+
+            # play it
+            result = xbmc_i.Player.Open(open_context)
+            look_at_res('playlist open', result)
         else:
-            print('not there')
-            os.mkdir(my_path)
-            
-        #for ob in playlist:
-            #thefile = utils.object_path_samba(ob)
-            #print('the file %s' % ob.fileName)
-            #fn = os.path.join(my_path,ob.fileName)
-            #print(fn)
-            #lname = os.path.join(my_path,fn)
-            #print(lname)
-            #print('would link %s to %s' % (thefile,lname))
-            #os.symlink(thefile,lname)
-            
+            message = unicode('Error unable to ping kodi at host %s' % host)
+            raise rutils.MyException(message)
 
     except Exception as ex:
         # in this case I want to see what the exception is
@@ -262,12 +255,8 @@ def kodi_slideshow(playlist,me):
         message = unicode('Cannot create/link kodi directory %s' % (type(ex).__name__))
         print (message)
         print (playlist)
-        raise MyException(message)
+        raise rutils.MyException(message)
 
-    
-    #for current in playlist:
-        
-    #    file_exists = os.path.exists(local_path)
     
 
 ############## vlc ################

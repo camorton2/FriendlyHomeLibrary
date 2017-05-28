@@ -18,30 +18,41 @@
 {% endif %}
 <br>
 </section>
+{% if use_all %}
 
-<form action="" method = "get">
-{% csrf_token %}
-<button type="submit" name='cPrev' value={{index}}>Previous</button>
-<button type="submit" name='cNext' value={{index}}>Next</button>
-<button type="submit" name='slideshow' value={{index}}>Slideshow</button>
-<button type="submit" name='CastAll' value={{index}}>Cast All</button>
-</form>
-
-<form action="" method = "get">
-<fieldset>
-    <legend>Chrome Cast</legend>    
+    <form action="" method = "get">
     {% csrf_token %}
-    {% for a,b in ccasts %}
-        <input type="radio" name="cast" value="{{forloop.counter0}}">{{b}} 
-    {% endfor %}
-    <p><input type="submit" value="Cast"></p>
-</fieldset>    
+    <button type="submit" name='cPrev' value={{index}}>Previous</button>
+    <button type="submit" name='cNext' value={{index}}>Next</button>
+    <button type="submit" name='slideshow' value={{index}}>Slideshow</button>
+    </form>
+
+{% else %}
+   {% include "FHLBuilder/kodi_buttons_get.html" %}
+
+    <fieldset>
+    <legend>PlayBack</legend>    
+
+    <form action="" method = "get">
+    {% csrf_token %}
+        <button type="submit" name='slideshow' value={{index}}>Slideshow</button>
+        <button type="submit" name='CastAll' value={{index}}>Cast All</button>
+        {% for a,b in ccasts %}            
+            <button type="submit" name='cast' value="{{forloop.counter0}}">Cast {{b}}</button>
+        {% endfor %}
+        <button type="submit" name='cPrev' value={{index}}>Previous</button>
+        <button type="submit" name='cNext' value={{index}}>Next</button>
+
+    </fieldset>    
 </form>
+
+{% endif %}
 
 <span style="float:left;">{{index}} / {{pictureCount}}</span>  
-<span style="float:right;">{{filename}}</span>
-<div style="text-align: centre;">
+<span style="float:right;">{{picture.friendly_name}}</span>
+<br>
+<div>
 {% load static %}
-    <img src="{% static filename %}" style="max-width:70%" style="max-height:60%">
+    <img src="{% static filename %}" style="width:100%" >
 </div>
 <br>

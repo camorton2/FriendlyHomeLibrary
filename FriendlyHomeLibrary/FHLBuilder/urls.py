@@ -57,6 +57,10 @@ urlpatterns = [
       bv.PictureDetailView.as_view(),
       name='builder_picture_detail'),
 
+    url(r'^picture-show/(?P<slug>[\w\-]+)/((?P<index>[0-9]+))/(?P<pictureCount>[0-9]+)/$',
+      bv.PictureShowView.as_view(),
+      name='builder_picture_show'),
+
 # Collections
     url(r'^collection/create/$',
       login_required(bv.CollectionFormView.as_view()),
