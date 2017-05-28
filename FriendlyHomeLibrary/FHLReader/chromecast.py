@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals, print_function
 
-import time
+import time, os
 import pychromecast
 
 import FHLBuilder.utility as utils
@@ -77,6 +77,8 @@ def cast_slides(devs,pictures,me):
             print('HERE PATH: %s' % (thefile))
             mc.play_media(thefile,'imag/jpg')
             time.sleep(20)
+            # TODO why doesn't this work?
+            #os.unlink(thefile)
             #cast.disconnect()
             #mc.play()
                 
@@ -109,6 +111,8 @@ def cast_slides_all(pictures,me):
             for mc in mcs:
                 mc.play_media(thefile,'imag/jpg', title=picture.title)
             time.sleep(20)
+            # TODO why doesn't this work?
+            #os.unlink(thefile)
             #cast.disconnect()
             #mc.play()
                 
