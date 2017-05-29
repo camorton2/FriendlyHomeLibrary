@@ -1,0 +1,14 @@
+
+<section>
+<form action="" method = "get">
+{% csrf_token %}
+<fieldset>
+    <legend>Kodi Options</legend>
+    <button type="submit" name="kodi_local">Kodi local</button>
+    <button type="submit" name="kodi_lf">Kodi LF</button>
+    <button type="submit" name="kodi_bf">Kodi BF</button>
+</fieldset>
+</form>
+</section>
+
+<p>{{message}}</p>

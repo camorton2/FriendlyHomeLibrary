@@ -4,10 +4,14 @@
 {{block.super}} - Picture
 {% endblock %}
 
+{% block friendly_title %}
+<h3>Friendly Picture: {{picture.title|title}}</h3>
+{% endblock %}
+
+
 {% block content %}
 
 <section>
-<li>Title: {{picture.title|title}}</li>
 {% if picture.year %}
     <li>Year: {{ picture.year }}</li>
 {% endif %}

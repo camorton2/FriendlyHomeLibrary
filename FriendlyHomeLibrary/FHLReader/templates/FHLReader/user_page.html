@@ -4,9 +4,11 @@
 {{ block.super }} User {{me.username}}
 {% endblock %}
 
-{% block content %}
+{% block friendly_title %}
+<h3>Friendly Channels: {{me.username|title}}</h3>
+{% endblock friendly_title %}
 
-<h3>{{me.username|title}}'s Page</h3>
+{% block content %}
 <h3>My Channels - sorted</h3>
 <li><a href="{% url 'user_songs' 'liked' %}">My liked Songs</a></li>
 <li><a href="{% url 'user_songs' 'loved' %}">My loved Songs</a></li>

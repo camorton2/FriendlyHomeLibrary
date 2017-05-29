@@ -16,7 +16,7 @@ from FHLBuilder import utility
 from FHLReader import kodi,chromecast
 from FHLReader import utility as rutils
 
-def run_slideshow(pictures):
+#def run_slideshow(pictures):
     #length = len(pictures)
     #count = 0
     #for p in pictures:
@@ -27,7 +27,8 @@ def run_slideshow(pictures):
     #    print('gohere %s' % gohere)
     #    redirect(gohere)
     #    time.sleep(30)
-    pass
+#    pass
+
 
 def generic_collection_view(request, **kwargs):
     """
@@ -102,11 +103,49 @@ def generic_collection_view(request, **kwargs):
         use_all = True
     me = models.User.objects.get(username=request.user)
 
-    if 'slideshow' in request.GET:
-        slideshow = True
+    message = ''
+
+    ccasts = []
+
+    print(request.GET)
+    if 'options' in request.GET:
+        ccasts = chromecast.find_chrome_casts()
+        print('hey got new')
+        val = request.GET.get('options')
+        print('val: %s %s' % (val,val[:4]))
+        print(request.GET)
+        if val == 'slideshow':
+            slideshow = True
+        elif val[:4] == 't___':
+            dev = val[4:]
+            chromecast.cast_slides(dev,pictures,me,True)
+        elif val[:4] == 'cst_':
+            dev = val[4:]
+            chromecast.cast_slides(dev,pictures,me,False)
+        elif val == 'CastAll-title':
+            chromecast.cast_slides_all(pictures,me,True)
+        elif val == 'CastAll':
+            chromecast.cast_slides_all(pictures,me,False)
+        else:
+            # kodi playlist options
+            me = models.User.objects.get(username=request.user)
+            try:
+                res = kodi.playlist_requests_new(pictures,val,me,request)
+                if res:
+                    message = u'success - pictures sent'
+            except rutils.MyException,ex:
+                message = ex.message
+                print('Caught %s' % ex.message)
+            
+    if picture_count and not slideshow:
+        # slow 
+        ccasts = chromecast.find_chrome_casts()
+        
+#    if 'slideshow' in request.GET:
+#        slideshow = True
 #        print('html slideshow')
 #        run_slideshow(pictures)
-    elif 'sNext' in request.GET and request.GET.get('sNext'):
+    if 'sNext' in request.GET and request.GET.get('sNext'):
         current_picture = int(request.GET.get('sNext'))
         slideshow = True
         current_picture = current_picture+1
@@ -124,17 +163,6 @@ def generic_collection_view(request, **kwargs):
         else:
             current_picture=current_picture-1
 
-    ccasts = []
-    
-    if picture_count and not slideshow:
-        # slow 
-        ccasts = chromecast.find_chrome_casts()
-    if 'cast' in request.GET and request.GET.get('cast'):
-        cc = request.GET.get('cast')
-        chromecast.cast_slides(cc,pictures,me)
-    if 'CastAll' in request.GET:
-        print('CastAll')
-        chromecast.cast_slides_all(pictures,me)
 
     if use_all:
         # all pictures view
@@ -161,7 +189,6 @@ def generic_collection_view(request, **kwargs):
             obj.tags.add(new_tag)
 
     # kodi playlist options
-    message = ''
     try:
         if movies and kodi.playlist_requests(movies,request):
             message = u'success - movies sent'

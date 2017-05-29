@@ -4,10 +4,13 @@
 {{block.super}} - {{ song.title }}
 {% endblock %}
 
+{% block friendly_title %}
+<h3>Friendly Song: {{song.title}}</h3>
+{% endblock friendly_title %}
+
 {% block content %}
 
 <section>
-<h3>{{song.title}}</h3>
 
 {% if song.musician_set.count %}
     {% for musician in song.musician_set.all %}

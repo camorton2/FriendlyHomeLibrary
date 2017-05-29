@@ -16,7 +16,6 @@ function clickIt(mtimer){
 <form action="" method = "get">
 {% csrf_token %}
 <button id='nextone' type="submit" name='sNext' value={{index}} hidden>Next</button>
-<button id='Stop' type="submit" name='stopshow' value={{index}} onclick="myFunction()">Stop</button>
 </form>
 <span style="float:left;">{{index}} / {{pictureCount}}</span>  
 <span style="float:right;">{{filename}}</span>

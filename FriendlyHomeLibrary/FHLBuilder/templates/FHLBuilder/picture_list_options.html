@@ -1,0 +1,26 @@
+
+<form action="" method = "get">
+    {% csrf_token %}
+    {% if slideshow %}
+        <button id='Stop' type="submit" name='stopshow' value={{index}} onclick="myFunction()">Stop</button>
+    {% else %}
+    <fieldset>
+    <legend>SlideShow Options</legend>    
+        <select name="options">
+            <option value="slideshow">HTML SlideShow</option>
+            <option value="CastAll">Cast All</option>
+            <option value="CastAll-title">Cast All with title</option>
+            {% for a,b in ccasts %}            
+                <option value="cst_{{a}}">Cast {{b}}</option>
+                <option value="t___{{a}}">Cast with title {{b}}</option>
+            {% endfor %}
+            <option value="kodi_local">Kodi Local</option>
+            <option value="kodi_lf">Kodi LF</option>
+            <option value="kodi_bf">Kodi BF</option>
+        </select>
+    <input type="submit" value="Go">
+    </fieldset>    
+    
+    {% endif %}
+</form>
+

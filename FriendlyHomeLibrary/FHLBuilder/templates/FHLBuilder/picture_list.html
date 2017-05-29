@@ -21,23 +21,9 @@
 
 <form action="" method = "get">
     {% csrf_token %}
-    <fieldset>
-    <legend>PlayBack</legend>    
-    <button type="submit" name='slideshow' value={{index}}>Slideshow</button>
-    <button type="submit" name='CastAll' value={{index}}>Cast All</button>
-    {% for a,b in ccasts %}            
-        <button type="submit" name='cast' value="{{forloop.counter0}}">Cast {{b}}</button>
-    {% endfor %}
     <button type="submit" name='cPrev' value={{index}}>Previous</button>
     <button type="submit" name='cNext' value={{index}}>Next</button>
-    </fieldset>    
 </form>
-
-{% if use_all %}
-
-{% else %}
-   {% include "FHLBuilder/kodi_buttons_get.html" %}
-{% endif %}
 
 <span style="float:left;">{{index}} / {{pictureCount}}</span>  
 <span style="float:right;">{{picture.friendly_name}}</span>

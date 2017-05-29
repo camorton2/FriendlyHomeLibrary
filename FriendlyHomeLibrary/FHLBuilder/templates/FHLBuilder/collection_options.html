@@ -1,0 +1,14 @@
+
+    <section>
+    <ul>
+    {% if songlist %}
+        {% include "FHLBuilder/song_playlist_options.html" %}
+    {% endif %}
+    {% if movielist %}
+        {% include 'FHLBuilder/movie_playlist_options.html' %}
+    {% endif %}
+    {% if picture %}
+         {% include "FHLBuilder/picture_list_options.html" %}
+    {% endif %}
+    </ul>
+    </section>

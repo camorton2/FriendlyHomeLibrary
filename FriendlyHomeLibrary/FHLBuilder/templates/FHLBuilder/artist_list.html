@@ -4,8 +4,11 @@
 {{ block.super }} - Artist {{ artist.fullName|title }}
 {% endblock %}
 
+{% block friendly_title %}
+<h3>Friendly Home Library: {{ title|title }}</h3>
+{% endblock friendly_title %}
+
 {% block content %}
-<h3>{{ title|title }}</h3>
 <ul>
 {% for person in targetlist %}
    <li><a href="{{ person.get_absolute_url}}"> {{person.fullName|title}}</a></li>

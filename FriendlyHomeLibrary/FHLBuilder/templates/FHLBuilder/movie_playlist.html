@@ -1,5 +1,4 @@
 
-
 {% if directors %}
     {% for d in directors %}
         <li><a href="{{d.get_absolute_url}}">{{d.fullName|title}}</a></li>
@@ -11,16 +10,8 @@
     {% endfor %}
 {% endif %}
 
-<section>
-{% include "FHLBuilder/kodi_buttons_get.html" %}
-</section>
-
-
 <ul id="filelist">
 {% for mv in movielist %}
     <li><a href="{{ mv.get_absolute_url }}">{{mv.title|title}}</a> {{ mv.collection.filePath }}/{{mv.fileName}} </li>
 {% endfor %}
 </ul>
-
-
-

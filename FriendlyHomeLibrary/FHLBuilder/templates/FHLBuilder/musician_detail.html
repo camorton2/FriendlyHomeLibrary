@@ -4,12 +4,21 @@
 {{block.super}} - Musician
 {% endblock %}
 
+{% block friendly_title %}
+<h2>Friendly Home Library: {{musician.fullName}}</h2>
+{% endblock friendly_title %}
+
+{% if musician.songs.count %}
+{% block specific_options %}
+    {% include "FHLBuilder/song_playlist_options.html" %}
+{% endblock specific_options %}
+{% endif %}
+
 {% block content %}
 
-<h2>{{musician.fullName}}</h2>
 {% if musician.concerts.count %}
 <section>
-<h3>Concerts and videos: {{musician.fullName}}</h3>
+<h3>Concerts and videos:</h3>
 <ul id='filelist'>
 {% for video in musician.concerts.all %}
 <li><a href="{{video.get_absolute_url}}">{{video.title}}</a></li>
@@ -20,7 +29,7 @@
 
 {% if musician.albums.count %}
 <section>
-<h3>Albums: {{musician.fullName}}</h3>
+<h3>Albums:</h3>
 <ul id='filelist'>
 {% for album in musician.albums.all %}
 <li><a href="{{album.get_absolute_url}}">{{album.title}}</a></li>
@@ -32,7 +41,7 @@
 
 {% if musician.songs.count %}
 <section>
-<h3>Songs: {{musician.fullName}}</h3>
+<h3>Songs:</h3>
 {% include "FHLBuilder/song_playlist.html" %}</ul>
 </section>
 {% endif %}

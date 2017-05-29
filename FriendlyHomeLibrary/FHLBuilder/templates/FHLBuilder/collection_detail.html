@@ -4,6 +4,14 @@
 {{block.super}} - Collection Detail
 {% endblock %}
 
+{% block friendly_title %}
+<h3>Friendly Collection: {{title|title}} </h3>
+{% endblock %}
+
+{% block specific_options %}
+    {% include "FHLBuilder/collection_options.html" %}
+{% endblock specific_options %}
+
 {% block content %}
 
 {% if not slideshow %}
@@ -14,7 +22,6 @@
 </div>
 {% endif %}
 
-<h2>{{title|title}}</h2>
 
 {% endif %}
 
@@ -31,8 +38,7 @@
             {% include "FHLBuilder/picture_show.html" %}
         {% else %}
             {% include "FHLBuilder/picture_list.html" %}
-        {% endif %}
-        
+        {% endif %}        
     {% endif %}
     </ul>
     </section>
@@ -59,4 +65,4 @@
         {% endif %}
     {% endif %}
 
-{% endblock %}
+{% endblock content %}

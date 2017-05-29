@@ -1,4 +1,5 @@
 <nav>
+<div class="container">    
     <a href="{% url 'homepage' %}">Home</a>
     <a href="{% url 'builder_collection_list' %}">Collections</a>    
     <a href="{% url 'builder_tag_list' %}">Tags</a>
@@ -6,4 +7,26 @@
     <a href="{% url 'artist_list' 'director' %}">Directors</a>
     <a href="{% url 'artist_list' 'musician' %}">Musicians</a>
     <a href="{% url 'builder_all_list' %}">All</a>
+    
+    <div class="dropdown">
+         <button class="dropbtn">Options</button>
+             <div class="dropdown-content">
+                 {% if user.is_authenticated %}
+                     <a href="{% url 'user_page' %}">Channels: {{user.username}}</a>
+                     <a href="{% url 'FHLUser_Logout' %}">Log Out</a>
+                     {% if perms.FHLBuilder.collection_builder %}
+                         <a href="{% url 'builder_collection_create' %}">Create Collection</a>
+                         <a href="{% url 'builder_diagnostics' %}">Diagnostics</a>
+                     {% endif %}               
+                 {% else %}
+                     <a href="{% url 'FHLUser_Login' %}">Log In</a>
+                 {% endif %}                 
+             </div>
+             
+         </div> 
+
+
+</div>
+    
+    
 </nav>

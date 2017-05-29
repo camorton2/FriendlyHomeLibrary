@@ -197,6 +197,35 @@ def play_to_kodi(playlist,ip,me):
         raise rutils.MyException(message)
 
 
+def playlist_requests_new(playlist,pattern,me,request):
+    """ handle play requests for playlist
+        given the html GET request
+        caller should catch MyException which is used for all
+        errors in kodi playback
+    """
+    
+    print('playlist_request pattern %s' % pattern)
+    if 'kodi_local' == pattern:
+        try:
+            clientip = request.META['REMOTE_ADDR']
+        except KeyError:
+            message = unicode('ERROR could not get client ip from request')
+            print(message)
+            raise rutils.MyException(message)
+        time.sleep(5)
+        play_to_kodi(playlist,clientip,me)
+        return True
+    elif 'kodi_lf' == pattern:
+        play_to_kodi(playlist,settings.HOST_LF,me)
+        return True
+    elif 'kodi_bf' == pattern:
+        time.sleep(5)
+        play_to_kodi(playlist,settings.HOST_BF,me)
+        return True
+    return False
+
+
+
 def playlist_requests(playlist,request):
     """ handle play requests for playlist
         given the html GET request
@@ -233,7 +262,7 @@ def slideshow_kodi(playlist,host,xbmc_i, me):
         file_path,_,smb_path = rutils.my_private_directory(me)
         # put all the pictures in the directory
         for picture in playlist:
-            rutils.annotate(picture,me)
+            _,_ = rutils.annotate(picture,me)
 
         ping_result = xbmc_i.JSONRPC.Ping()
         look_at_res('ping',ping_result)

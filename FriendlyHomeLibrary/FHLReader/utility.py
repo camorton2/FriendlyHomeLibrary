@@ -22,7 +22,6 @@ def my_private_directory(me):
         my_dir = (u'FHL/slides-%s' % me.username)
         my_path = os.path.join(settings.DRIVES[1], my_dir)
         
-        
         drive = utils.get_drive_slink(2)
         web_path = os.path.join(u'links/', drive)
         web_path = os.path.join(settings.HTTP_PREFIX,web_path)
@@ -30,10 +29,6 @@ def my_private_directory(me):
 
         smb_path = utils.get_drive_samba(2)
         smb_path = os.path.join(smb_path, my_dir)
-
-        
-        print('my_dir %s' % (my_path))
-        print('web_path %s' % (web_path))
     
         if os.path.exists(my_path):
             print('exists')
@@ -49,8 +44,8 @@ def my_private_directory(me):
         raise MyException(message)
 
 
-def cleanup_my_private_directory(me):
-    pass
+#def cleanup_my_private_directory(me):
+#    pass
 
 
 def annotate(picture,me):
@@ -60,15 +55,15 @@ def annotate(picture,me):
     tmp_file = os.path.join(me_local,filename)
     web_file = os.path.join(me_web,filename)
     pic_path = utils.object_path_local(picture)
-    print('source %s destination %s' % (pic_path,tmp_file))
+    #print('source %s destination %s' % (pic_path,tmp_file))
     #shutil.copyfile(pic_path,tmp_file)
     
     ccmd = '/usr/bin/convert '
     opts0 = ' -scale 1280x1080 '
     opts = ' -pointsize 30 -fill black -undercolor white -annotate +0+22 '
     acmd = ccmd + pic_path + opts0 + opts + picture.friendly_name() + ' ' + tmp_file
-    print('acmd %s' % acmd)    
+    # print('acmd %s' % acmd)    
     os.system(acmd)
-    return web_file
+    return web_file, tmp_file
     
     

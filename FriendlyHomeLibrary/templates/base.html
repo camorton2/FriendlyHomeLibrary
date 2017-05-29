@@ -31,41 +31,20 @@ body{
     <div>
     {% if not slideshow %}
     <header>
-        <h1>Friendly Home Library {{settings.TEST_ONLY_WARNING}}</h1>
         <div>{% include "nav.html" %}</div>
-        <div>
-            {% if user.is_authenticated %}
-               <p><a href="{% url 'user_page' %}">Channels: {{user.username}}</a></p>
-                {% if perms.FHLBuilder.collection_builder %}
-                <section>
-                    <li><a href="{% url 'builder_collection_create' %}">Create Collection</a></li>
-                    <li><a href="{% url 'builder_diagnostics' %}">Diagnostics</a></li>
-                </section>
-                {% endif %}
-               
-            {% else %}
-               <p>Anonymous user</p>
-            {% endif %}
-        </div>
+        {% block friendly_title %}
+        <h3>Friendly Home Library</h3>
+        {% endblock friendly_title %}
+        <p>{{settings.TEST_ONLY_WARNING}}</p>
     </header>
     {% endif %}
     <main>
-        {% block content %}
-        <br>Welcome to the Friendly Home Library
+         {% block specific_options %}
+         {% endblock specific_options %}
 
-        <div class="status row">
-        <div class="offset-by-eight four columns">
-        <ul id="displaylist">
-            {% if user.is_authenticated %}
-            <li><a href="{% url 'FHLUser_Logout' %}">Log Out</a></li>
-            {% else %}
-            <li><a href="{% url 'FHLUser_Login' %}">Log In</a></li>
-            {% endif %}
-        </ul>
-        </div>
-    </div>
-                        
-    {% endblock %}
+        {% block content %}
+        <p>Welcome to the Friendly Home Library                        
+        {% endblock content %}
     </main>
     </div>
 
@@ -76,7 +55,6 @@ body{
     {% if not slideshow %}
     <footer>
     <br>    
-    <div>{% include "nav.html" %}    </div>
     <p>&copy;2017 Catherine Morton</p>
     </footer>
     {% endif %}

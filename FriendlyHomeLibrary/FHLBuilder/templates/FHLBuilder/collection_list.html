@@ -4,8 +4,11 @@
 {{ block.super }} - List of Collections
 {% endblock %}
 
+{% block friendly_title %}
+<h3>Friendly Home {{title}} {{clist.objects.count}}</h3>
+{% endblock friendly_title %}
+
 {% block content %}
-<h3>{{title}}: {{clist.objects.count}}</h3>
 <div>
     {% include "FHLBuilder/collection_select.html" %}
 </div>
