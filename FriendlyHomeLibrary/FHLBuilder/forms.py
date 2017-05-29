@@ -133,7 +133,7 @@ class CollectionForm(forms.ModelForm):
         if self.drive > 0:
             last = new_path.rpartition('/')[2]
             if len(last):
-                return utility.to_str(new_path)
+                return unicode(new_path)
             # remove final /
             return unicode(new_path[:-1])
         utility.log("DOES NOT EXIST")
