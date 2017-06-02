@@ -289,10 +289,10 @@ class CollectionFormView(View,CollectionMixins):
         once the form is valid start walking files
         and populating the database
         """
-        print('CollectionFormView POST')
+        #print('CollectionFormView POST')
         bound_form=self.form_class(request.POST)
         if bound_form.is_valid():
-            print('valid create kind %s' % bound_form.cleaned_data['kind'])
+            #print('valid create kind %s' % bound_form.cleaned_data['kind'])
             album,artist = self.add_members(
                 bound_form.cleaned_data['filePath'],
                 bound_form.drive,
@@ -335,7 +335,7 @@ class CollectionUpdate(View,CollectionMixins):
 
     def get(self,request,slug):
         """ setup form """
-        print("CollectionUpdate GET")
+        #print("CollectionUpdate GET")
         target = self.get_object(slug)
 
         context={'form': self.form_class(instance=target)}
@@ -343,12 +343,12 @@ class CollectionUpdate(View,CollectionMixins):
 
     def post(self,request,slug):
         """ handle valid form and redirect """
-        print("CollectionUpdate POST")
+        #print("CollectionUpdate POST")
         target = self.get_object(slug)
         bound_form = self.form_class(request.POST,instance=target)
         if bound_form.is_valid():
             try:
-                print('valid update tag %s' % bound_form.cleaned_data['tag'])
+                #print('valid update tag %s' % bound_form.cleaned_data['tag'])
                 album,artist = self.add_members(
                     target.filePath,
                     target.drive,
@@ -406,7 +406,7 @@ class MovieDetailView(View):
         """
         movie=get_object_or_404(models.Movie,slug__iexact=slug)
 
-        print ("MovieDetail POST for slug %s movie %s " % (slug,movie.title))
+        #print ("MovieDetail POST for slug %s movie %s " % (slug,movie.title))
         playit = utility.object_path(movie)
 
         bound_form = self.form_class(request.POST,
@@ -421,10 +421,10 @@ class MovieDetailView(View):
 
                 cast = bound_form.cleaned_data['cast']
                 if len(cast):
-                    print('cast %s' % cast)
+                    #print('cast %s' % cast)
                     try:
                         message = u'success'
-                        print('view calls cast_movie')
+                        #print('view calls cast_movie')
                         chromecast.cast_movie(cast,movie)
                     except rutils.MyException,ex:
                         message = ex.message
@@ -485,7 +485,7 @@ class MovieDetailView(View):
             'objectForm': self.form_class(instance=movie),
             'vlcPlugin':vlcPlugin,
             'message':message}
-        print('render with message %s' % message)
+        #print('render with message %s' % message)
         return render(request,self.template_name, movieContext)
 
 
@@ -621,14 +621,14 @@ class PictureDetailView(View):
 
                 cast = bound_form.cleaned_data['cast']
                 if len(cast):
-                    print('cast %s' % cast)
+                    #print('cast %s' % cast)
                     try:
                         message = u'success'
-                        print('view calls cast_picture')
+                        #print('view calls cast_picture')
                         chromecast.cast_picture(cast,picture)
                     except rutils.MyException,ex:
                         message = ex.message
-                        print('Caught %s' % ex.message)
+                        #print('Caught %s' % ex.message)
 
                 # tag
                 tq = bound_form.cleaned_data['tag']
@@ -708,7 +708,7 @@ class MusicianCleanupView(View):
         if bound_form.is_valid():
             artists = bound_form.cleaned_data['choices']
             for a in artists:
-                print('wants to remove %s' % (a.fullName))
+                #print('wants to remove %s' % (a.fullName))
                 collection.remove_musician(a)                    
 
         context = {'form':bound_form,'title': 'Remove a Musician'}

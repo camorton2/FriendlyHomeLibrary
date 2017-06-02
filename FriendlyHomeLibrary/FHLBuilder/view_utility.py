@@ -104,13 +104,13 @@ def generic_collection_view(request, **kwargs):
 
     ccasts = []
 
-    print(request.GET)
+    #print(request.GET)
     if 'options' in request.GET:
         ccasts = chromecast.find_chrome_casts()
-        print('hey got new')
+        #print('hey got new')
         val = request.GET.get('options')
-        print('val: %s %s' % (val,val[:4]))
-        print(request.GET)
+        #print('val: %s %s' % (val,val[:4]))
+        #print(request.GET)
         if val == 'slideshow':
             slideshow = True
         elif val[:4] == 't___':
@@ -132,7 +132,7 @@ def generic_collection_view(request, **kwargs):
                     message = u'success - pictures sent'
             except rutils.MyException,ex:
                 message = ex.message
-                print('Caught %s' % ex.message)
+                #print('Caught %s' % ex.message)
             
     if picture_count and not slideshow:
         # slow 
@@ -140,7 +140,7 @@ def generic_collection_view(request, **kwargs):
         
 #    if 'slideshow' in request.GET:
 #        slideshow = True
-#        print('html slideshow')
+#        #print('html slideshow')
 #        run_slideshow(pictures)
     if 'sNext' in request.GET and request.GET.get('sNext'):
         current_picture = int(request.GET.get('sNext'))

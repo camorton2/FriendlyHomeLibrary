@@ -190,14 +190,14 @@ class Newest_Song_Manager(models.Manager):
     def get_queryset(self):
         return super(Newest_Song_Manager,self). \
             get_queryset(). \
-            order_by('-date_added','musician','track')
+            order_by('-date_added','collection','track')
 
 
 class Oldest_Song_Manager(models.Manager):
     def get_queryset(self):
         return super(Oldest_Song_Manager,self). \
             get_queryset(). \
-            order_by('date_added','musician','track')
+            order_by('date_added','collection','track')
 
 
 class Random_Song_Manager(models.Manager):
@@ -291,7 +291,7 @@ class Director(Artist):
 class Musician(Artist):
     albums = models.ManyToManyField(Collection, blank=True, related_name='album_musicians')
     concerts = models.ManyToManyField(Movie, blank=True, related_name='concert_musicians')
-    songs = models.ManyToManyField(Song, blank=True, related_name='musicians')
+    songs = models.ManyToManyField(Song, blank=True, related_name='song_musicians')
     def get_absolute_url(self):
         return reverse('builder_musician_detail',kwargs={'slug': self.slug})
     def get_update_url(self):

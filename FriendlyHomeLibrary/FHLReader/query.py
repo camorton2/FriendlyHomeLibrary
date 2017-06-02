@@ -346,7 +346,7 @@ def artist_radio_select(artists,xmas):
     returns a list of all songs by artists in that queryset
     without ick
     """
-    query = reduce(operator.or_, (Q(musician=item) for item in artists))                           
+    query = reduce(operator.or_, (Q(song_musicians=item) for item in artists))                           
     
     big = bmod.Song.objects.filter(query).order_by('?')
         

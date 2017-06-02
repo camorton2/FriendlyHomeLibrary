@@ -336,7 +336,7 @@ class RadioChannel(View):
 
 
     def post(self, request):
-        print("RandomList POST")
+        print("RadioChannel POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
 
@@ -365,7 +365,9 @@ class RadioChannel(View):
             else:
                 alist = rq.radio_select(justme,me,target)
             
+            # after slide no more queries
             rlist = alist[:count]
+            print('radio count %d len %d' % (count,len(alist)))
             if recent:
                 rlist = rq.random_count(rlist,count)
                 

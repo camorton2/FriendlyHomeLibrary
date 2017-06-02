@@ -43,7 +43,7 @@ class MyCache:
         if self.channel in cache:
             channel = cache.get(self.channel)
             
-        print('cache get songs %s videos %d pictures %d' % (len(songs),len(videos),len(pictures)))
+        #print('cache get songs %s videos %d pictures %d' % (len(songs),len(videos),len(pictures)))
         return songs,pictures,videos,channel
 
 
@@ -62,7 +62,7 @@ def cache_list_bykind(rlist,kind,channel,mycache):
     redirect to the cache-list display page
     """
 
-    print('cache by kind %s' % kind)
+    #print('cache by kind %s' % kind)
 
     songs = []
     videos = []

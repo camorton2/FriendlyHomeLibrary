@@ -390,8 +390,8 @@ def remove_picture(target):
 
 def remove_song(target):
     #print('remove song %s' % (target.title))
-    for m in target.musicians.all():
-        target.musicians.remove(m)
+    for m in target.song_musicians.all():
+        target.song_musicians.remove(m)
     for lk in target.likes.all():
         target.likes.remove(lk)
     for lv in target.loves.all():
@@ -426,7 +426,7 @@ def remove_musician(target):
         remove_song(sg)
     for con in target.concerts.all():
         # do not remove the concert, just remove the musician
-        con.musicians.remove(target)
+        con.concert_musicians.remove(target)
     for col in target.albums.all():
         remove_collection(col)
     target.delete()

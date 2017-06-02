@@ -132,8 +132,8 @@ class CollectionForm(forms.ModelForm):
                 break
         if self.drive > 0:
             a,b,last = new_path.rpartition('/')
-            print('last a %s b %s last %s' % (a,b,last))
-            print('new_path unchanged %s' % new_path)
+            #print('last a %s b %s last %s' % (a,b,last))
+            #print('new_path unchanged %s' % new_path)
             if len(last):
                 final = unicode(new_path)
             else:
