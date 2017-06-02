@@ -43,9 +43,14 @@ urlpatterns = [
       name='builder_director_detail'),
 
 # Musicians
+    url(r'^musician-cleanup/$',
+      bv.MusicianCleanupView.as_view(),
+      name='builder_musician_remove'),
+
     url(r'^musician/(?P<slug>[\w\-]+)/$',
       bv.MusicianDetailView.as_view(),
       name='builder_musician_detail'),
+
 
 # Songs
     url(r'^song/(?P<slug>[\w\-]+)/$',

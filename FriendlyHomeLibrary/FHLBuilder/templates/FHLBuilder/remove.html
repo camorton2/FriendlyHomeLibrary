@@ -1,0 +1,23 @@
+{% extends parent_template|default:"FHLBuilder/base_fhlbuilder.html" %}
+
+{% block title %}
+{{ block.super }} generated channel
+{% endblock %}
+
+{% block content %}
+{% if perms.FHLBuilder.collection_builder %}
+
+    <h3>{{title}}</h3>
+
+    <form action="" method = "post">
+    {% csrf_token %}    
+    <fieldset>
+        <legend>Pick musician(s) to remove</legend>    
+        {{form.as_p}}
+        <button type="submit">Submit</button>
+    </fieldset>
+    </form>
+
+
+{% endif %}
+{% endblock %}

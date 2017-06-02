@@ -48,7 +48,7 @@ class TagDetailView(View):
         """
         #print("TagDetailView GET")
         tag=get_object_or_404(models.Tag,slug__iexact=slug)
-        
+
         vargs = {
             'songs': tag.song_tags.all(),
             'pictures':tag.picture_tags.all(),
@@ -183,15 +183,18 @@ class CollectionMixins:
     """
     def __init__(self):
         pass
-        
+
     def handle_collection(self,path,drive):
         """
         handle the creation or selection of the appropriate collection
         """
+        if path[0] == '/':
+            path = path[1:]
         spath = path.replace('/','-')
         upath = unicode('%s' % (spath))
         slug = slugify(upath)
         title = upath
+        #print('add collection slug %s spath %s upath %s path %s' % (slug,spath,upath,path))
         nc = collection.add_collection(title,slug,path,drive,False)
         return nc
 
@@ -255,7 +258,7 @@ class CollectionDetailView(View):
             songs = target.songs.all().order_by('track')
         else:
             songs = target.songs.all()
-            
+
         vargs = {
             'songs': songs,
             'pictures': target.pictures.all(),
@@ -388,7 +391,7 @@ class MovieDetailView(View):
 
         # real path required for playback
         playit = utility.object_path(movie)
-                
+
         myform = self.form_class(instance=movie,
             initial = query.my_preference_dict(movie,request.user))
         context = {'movie':movie,
@@ -425,7 +428,7 @@ class MovieDetailView(View):
                         chromecast.cast_movie(cast,movie)
                     except rutils.MyException,ex:
                         message = ex.message
-                        print('Caught %s' % ex.message)                        
+                        print('Caught %s' % ex.message)
 
                 # tag
                 tq = bound_form.cleaned_data['tag']
@@ -511,7 +514,7 @@ class ActorDetailView(View):
     def get(self,request,slug):
         """ display movie list using common collection view """
         actor=get_object_or_404(models.Actor,slug__iexact=slug)
-        
+
         vargs={
             'movies': actor.movies.all(),
             'title': ('Movies with actor %s' % actor.fullName)
@@ -524,7 +527,7 @@ class DirectorDetailView(View):
     def get(self,request,slug):
         """ display movie list using common collection view """
         director=get_object_or_404(models.Director,slug__iexact=slug)
-        
+
         vargs={
             'movies': director.movies.all(),
             'title': ('Movies directed by %s' % director.fullName)
@@ -625,7 +628,7 @@ class PictureDetailView(View):
                         chromecast.cast_picture(cast,picture)
                     except rutils.MyException,ex:
                         message = ex.message
-                        print('Caught %s' % ex.message)                        
+                        print('Caught %s' % ex.message)
 
                 # tag
                 tq = bound_form.cleaned_data['tag']
@@ -683,4 +686,31 @@ class DiagnosticsView(View):
             'title': title }
         return render(request,self.template_name, context)
 
+
+@require_authenticated_permission('FHLBuilder.collection_builder')
+class MusicianCleanupView(View):
+    """
+    Allow user to select musician(s) to remove from the database
+    """
+    template_name = 'FHLBuilder/remove.html'
+    form_class=forms.MusicianCleanupForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Remove a Musician'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            artists = bound_form.cleaned_data['choices']
+            for a in artists:
+                print('wants to remove %s' % (a.fullName))
+                collection.remove_musician(a)                    
+
+        context = {'form':bound_form,'title': 'Remove a Musician'}
+        return render(request,self.template_name,context)
 

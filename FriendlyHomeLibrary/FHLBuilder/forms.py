@@ -131,11 +131,31 @@ class CollectionForm(forms.ModelForm):
                 utility.log("OK selecting drive %d" % i)
                 break
         if self.drive > 0:
-            last = new_path.rpartition('/')[2]
+            a,b,last = new_path.rpartition('/')
+            print('last a %s b %s last %s' % (a,b,last))
+            print('new_path unchanged %s' % new_path)
             if len(last):
-                return unicode(new_path)
-            # remove final /
-            return unicode(new_path[:-1])
+                final = unicode(new_path)
+            else:
+                final = unicode(new_path[:-1])
+            if final[0]=='/':
+                return final[1:]
+            return final
+            
         utility.log("DOES NOT EXIST")
         raise ValidationError(u'Path does not exist '+new_path,code=u'invalid')
+
+
+class MusicianCleanupForm(forms.ModelForm):
+    """
+    Used to complete remove a musician and all albums songs
+    """
+    class Meta:
+        model=models.Musician
+        fields=[]
+             
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Musician.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick musician(s)')
 

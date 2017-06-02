@@ -11,6 +11,7 @@ from django.utils.text import slugify
 
 from FHLBuilder import utility,choices
 from FHLBuilder import models as bmodels
+from FHLReader import utility as rutils
 
 def setFileKind(obj,kind):
     
@@ -44,7 +45,7 @@ def add_song(sTitle, sFileName, sSlug, sCollection):
     try:
         dbobj = bmodels.Song.objects.get(slug__iexact=sSlug)
     except bmodels.Song.DoesNotExist:
-        utility.log("---> ADD Song %s, filename %s, slug %s: " % (sTitle,sFileName,sSlug))
+        utility.log("---> ADD Song slug %s: " % (sSlug))
         sCollection.save()
         title = unicode(sTitle)
         fileName = unicode(sFileName)
@@ -58,7 +59,7 @@ def add_movie(mTitle, mFileName, mSlug, mCollection, fKind=choices.MOVIE):
     try:
         dbobj = bmodels.Movie.objects.get(slug__iexact=mSlug)
     except bmodels.Movie.DoesNotExist:
-        utility.log("---> ADD Movie %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
+        utility.log("---> ADD Movie slug %s: " % (mSlug))
         mCollection.save()
         title = unicode(mTitle)
         fileName = unicode(mFileName)
@@ -72,7 +73,7 @@ def add_picture(mTitle, mFileName, mSlug, mCollection):
     try:
         dbobj = bmodels.Picture.objects.get(slug__iexact=mSlug)
     except bmodels.Picture.DoesNotExist:
-        utility.log("---> ADD Picture %s, filename %s, slug %s: " % (mTitle,mFileName,mSlug))
+        utility.log("---> ADD Picture %s: " % (mSlug))
         mCollection.save()
         title = unicode(mTitle)
         fileName = unicode(mFileName)
@@ -83,6 +84,11 @@ def add_picture(mTitle, mFileName, mSlug, mCollection):
     return dbobj
 
 def add_musician(aName, aSlug):
+    if aSlug == 'unknown-mus':
+        raise rutils.MyException('No Way - no unknown musicians')
+    if aSlug == 'unknown-artist-mus':
+        raise rutils.MyException('No Way - no unknown-artist musicians')
+        
     try:
         dbobj = bmodels.Musician.objects.get(slug__iexact=aSlug)
     except bmodels.Musician.DoesNotExist:
@@ -99,7 +105,7 @@ def add_actor(aName, aSlug):
     try:
         dbobj = bmodels.Actor.objects.get(slug__iexact=aSlug)
     except bmodels.Actor.DoesNotExist:
-        print("---> ADD Actor %s, slug %s" % (aName, aSlug))
+        # print("---> ADD Actor %s, slug %s" % (aName, aSlug))
         name = unicode(aName)
         dbobj = bmodels.Actor(fullName=name,slug=aSlug)
         dbobj.save()
@@ -109,7 +115,7 @@ def add_director(aName, aSlug):
     try:
         dbobj = bmodels.Director.objects.get(slug__iexact=aSlug)
     except bmodels.Director.DoesNotExist:
-        print("---> ADD Director %s, slug %s" % (aName, aSlug))
+        # print("---> ADD Director %s, slug %s" % (aName, aSlug))
         name = unicode(aName)
         dbobj = bmodels.Director(fullName=name,slug=aSlug)
         dbobj.save()
@@ -119,7 +125,7 @@ def add_tag(tName, tSlug):
     try:
         dbobj = bmodels.Tag.objects.get(slug__iexact=tSlug)
     except bmodels.Tag.DoesNotExist:
-        print("---> ADD Tag %s, slug %s" % (tName, tSlug))
+        # print("---> ADD Tag %s, slug %s" % (tName, tSlug))
         name = unicode(tName)
         dbobj = bmodels.Tag(name=name,slug=tSlug)
         dbobj.save()
@@ -135,6 +141,18 @@ def as_movie(ext):
     if any(k == ext.lower() for k in choices.movs):
         return True
     return False
+
+
+def pick_artist(path):
+    # print('pick an artist from %s %s' % (path,path[:5]))
+    first,_,album = path.rpartition('/')
+    # print('first %s album %s' % (first,album))
+    first,_,artist = first.rpartition('/')
+    # print('first %s artist %s' % (first,artist))
+    if artist:
+        return artist
+    # this will blow up
+    return 'unknown'
 
 def fix_song(song,theFile,collection):
     """
@@ -155,12 +173,20 @@ def fix_song(song,theFile,collection):
             
     if tag is None:
         # pick some reasonable defaults
-        myArtist = u'various'
+        myArtist = pick_artist(collection.filePath)
         title = song.title
     else:
         myArtist = unicode(tag.artist)
         if myArtist is None :
-            myArtist = u'various'
+            #myArtist = u'various'
+            myArtist = pick_artist(collection.filePath)
+        elif myArtist == 'unknown':
+            myArtist = pick_artist(collection.filePath)
+        elif myArtist == 'Unknown':
+            myArtist = pick_artist(collection.filePath)
+        elif myArtist == 'Unknown Artist':
+            myArtist = pick_artist(collection.filePath)
+        
         title = unicode(tag.title)
         if title is None:
             title=song.title
@@ -182,10 +208,13 @@ def fix_song(song,theFile,collection):
     
     # musician has name, slug
     artistSlug = slugify( unicode('%s%s' % (myArtist,'-mus')))
+    
     musician = add_musician(aName=myArtist, aSlug=artistSlug)
     musician.albums.add(collection)
     musician.songs.add(song)
     musician.save()
+    
+    #print('musician %s collection %s' % (musician.fullName,collection.title))
     
     genre = tag.genre
     if genre is None:
@@ -194,6 +223,8 @@ def fix_song(song,theFile,collection):
         pass
     elif genre.name == 'Unknown':
         pass
+    elif genre.name == 'unknown':
+        pass        
     else:
         genreSlug = slugify(unicode('%s' % (genre.name)))
         gen = add_tag(unicode(genre.name),genreSlug)
@@ -324,4 +355,104 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
             utility.log("SKIPPING - unhandled extension %s/%s" % (path,base))
     return musician
 
+
+def remove_movie(target):
+    # concert_musicians,movie_directors,movie_actors
+    
+    for mus in target.concert_musicians.all():
+        target.concert_musicians.remove(mus)
+    for dtor in target.movie_directors.all():
+        target.movie_directors.remove(dtor)
+    for act in target.movie_actors.all():
+        target.movie_directors.remove(act)
+    for lk in target.likes.all():
+        target.likes.remove(lk)
+    for lv in target.loves.all():
+        target.loves.remove(lv)
+    for tg in target.tags.all():
+        target.tags.remove(tg)
+    for dl in target.dislikes.all():
+        target.dislikes.remove(dl)        
+    target.delete()
+
+
+def remove_picture(target):
+    for lk in target.likes.all():
+        target.likes.remove(lk)
+    for lv in target.loves.all():
+        target.loves.remove(lv)
+    for tg in target.tags.all():
+        target.tags.remove(tg)
+    for dl in target.dislikes.all():
+        target.dislikes.remove(dl)        
+    target.delete()
+
+
+def remove_song(target):
+    #print('remove song %s' % (target.title))
+    for m in target.musicians.all():
+        target.musicians.remove(m)
+    for lk in target.likes.all():
+        target.likes.remove(lk)
+    for lv in target.loves.all():
+        target.loves.remove(lv)
+    for dl in target.dislikes.all():
+        target.dislikes.remove(dl)        
+    for tg in target.tags.all():
+        target.tags.remove(tg)
+    target.delete()
+    
+    
+def remove_collection(target):
+    # movies, games,books,pictures,songs,chapters
+    for mv in target.movies.all():
+        remove_movie(mv)
+    for pc in target.pictures.all():
+        remove_picture(pc)
+    for sg in target.songs.all():
+        remove_song(sg)
+    if target.games.all():
+        raise rutils.MyException('No Way - games are not implemented')
+    if target.books.all():
+        raise rutils.MyException('No Way - books are not implemented')
+    if target.chapters.all():
+        raise rutils.MyException('No Way - chapters are not implemented')
+    target.delete()
+
+
+def remove_musician(target):
+    #print('remove musician %s' % (target.fullName))
+    for sg in target.songs.all():
+        remove_song(sg)
+    for con in target.concerts.all():
+        # do not remove the concert, just remove the musician
+        con.musicians.remove(target)
+    for col in target.albums.all():
+        remove_collection(col)
+    target.delete()
+    
+
+def remove_actor(target):
+    for mv in target.movies.all():
+        # do not remove the movie, just remove the actor
+        mv.actors.remove(target)
+    target.delete()
+    
+
+def remove_director(target):
+    for mv in target.movies.all():
+        # do not remove the movie, just remove the director
+        mv.directors.remove(target)
+    target.delete()
+    
+
+def remove_tag(target):
+    for mv in target.movie_tags.all():
+        # do not remove the movie, just remove the tag
+        mv.tags.remove(target)
+    for sg in target.song_tags.all():
+        sg.tags.remove(target)
+    for pt in target.picture_tags.all():
+        pt.tags.remove(target)
+    target.delete()
 

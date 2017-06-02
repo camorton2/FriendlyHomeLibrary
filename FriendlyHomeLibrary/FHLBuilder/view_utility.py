@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import time
-
 from django.core.urlresolvers import reverse
 from django.shortcuts import render,redirect
 from django.utils.text import slugify
-
 
 from FHLBuilder import models
 from FHLBuilder import collection

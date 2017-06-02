@@ -9,38 +9,28 @@ from FriendlyHomeLibrary import settings
 
 #Utility functions
 
+
 def log(msg):
     try:
-        my_log = unicode('%s/log%s' % (settings.LOG_PATH,datetime.date.today()))
+        my_log = ('%s/log%s' % (settings.LOG_PATH,datetime.date.today()))
         with open(my_log,'a+') as f:
             f.write(msg)
             f.write('\n')
             f.close()
     except UnicodeDecodeError:
-        print("RATS UnicodeDecodeError in to_str with %s" % msg)
+        print("RATS UnicodeDecodeError logging message %s" % msg)
         f.close()
     except UnicodeEncodeError:
-        print("RATS UnicodeEncodeError in to_str with %s" % msg)
+        print("RATS UnicodeEncodeError logging Message %s" % msg)
         f.close()
 
 
-def to_str_unused(unicode_or_string):
-    try:
-        if isinstance(unicode_or_string,unicode):
-            value = unicode_or_string.encode('utf-8')
-        else:
-            value = unicode_or_string
-        return value
-    except UnicodeDecodeError:
-        print("RATS UnicodeDecodeError in to_str with %s" % unicode_or_string)
-        print(type(unicode_or_string))
-        return 'x'
         
 
 def slugCompare(s1,s2):
-    remove = u'-_'
-    c1 = unicode(s1).translate(None,remove)
-    c2 = unicode(s2).translate(None,remove)
+    remove = str('-_')
+    c1 = str(s1).translate(None,remove)
+    c2 = str(s2).translate(None,remove)
     return c1==c2
 
 def get_drive(driveNo):

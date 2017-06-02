@@ -291,7 +291,7 @@ class Director(Artist):
 class Musician(Artist):
     albums = models.ManyToManyField(Collection, blank=True, related_name='album_musicians')
     concerts = models.ManyToManyField(Movie, blank=True, related_name='concert_musicians')
-    songs = models.ManyToManyField(Song, blank=True)
+    songs = models.ManyToManyField(Song, blank=True, related_name='musicians')
     def get_absolute_url(self):
         return reverse('builder_musician_detail',kwargs={'slug': self.slug})
     def get_update_url(self):

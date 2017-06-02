@@ -17,6 +17,7 @@
                      {% if perms.FHLBuilder.collection_builder %}
                          <a href="{% url 'builder_collection_create' %}">Create Collection</a>
                          <a href="{% url 'builder_diagnostics' %}">Diagnostics</a>
+                         <a href="{% url 'builder_musician_remove' %}">Remove Musician</a>
                      {% endif %}               
                  {% else %}
                      <a href="{% url 'FHLUser_Login' %}">Log In</a>
