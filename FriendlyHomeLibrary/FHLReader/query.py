@@ -219,18 +219,21 @@ def mix(rest,mine,mixit):
     
     result = []
     count = 0
-    mycount = len(mine)-1
-    
+    mel = len(mine)
+    if mel==1:
+        result.append(mine[0])
+    mycount = mel-1
+        
     for a in rest:
         count = count+1
         if count == mixit:
             if mycount >= 0:
                 result.append(mine[mycount])
                 count = 0
-                mycount = mycount-1
-                
+                mycount = mycount-1                
         result.append(a) 
     if mycount == 0:
+        # make sure last item is there
         result.append(mine[0])
     return result
 
