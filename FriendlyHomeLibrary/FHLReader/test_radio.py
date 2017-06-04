@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from FHLBuilder.models import Song, Collection, Tag
+from FHLBuilder.models import Song, Collection
 from FHLBuilder.views import CollectionMixins
 from FHLBuilder import choices, collection
 
@@ -76,11 +76,11 @@ class Radio1(TestCase):
     def test4(self):
         # more than one song in my list
         for sg in  Song.objects.filter(title__icontains='remember'):
-           self.mysong.append(sg)
-           sg.loves.add(self.me)
+            self.mysong.append(sg)
+            sg.loves.add(self.me)
         for sg in Song.objects.filter(title__icontains='heartache'):
-           sg.likes.add(self.me)
-           self.mysong.append(sg)
+            sg.likes.add(self.me)
+            self.mysong.append(sg)
            
         self.assertTrue(len(self.mysong)>1)
         
@@ -141,11 +141,11 @@ class Radio1(TestCase):
     def test8(self):
         # more than one song in my list
         for sg in  Song.objects.filter(title__icontains='remember'):
-           self.mysong.append(sg)
-           sg.loves.add(self.me)
+            self.mysong.append(sg)
+            sg.loves.add(self.me)
         for sg in Song.objects.filter(title__icontains='heartache'):
-           sg.likes.add(self.me)
-           self.mysong.append(sg)
+            sg.likes.add(self.me)
+            self.mysong.append(sg)
            
         self.assertTrue(len(self.mysong)>1)
         

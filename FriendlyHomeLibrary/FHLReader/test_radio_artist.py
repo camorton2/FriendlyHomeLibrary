@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.db.models import Q
 
-from FHLBuilder.models import Song, Collection, Tag, Musician
+from FHLBuilder.models import Collection, Musician
 from FHLBuilder.views import CollectionMixins
 from FHLBuilder import choices, collection
 

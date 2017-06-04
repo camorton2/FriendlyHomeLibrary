@@ -671,16 +671,18 @@ class DiagnosticsView(View):
         title = 'diagnostics'
         if 'symlinks' in request.GET:
             diagnostics.play_with_links()
-        if 'verify-songs' in request.GET:
+        elif 'verify-songs' in request.GET:
             title = 'missing songs'
             blist = diagnostics.verify_list(models.Song.objects.all())
-        if 'verify-movies' in request.GET:
+        elif 'verify-movies' in request.GET:
             title = 'missing movies'
             blist = diagnostics.verify_list(models.Movie.objects.all())
-        if 'verify-pictures' in request.GET:
+        elif 'verify-pictures' in request.GET:
             title = 'missing pictures'
             blist = diagnostics.verify_list(models.Picture.objects.all())
-
+        else:
+            a = CollectionMixins()
+            utility.rescan(request.GET,a)
         context = { 'message': message,
             'brokenList': blist,
             'title': title }
@@ -713,4 +715,5 @@ class MusicianCleanupView(View):
 
         context = {'form':bound_form,'title': 'Remove a Musician'}
         return render(request,self.template_name,context)
+
 

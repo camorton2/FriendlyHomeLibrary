@@ -5,7 +5,7 @@ import os
 import datetime
 
 from FriendlyHomeLibrary import settings
-
+from FHLBuilder import choices
 
 #Utility functions
 
@@ -141,4 +141,39 @@ def collection_sets(collections):
                     variousc.append(current)
     return songc,moviec,picturec,variousc
 
+
+def rescan(myreq,a):
+    
+    if 'rescan-songs' in myreq:
+        print('rescan scons')
+        _,_ = a.add_members('mp3s',2,choices.CONCERT,'')            
+    elif 'rescan-pictures' in myreq:
+        print('rescan pictures')
+        _,_ = a.add_members('picturesbackup',2,choices.MINI_MOVIE,'')            
+    elif 'rescan-movies' in myreq:
+        print('rescan-movies')
+        _,_ = a.add_members('Videos',1,choices.MOVIE,'')
+    elif 'rescan-video' in myreq:
+        print('rescan bava')
+        _,_ = a.add_members('Videos/bava',2,choices.MOVIE,'scary')
+        print('rescan 3d')
+        _,_ = a.add_members('Videos/3d',2,choices.MOVIE,'')
+        print('rescan TV')
+        _,_ = a.add_members('Videos/TV',2,choices.UNKNOWN,'')
+        print('rescan comedy')
+        _,_ = a.add_members('Videos/comedy',2,choices.STANDUP,'')
+        print('rescan concert')
+        _,_ = a.add_members('Videos/concert',2,choices.CONCERT,'')
+        print('rescan documentaries')
+        _,_ = a.add_members('Videos/documentaries',2,choices.DOCUMENTARY,'')
+        print('rescan instructional')
+        _,_ = a.add_members('Videos/Instructional',2,choices.MINI_MOVIE,'')
+        print('rescan neal')
+        _,_ = a.add_members('Videos/nealYoundArchives',2,choices.CONCERT,'')
+        print('rescan workout')
+        _,_ = a.add_members('Videos/Workout',2,choices.MINI_MOVIE,'')
+        print('rescan snowboarding')
+        _,_ = a.add_members('Videos/zz-snowboarding',2,choices.MINI_MOVIE,'')
+        print('rescan twisted')
+        _,_ = a.add_members('Videos/ZZtwistedMonk',2,choices.MINI_MOVIE,'')
 
