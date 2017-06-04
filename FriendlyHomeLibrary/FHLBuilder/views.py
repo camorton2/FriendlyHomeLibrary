@@ -419,17 +419,6 @@ class MovieDetailView(View):
                 movie.title=new_movie.title
                 movie.year=new_movie.year
 
-                cast = bound_form.cleaned_data['cast']
-                if len(cast):
-                    #print('cast %s' % cast)
-                    try:
-                        message = u'success'
-                        #print('view calls cast_movie')
-                        chromecast.cast_movie(cast,movie)
-                    except rutils.MyException,ex:
-                        message = ex.message
-                        print('Caught %s' % ex.message)
-
                 # tag
                 tq = bound_form.cleaned_data['tag']
                 if len(tq):
