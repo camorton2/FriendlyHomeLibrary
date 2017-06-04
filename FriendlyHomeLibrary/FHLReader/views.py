@@ -418,3 +418,72 @@ class MusicianRadioChannel(View):
         context = {'form':bound_form,'rlist':flist,
             'title': 'Build a  Channel'}
         return render(request,self.template_name,context)
+
+
+
+class CollectionRadioChannel(View):
+    """
+    Allow user to select a radio channel based on the form
+    in this case by selection collections
+    """
+    template_name = 'FHLReader/channel.html'
+    form_class=forms.CollectionRadioForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Build a Collection Radio Channel'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+        me = User.objects.get(username=request.user)
+        mycache = cu.MyCache(me)
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            xmas = bound_form.cleaned_data['xmas']
+            colls = bound_form.cleaned_data['choices']
+            rlist = rq.collection_radio_select(colls,xmas)
+            cu.cache_list_bykind(rlist,choices.SONG,'special_channel',mycache)
+            return redirect(reverse('cached_list'))
+
+        flist = bu.link_file_list(rlist)
+        # display the list as files with the form
+        context = {'form':bound_form,'rlist':flist,
+            'title': 'Build a  Channel'}
+        return render(request,self.template_name,context)
+
+
+class SongRadioChannel(View):
+    """
+    Allow user to select a radio channel based on the form
+    in this case by selecting songs
+    """
+    template_name = 'FHLReader/channel.html'
+    form_class=forms.SongRadioForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Build a Song Radio Channel'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+        me = User.objects.get(username=request.user)
+        mycache = cu.MyCache(me)
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            xmas = bound_form.cleaned_data['xmas']
+            rlist = bound_form.cleaned_data['choices']
+            #rlist = rq.collection_radio_select(colls,xmas)
+            cu.cache_list_bykind(rlist,choices.SONG,'special_channel',mycache)
+            return redirect(reverse('cached_list'))
+
+        flist = bu.link_file_list(rlist)
+        # display the list as files with the form
+        context = {'form':bound_form,'rlist':flist,
+            'title': 'Build a  Channel'}
+        return render(request,self.template_name,context)

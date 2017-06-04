@@ -358,3 +358,19 @@ def artist_radio_select(artists,xmas):
     else:
         return exclude_ick_xmas(big)
     
+
+def collection_radio_select(colls,xmas):
+    """
+    passed a queryset containing collections and boolean for xmas
+    returns a list of all songs by artists in that queryset
+    without ick
+    """
+    query = reduce(operator.or_, (Q(collection=item) for item in colls))                           
+    
+    big = bmod.Song.objects.filter(query).order_by('?')
+        
+    if xmas:
+        return exclude_ick(big)
+    else:
+        return exclude_ick_xmas(big)
+    

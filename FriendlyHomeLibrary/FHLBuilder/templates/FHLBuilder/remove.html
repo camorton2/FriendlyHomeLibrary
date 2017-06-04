@@ -12,9 +12,9 @@
     <form action="" method = "post">
     {% csrf_token %}    
     <fieldset>
-        <legend>Pick musician(s) to remove</legend>    
+        <legend>Remove from database (does not remove files)</legend>    
         {{form.as_p}}
-        <button type="submit">Submit</button>
+        <button type="submit">REMOVE FROM DATABASE</button>
     </fieldset>
     </form>
 

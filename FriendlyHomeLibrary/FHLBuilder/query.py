@@ -59,7 +59,7 @@ def handle_collection_kind(kind):
     containing files of kind
     """
     if kind in choices.SONG:
-        return Collection.objects.exclude(songs=None)
+        return Collection.song_objects.all()
     if kind in choices.PICTURE:
         return Collection.objects.exclude(pictures=None)
     if kind in choices.videos:

@@ -159,3 +159,101 @@ class MusicianCleanupForm(forms.ModelForm):
         widget=forms.CheckboxSelectMultiple, 
         label = 'Pick musician(s)')
 
+
+class CollectionCleanupForm(forms.ModelForm):
+    """
+    Used to remove a collection and everything in it
+    """
+    class Meta:
+        model=models.Collection
+        fields=[]
+             
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Collection.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick collection(s)')
+
+
+class DirectorCleanupForm(forms.ModelForm):
+    """
+    Used to remove a director (does not remove movies)
+    """
+    class Meta:
+        model=models.Director
+        fields=[]
+             
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Director.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick director(s)')
+
+
+class ActorCleanupForm(forms.ModelForm):
+    """
+    Used to remove an actor (does not remove movies)
+    """
+    class Meta:
+        model=models.Actor
+        fields=[]
+             
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Actor.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick actor(s)')
+
+
+class TagCleanupForm(forms.ModelForm):
+    """
+    Used to remove an actor (does not remove movies)
+    """
+    class Meta:
+        model=models.Tag
+        fields=[]
+             
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Tag.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick tag(s)')
+
+
+class PictureCleanupForm(forms.ModelForm):
+    """
+    Used to remove a picture
+    """
+    class Meta:
+        model=models.Picture
+        fields=[]
+             
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Picture.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick picture(s)')
+
+
+class SongCleanupForm(forms.ModelForm):
+    """
+    Used to remove a song
+    """
+    class Meta:
+        model=models.Song
+        fields=[]
+             
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Song.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick song(s)')
+
+
+class MovieCleanupForm(forms.ModelForm):
+    """
+    Used to remove a movie
+    """
+    class Meta:
+        model=models.Movie
+        fields=[]
+             
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Movie.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick movie(s)')
+

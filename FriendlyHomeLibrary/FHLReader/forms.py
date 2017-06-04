@@ -104,8 +104,8 @@ class RadioForm(forms.ModelForm):
 
 class MusicianRadioForm(forms.ModelForm):
     """
-    Used for radio stations which pick random songs based on 
-    selected users
+    Used for radio stations which pick songs based on 
+    selected musicians
     """
     class Meta:
         model=models.Musician
@@ -118,6 +118,44 @@ class MusicianRadioForm(forms.ModelForm):
         queryset=models.Musician.objects.all(),
         widget=forms.CheckboxSelectMultiple, 
         label = 'Pick musician(s)')
+
+
+class CollectionRadioForm(forms.ModelForm):
+    """
+    Used for radio stations which pick songs based on selected 
+    collections
+    """
+    class Meta:
+        model=models.Collection
+        fields=[]
+     
+    xmas = forms.BooleanField(label = 'include Christmas', 
+        initial=False,required=False)
+        
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Collection.song_objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick collection(s)')
+
+
+class SongRadioForm(forms.ModelForm):
+    """
+    Used for radio stations which pick songs based on selected 
+    songs
+    """
+    class Meta:
+        model=models.Song
+        fields=[]
+     
+    xmas = forms.BooleanField(label = 'include Christmas', 
+        initial=False,required=False)
+        
+    choices = forms.ModelMultipleChoiceField(
+        queryset=models.Song.objects.all(),
+        widget=forms.CheckboxSelectMultiple, 
+        label = 'Pick song(s)')
+
+
 
 class MovieChannelForm(forms.ModelForm):
     """

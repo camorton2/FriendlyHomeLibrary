@@ -30,6 +30,12 @@ class Tag(models.Model):
     def get_update_url(self):
         return reverse('builder_tag_update',kwargs={'slug': self.slug})
 
+
+class Song_Collection_Manager(models.Manager):
+    def get_queryset(self):
+        return super(Song_Collection_Manager,self).get_queryset().exclude(songs=None)
+
+
 # holds the path, represents an Album/audioBook (audio) or Series (video)
 class Collection(models.Model):
     filePath = models.CharField(max_length=CHAR_LENGTH)
@@ -43,6 +49,12 @@ class Collection(models.Model):
         return reverse('builder_collection_update',kwargs={'slug': self.slug})
     def __unicode__(self):
         return self.title
+
+
+    # default manager
+    objects = models.Manager() 
+    # just finds collections with songs
+    song_objects = Song_Collection_Manager()
 
     class Meta:
         ordering = ['title']

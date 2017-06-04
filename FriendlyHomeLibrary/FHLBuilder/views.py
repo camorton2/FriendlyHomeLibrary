@@ -717,3 +717,198 @@ class MusicianCleanupView(View):
         return render(request,self.template_name,context)
 
 
+@require_authenticated_permission('FHLBuilder.collection_builder')
+class CollectionCleanupView(View):
+    """
+    Allow user to select musician(s) to remove from the database
+    """
+    template_name = 'FHLBuilder/remove.html'
+    form_class=forms.CollectionCleanupForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Remove a Collection'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            colls = bound_form.cleaned_data['choices']
+            for collect in colls:
+                #print('wants to remove %s' % (collect.title))
+                collection.remove_collection(collect)                    
+
+        context = {'form':bound_form,'title': 'Remove a Collection'}
+        return render(request,self.template_name,context)
+
+
+@require_authenticated_permission('FHLBuilder.collection_builder')
+class DirectorCleanupView(View):
+    """
+    Allow user to select director(s) to remove from the database
+    """
+    template_name = 'FHLBuilder/remove.html'
+    form_class=forms.DirectorCleanupForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Remove a Director'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            dtors = bound_form.cleaned_data['choices']
+            for dtor in dtors:
+                print('wants to remove %s' % (dtor.fullName))
+                collection.remove_director(dtor)                    
+
+        context = {'form':bound_form,'title': 'Remove a Director'}
+        return render(request,self.template_name,context)
+
+
+@require_authenticated_permission('FHLBuilder.collection_builder')
+class ActorCleanupView(View):
+    """
+    Allow user to select director(s) to remove from the database
+    """
+    template_name = 'FHLBuilder/remove.html'
+    form_class=forms.ActorCleanupForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Remove an Actor'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            acts = bound_form.cleaned_data['choices']
+            for act in acts:
+                print('wants to remove %s' % (act.fullName))
+                collection.remove_actor(act)                    
+
+        context = {'form':bound_form,'title': 'Remove an Actor'}
+        return render(request,self.template_name,context)
+
+
+@require_authenticated_permission('FHLBuilder.collection_builder')
+class TagCleanupView(View):
+    """
+    Allow user to select tag(s) to remove from the database
+    """
+    template_name = 'FHLBuilder/remove.html'
+    form_class=forms.TagCleanupForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Remove a tag'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            tags = bound_form.cleaned_data['choices']
+            for tag in tags:
+                print('wants to remove %s' % (tag.name))
+                collection.remove_tag(tag)                    
+
+        context = {'form':bound_form,'title': 'Remove a tag'}
+        return render(request,self.template_name,context)
+
+
+@require_authenticated_permission('FHLBuilder.collection_builder')
+class PictureCleanupView(View):
+    """
+    Allow user to select picture(s) to remove from the database
+    """
+    template_name = 'FHLBuilder/remove.html'
+    form_class=forms.PictureCleanupForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Remove a picture'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            picts = bound_form.cleaned_data['choices']
+            for pict in picts:
+                print('wants to remove %s' % (pict.title))
+                collection.remove_picture(pict)                    
+
+        context = {'form':bound_form,'title': 'Remove a picture'}
+        return render(request,self.template_name,context)
+
+
+@require_authenticated_permission('FHLBuilder.collection_builder')
+class SongCleanupView(View):
+    """
+    Allow user to select picture(s) to remove from the database
+    """
+    template_name = 'FHLBuilder/remove.html'
+    form_class=forms.SongCleanupForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Remove a song'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            songs = bound_form.cleaned_data['choices']
+            for song in songs:
+                print('wants to remove %s' % (song.title))
+                collection.remove_song(song)                    
+
+        context = {'form':bound_form,'title': 'Remove a song'}
+        return render(request,self.template_name,context)
+
+
+@require_authenticated_permission('FHLBuilder.collection_builder')
+class MovieCleanupView(View):
+    """
+    Allow user to select movie(s) to remove from the database
+    """
+    template_name = 'FHLBuilder/remove.html'
+    form_class=forms.MovieCleanupForm
+
+    def get(self, request):
+        context = {'form':self.form_class(),
+            'title': 'Remove a movie'}
+        return render(request,self.template_name,context)
+
+
+    def post(self, request):
+
+        rlist = []
+        bound_form = self.form_class(request.POST)
+        if bound_form.is_valid():
+            movies = bound_form.cleaned_data['choices']
+            for movie in movies:
+                print('wants to remove %s' % (movie.title))
+                collection.remove_movie(movie)                    
+
+        context = {'form':bound_form,'title': 'Remove a movie'}
+        return render(request,self.template_name,context)
+

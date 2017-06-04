@@ -225,6 +225,8 @@ def fix_song(song,theFile,collection):
         pass
     elif genre.name == 'unknown':
         pass        
+    elif genre.name == '<not-set>':
+        pass                
     else:
         genreSlug = slugify(unicode('%s' % (genre.name)))
         gen = add_tag(unicode(genre.name),genreSlug)
@@ -435,14 +437,14 @@ def remove_musician(target):
 def remove_actor(target):
     for mv in target.movies.all():
         # do not remove the movie, just remove the actor
-        mv.actors.remove(target)
+        mv.movie_actors.remove(target)
     target.delete()
     
 
 def remove_director(target):
     for mv in target.movies.all():
         # do not remove the movie, just remove the director
-        mv.directors.remove(target)
+        mv.movie_directors.remove(target)
     target.delete()
     
 
