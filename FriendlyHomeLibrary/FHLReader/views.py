@@ -350,6 +350,7 @@ class RadioChannel(View):
             kind = bound_form.cleaned_data['kind']
             xmas = bound_form.cleaned_data['xmas']
             recent = bound_form.cleaned_data['recent']
+            cl = bound_form.cleaned_data['classic']
 
             justme = False
             if kind == choices.ME:
@@ -361,9 +362,9 @@ class RadioChannel(View):
                 target = Song.random_objects.all()
                 
             if xmas:
-                alist = rq.radio_select_christmas(justme,me,target)
+                alist = rq.radio_select_christmas(justme,me,target,cl)
             else:
-                alist = rq.radio_select(justme,me,target)
+                alist = rq.radio_select(justme,me,target,cl)
             
             # after slide no more queries
             rlist = alist[:count]
@@ -476,9 +477,7 @@ class SongRadioChannel(View):
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
-            xmas = bound_form.cleaned_data['xmas']
             rlist = bound_form.cleaned_data['choices']
-            #rlist = rq.collection_radio_select(colls,xmas)
             cu.cache_list_bykind(rlist,choices.SONG,'special_channel',mycache)
             return redirect(reverse('cached_list'))
 

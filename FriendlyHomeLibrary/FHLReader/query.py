@@ -238,16 +238,23 @@ def mix(rest,mine,mixit):
     return result
 
 
-def radio_list(start,justme,me):
+def radio_list(start,justme,me,cl):
     """
     Get the list of random songs added prefered songs if requested
+    add classical songs if requested
     """
+    
     if justme:
         g1 = Q(likes__username=me)
         g2 = Q(loves__username=me)
         set2 = bmod.Song.random_objects.filter(g1|g2)        
         if set2.count():
             start = mix(start,set2,10)
+    
+    if cl:
+        cq = Q(tags__name__icontains='classical')
+        clst = bmod.Song.objects.filter(cq)
+        start = mix(start,clst,25)
     return start
 
 
@@ -255,7 +262,9 @@ def exclude_ick(big):
     ick1 = Q(tags__name__icontains='bagpipe')
     ick2 = Q(tags__name__icontains='fiddle')
     ick3 = Q(tags__name__icontains='yuck')
-    return big.exclude(ick1|ick2|ick3)
+    # by default exclude classical music
+    cq = Q(tags__name__icontains='classical')
+    return big.exclude(ick1|ick2|ick3|cq)
 
 
 def exclude_ick_xmas(big):
@@ -274,9 +283,12 @@ def only_xmas(big):
     return exclude_ick(big.filter(b1|b2|b3))
 
 
-def radio_select(justme,me,target):
+def radio_select(justme,me,target,cl):
     """
     Select a list of non-Christmas songs
+    if justme is true include favourites of me
+    target is the start list to select from
+    if cl is true include some classical music
     """
     
     big = exclude_ick_xmas(target)
@@ -286,12 +298,15 @@ def radio_select(justme,me,target):
     else:
         start = big.filter(dislikes=None)
     
-    return radio_list(start,justme,me)
+    return radio_list(start,justme,me,cl)
 
 
-def radio_select_christmas(justme,me,target):
+def radio_select_christmas(justme,me,target,cl):
     """
     select an appropriate mix of Christmas songs
+    if justme is true include favourites of me
+    target is the start list to select from
+    if cl is true include some classical music    
     """
     # no Christmas part
     big = exclude_ick_xmas(target)
@@ -301,7 +316,7 @@ def radio_select_christmas(justme,me,target):
     else:
         start = big.filter(dislikes=None)
         
-    therest = radio_list(start,justme,me)
+    therest = radio_list(start,justme,me,cl)
 
     # Christmas
     big = only_xmas(target)
@@ -312,7 +327,7 @@ def radio_select_christmas(justme,me,target):
     else:
         start = big.filter(dislikes=None)
         
-    xmas = radio_list(start,justme,me)
+    xmas = radio_list(start,justme,me,cl)
     
     return christmas(therest, xmas)
 

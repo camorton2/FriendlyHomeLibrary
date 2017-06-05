@@ -25,7 +25,7 @@
 <div>
     {% for song,path in rlist %}
         <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a> 
-            {{ song.collection.filePath }}/{{song.fileName}} </li>
+            <span style="float:right;">{{song.friendly_name}}</span></li>
     {% endfor %}
 </div>
 {% endblock %}

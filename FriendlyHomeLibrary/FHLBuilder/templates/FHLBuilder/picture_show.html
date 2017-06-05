@@ -1,7 +1,7 @@
 
 <script>
 function myFunction(please_stop){
-    var mtimer = setInterval( function(){ clickIt(mtimer); },4000 )
+    var mtimer = setInterval( function(){ clickIt(mtimer); },6000 )
     if(please_stop === undefined){
         clearInterval(mtimer);
     }
@@ -15,12 +15,14 @@ function clickIt(mtimer){
 
 <form action="" method = "get">
 {% csrf_token %}
-<button id='nextone' type="submit" name='sNext' value={{index}} hidden>Next</button>
+    <button id='nextone' type="submit" name='sNext' value={{index}} hidden>Next</button>
 </form>
+
+<p>
 <span style="float:left;">{{index}} / {{pictureCount}}</span>  
-<span style="float:right;">{{filename}}</span>
-
+<span style="float:right;">{{picture.friendly_name}}</span>
+</p>
 {% load static %}
-    <img onload="myFunction('go')" src="{% static filename %}" style="max-width:70%" style="max-height:80%">
-
-</section>
+<p>
+<img onload="myFunction('go')" src="{% static filename %}" style="max-width:60%">
+</p>

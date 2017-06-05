@@ -204,7 +204,6 @@ def playlist_requests_new(playlist,pattern,me,request):
         errors in kodi playback
     """
     
-    print('playlist_request pattern %s' % pattern)
     if 'kodi_local' == pattern:
         try:
             clientip = request.META['REMOTE_ADDR']
@@ -233,7 +232,7 @@ def playlist_requests(playlist,request):
         errors in kodi playback
     """
     me = models.User.objects.get(username=request.user)
-    print('playlist_request')
+
     if 'kodi_local' in request.GET:
         try:
             clientip = request.META['REMOTE_ADDR']

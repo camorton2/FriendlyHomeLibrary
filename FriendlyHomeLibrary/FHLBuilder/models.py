@@ -72,6 +72,15 @@ class CommonFile(models.Model):
     title = models.CharField(max_length=CHAR_LENGTH)
     slug = models.SlugField(max_length=CHAR_LENGTH,unique=True)
     date_added = models.DateField(default = now)
+
+    def friendly_name(self):
+        """ strip first directory from path """
+        fpath = self.collection.filePath
+        if '/' in fpath:
+            bg = fpath.index('/')+1
+            return fpath[bg:]+ '/' + self.fileName
+        return fpath+'/'+self.fileName
+
     
     def __unicode__(self):
         return self.title
@@ -180,14 +189,6 @@ class Picture(CommonFile):
     objects = models.Manager() 
     # excludes extensions not wanted in slide shows
     slide_objects = Slide_Manager()
-
-    def friendly_name(self):
-        """ strip first directory from path """
-        fpath = self.collection.filePath
-        if '/' in fpath:
-            bg = fpath.index('/')+1
-            return fpath[bg:]+ '/' + self.fileName
-        return fpath+'/'+self.fileName
     
     def get_absolute_url(self):
         return reverse('builder_picture_detail',kwargs={'slug': self.slug})

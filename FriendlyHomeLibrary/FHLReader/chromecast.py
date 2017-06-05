@@ -23,6 +23,7 @@ def find_chrome_casts():
     for x in chromecasts:
         item = chromecasts.index(x),x.device.friendly_name
         res.append(item)
+        x.disconnect()
         
     print(res)
     return res

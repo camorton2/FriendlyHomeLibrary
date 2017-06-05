@@ -12,12 +12,9 @@
 
 <section>
 
-{% if song.musician_set.count %}
-    {% for musician in song.musician_set.all %}
-        <li><a href="{{musician.get_absolute_url}}">Artist: {{musician.fullName|title}}</a></li>
-    {% endfor %}
-{% endif %}
-
+{% for musician in song.song_musicians.all %}
+    <li><a href="{{musician.get_absolute_url}}">Artist: {{musician.fullName|title}}</a></li>
+{% endfor %}
 
 <li><a href="{{song.collection.get_absolute_url}}">Album: {{song.collection.title|title}}</a></li>
 
@@ -25,7 +22,7 @@
     <li>Year: {{song.year}}</li>
 {% endif %}
 <li>Track: {{song.track}}</li>
-<li>Filename: {{playit}}</li>
+<li>Filename: {{song.friendly_name}}</li>
 <li>Date added: {{song.date_added}}</li>
 
 

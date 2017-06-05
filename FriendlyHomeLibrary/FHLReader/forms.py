@@ -92,6 +92,8 @@ class RadioForm(forms.ModelForm):
         initial=choices.ALL,label = 'who is listening')
     xmas = forms.BooleanField(label = 'include Christmas', 
         initial=False,required=False)
+    classic = forms.BooleanField(label = 'include classical', 
+        initial=False,required=False)        
     recent = forms.BooleanField(label = 'select only recent', 
         initial=True,required=False)
         
@@ -146,15 +148,11 @@ class SongRadioForm(forms.ModelForm):
     class Meta:
         model=models.Song
         fields=[]
-     
-    xmas = forms.BooleanField(label = 'include Christmas', 
-        initial=False,required=False)
-        
+             
     choices = forms.ModelMultipleChoiceField(
         queryset=models.Song.objects.all(),
         widget=forms.CheckboxSelectMultiple, 
         label = 'Pick song(s)')
-
 
 
 class MovieChannelForm(forms.ModelForm):

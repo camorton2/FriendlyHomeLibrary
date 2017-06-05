@@ -33,7 +33,7 @@ class Radio1(TestCase):
         self.mysong = []
         
     def test1(self):
-        full = query.radio_select(False,self.me,Song.objects.all())
+        full = query.radio_select(False,self.me,Song.objects.all(),False)
         radio = full[:30]
         for s in radio:
             xt = s.tags.filter(name__icontains='christmas')
@@ -45,7 +45,7 @@ class Radio1(TestCase):
     def test2(self):
         # no songs in my list
         self.assertTrue(len(self.mysong)==0)
-        full = query.radio_select(True,self.me,Song.random_objects.all())
+        full = query.radio_select(True,self.me,Song.random_objects.all(),True)
         radio = full[:30]
         for s in radio:
             xt = s.tags.filter(name__icontains='christmas')
@@ -62,7 +62,7 @@ class Radio1(TestCase):
         for x in self.mysong:
             x.loves.add(self.me)
         
-        full = query.radio_select(True,self.me,Song.random_objects.all())
+        full = query.radio_select(True,self.me,Song.random_objects.all(),False)
         radio = full[:30]
         for s in radio:
             xt = s.tags.filter(name__icontains='christmas')
@@ -84,7 +84,7 @@ class Radio1(TestCase):
            
         self.assertTrue(len(self.mysong)>1)
         
-        full = query.radio_select(True,self.me,Song.random_objects.all())
+        full = query.radio_select(True,self.me,Song.random_objects.all(),True)
         radio = full[:50]
         for s in radio:
             xt = s.tags.filter(name__icontains='christmas')
@@ -105,7 +105,7 @@ class Radio1(TestCase):
 
 
     def test5(self):
-        full = query.radio_select_christmas(False,self.me,Song.objects.all())
+        full = query.radio_select_christmas(False,self.me,Song.objects.all(),False)
         radio = full[:30]
         self.check_christmas(radio)
         self.assertNotIn(self.nosong,radio)        
@@ -114,7 +114,7 @@ class Radio1(TestCase):
     def test6(self):
         # no songs in my list
         self.assertTrue(len(self.mysong)==0)
-        full = query.radio_select_christmas(True,self.me,Song.random_objects.all())
+        full = query.radio_select_christmas(True,self.me,Song.random_objects.all(),True)
         radio = full[:30]
         self.check_christmas(radio)
         for x in self.nosong:
@@ -129,7 +129,7 @@ class Radio1(TestCase):
         for x in self.mysong:
             x.loves.add(self.me)
         
-        full = query.radio_select_christmas(True,self.me,Song.random_objects.all())
+        full = query.radio_select_christmas(True,self.me,Song.random_objects.all(),False)
         radio = full[:30]
         self.check_christmas(radio)
         for x in self.nosong:
@@ -149,7 +149,7 @@ class Radio1(TestCase):
            
         self.assertTrue(len(self.mysong)>1)
         
-        full = query.radio_select_christmas(True,self.me,Song.random_objects.all())
+        full = query.radio_select_christmas(True,self.me,Song.random_objects.all(),True)
         radio = full[:50]
         
         self.check_christmas(radio)

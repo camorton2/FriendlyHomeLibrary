@@ -18,10 +18,10 @@
             </audio>
             <ul id="playlist">
             <li class="current-song"><a href="{% static path %}"> {{song.title|title}}</a> 
-                {{ song.collection.filePath }}/{{song.fileName}} </li>
+                <span style="float:right;">{{song.friendly_name}}</span></li>
         {% else %}
             <li><a href="{% static path %}">{{song.title|title}}</a> 
-                {{ song.collection.filePath }}/{{song.fileName}} </li>
+                <span style="float:right;">{{song.friendly_name}}</span></li>
         {% endif %}
         {% if forloop.last %}
             </ul>
@@ -33,7 +33,7 @@
     <ul>
     {% for song,path in songlist %}
         <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a> 
-            {{ song.collection.filePath }}/{{song.fileName}} </li>
+            <span style="float:right;">{{song.friendly_name}}</span></li>
     {% endfor %}
     </ul>
 
