@@ -253,7 +253,7 @@ def radio_list(start,justme,me,cl):
     
     if cl:
         cq = Q(tags__name__icontains='classical')
-        clst = bmod.Song.objects.filter(cq)
+        clst = bmod.Song.random_objects.filter(cq)
         start = mix(start,clst,25)
     return start
 
