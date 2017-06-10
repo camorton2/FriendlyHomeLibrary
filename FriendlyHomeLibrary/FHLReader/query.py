@@ -219,22 +219,18 @@ def mix(rest,mine,mixit):
     
     result = []
     count = 0
-    mel = len(mine)
-    if mel==1:
-        result.append(mine[0])
-    mycount = mel-1
-        
+    mycount = 0
+    mel = len(mine)  
+    
     for a in rest:
-        count = count+1
-        if count == mixit:
-            if mycount >= 0:
+        count+=1
+        mres = count % mixit
+        if not mres:
+            if mycount < mel:
                 result.append(mine[mycount])
-                count = 0
-                mycount = mycount-1                
-        result.append(a) 
-    if mycount == 0:
-        # make sure last item is there
-        result.append(mine[0])
+                mycount+=1
+        result.append(a)
+            
     return result
 
 
@@ -243,14 +239,12 @@ def radio_list(start,justme,me,cl):
     Get the list of random songs added prefered songs if requested
     add classical songs if requested
     """
-    
     if justme:
         g1 = Q(likes__username=me)
         g2 = Q(loves__username=me)
-        set2 = bmod.Song.random_objects.filter(g1|g2)        
+        set2 = bmod.Song.random_objects.filter(g1|g2)
         if set2.count():
             start = mix(start,set2,10)
-    
     if cl:
         cq = Q(tags__name__icontains='classical')
         clst = bmod.Song.random_objects.filter(cq)
@@ -316,7 +310,7 @@ def radio_select_christmas(justme,me,target,cl):
     else:
         start = big.filter(dislikes=None)
         
-    therest = radio_list(start,justme,me,cl)
+    therest = radio_list(start,False,me,False)
 
     # Christmas
     big = only_xmas(target)
@@ -327,9 +321,12 @@ def radio_select_christmas(justme,me,target,cl):
     else:
         start = big.filter(dislikes=None)
         
-    xmas = radio_list(start,justme,me,cl)
+    xmas = radio_list(start,False,me,False)
     
-    return christmas(therest, xmas)
+    radio = christmas(therest, xmas)
+    if justme or cl:
+        return radio_list(radio,justme,me,cl)
+    return radio
 
 
 def christmas(rest, xmas):

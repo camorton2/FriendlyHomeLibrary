@@ -32,6 +32,14 @@ class Radio1(TestCase):
         self.assertFalse(len(self.nosong) == 0)
         self.mysong = []
         
+        
+    def check_me(self,alist):
+        for y in self.mysong:
+            if y in alist:
+                return True
+        return False
+        
+        
     def test1(self):
         full = query.radio_select(False,self.me,Song.objects.all(),False)
         radio = full[:30]
@@ -69,8 +77,7 @@ class Radio1(TestCase):
             self.assertTrue(len(xt)==0)
         for x in self.nosong:
             self.assertNotIn(x,radio)
-        for y in self.mysong:
-            self.assertIn(y,radio)
+        self.assertTrue(self.check_me(radio))
         
 
     def test4(self):
@@ -91,8 +98,7 @@ class Radio1(TestCase):
             self.assertTrue(len(xt)==0)
         for x in self.nosong:
             self.assertNotIn(x,radio)
-        for y in self.mysong:
-            self.assertIn(y,radio)
+        self.assertTrue(self.check_me(radio))
 
 
     def check_christmas(self,radio):
@@ -125,6 +131,7 @@ class Radio1(TestCase):
         # one song in my list
         mysongq = Song.objects.filter(title__icontains='remember')
         self.mysong = list(mysongq)
+        
         self.assertTrue(len(self.mysong)==1)
         for x in self.mysong:
             x.loves.add(self.me)
@@ -134,10 +141,9 @@ class Radio1(TestCase):
         self.check_christmas(radio)
         for x in self.nosong:
             self.assertNotIn(x,radio)
-        for y in self.mysong:
-            self.assertIn(y,radio)
-        
+        self.assertTrue(self.check_me(radio))
 
+        
     def test8(self):
         # more than one song in my list
         for sg in  Song.objects.filter(title__icontains='remember'):
@@ -152,11 +158,7 @@ class Radio1(TestCase):
         full = query.radio_select_christmas(True,self.me,Song.random_objects.all(),True)
         radio = full[:50]
         
-        self.check_christmas(radio)
-                
-        for x in self.nosong:
-            self.assertNotIn(x,radio)
-        for y in self.mysong:
-            self.assertIn(y,radio)
+        self.check_christmas(radio)                
+        self.assertTrue(self.check_me(radio))
 
 
