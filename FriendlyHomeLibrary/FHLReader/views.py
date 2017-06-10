@@ -135,7 +135,7 @@ class CachedFileList(View):
     cached list
     """
     def get(self,request):
-        print("CachedFileList GET")
+        #print("CachedFileList GET")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
 
@@ -155,13 +155,13 @@ class RandomList(View):
     form_class=forms.RandomForm
 
     def get(self, request):
-        print("RandomList GET")
+        #print("RandomList GET")
         context = {'form':self.form_class(),
             'title': 'Build a Random Channel'}
         return render(request,self.template_name,context)
 
     def post(self, request):
-        print("RandomList POST")
+        #print("RandomList POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
 
@@ -171,12 +171,12 @@ class RandomList(View):
         rlist = []
         bound_form = self.form_class(request.POST)
         if bound_form.is_valid():
-            print(' valid form ')
+            #print(' valid form ')
             count = bound_form.cleaned_data['count']
             kind = bound_form.cleaned_data['kind']
             tag = bound_form.cleaned_data['tag']
             title = bound_form.cleaned_data['atitle']
-            print( kind )
+            #print( kind )
             rlist = rq.random_select(count,title,tag,kind)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
@@ -193,13 +193,13 @@ class RecentList(View):
     form_class=forms.RecentForm
 
     def get(self, request):
-        print("RecentList GET")
+        #print("RecentList GET")
         context = {'form':self.form_class(),
             'title': 'Build a Recent Channel'}
         return render(request,self.template_name,context)
 
     def post(self, request):
-        print("RecentList POST")
+        #print("RecentList POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
 
@@ -226,7 +226,7 @@ class SpecialChannel(View):
     form_class=forms.CountForm
 
     def get(self, request, select):
-        print("RandomList GET")
+        #print("RandomList GET")
         title = ('Build a channel %s' % (select))
         context = {'form':self.form_class(),
             'title': title}
@@ -234,7 +234,7 @@ class SpecialChannel(View):
 
 
     def post(self, request, select):
-        print("RandomList POST")
+        #print("RandomList POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
 
@@ -329,14 +329,14 @@ class RadioChannel(View):
     form_class=forms.RadioForm
 
     def get(self, request):
-        print("RandomList GET")
+        #print("RandomList GET")
         context = {'form':self.form_class(),
             'title': 'Build a Radio Channel'}
         return render(request,self.template_name,context)
 
 
     def post(self, request):
-        print("RadioChannel POST")
+        #print("RadioChannel POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
 
@@ -357,21 +357,11 @@ class RadioChannel(View):
                 justme = True
 
             if recent:
-                target = Song.newest_objects.all()
+                rlist = rq.radio_recent(justme,me,cl,xmas,count)
             else:
-                target = Song.random_objects.all()
-                
-            if xmas:
-                alist = rq.radio_select_christmas(justme,me,target,cl)
-            else:
-                alist = rq.radio_select(justme,me,target,cl)
-            
-            # after slice no more queries
-            rlist = alist[:count]
-            print('radio count %d len %d' % (count,len(alist)))
-            if recent:
-                rlist = rq.random_count(rlist,count)
-                
+                target = rq.radio_all(justme,me,cl,xmas)
+                rlist = target[:count]
+                                
             cu.cache_list_bykind(rlist,choices.SONG,'special_channel',
                 mycache)
             if recent:
@@ -394,14 +384,14 @@ class MusicianRadioChannel(View):
     form_class=forms.MusicianRadioForm
 
     def get(self, request):
-        print("RandomList GET")
+        #print("RandomList GET")
         context = {'form':self.form_class(),
             'title': 'Build a Musician Radio Channel'}
         return render(request,self.template_name,context)
 
 
     def post(self, request):
-        print("RandomList POST")
+        #print("RandomList POST")
         me = User.objects.get(username=request.user)
         mycache = cu.MyCache(me)
 

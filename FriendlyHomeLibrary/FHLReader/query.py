@@ -242,40 +242,67 @@ def radio_list(start,justme,me,cl):
     if justme:
         g1 = Q(likes__username=me)
         g2 = Q(loves__username=me)
-        set2 = exclude_ick_xmas(bmod.Song.random_objects.filter(g1|g2))
+        set2 = exclude_ick_xmas(bmod.Song.random_objects.filter(g1|g2),cl)
         if set2.count():
             start = mix(start,set2,10)
     if cl:
         cq = Q(tags__name__icontains='classical')
-        clst = exclude_ick_xmas(bmod.Song.random_objects.filter(cq))
+        clst = exclude_ick_xmas(bmod.Song.random_objects.filter(cq),cl)
         if clst.count():
             start = mix(start,clst,25)
     return start
 
 
-def exclude_ick(big):    
+def exclude_ick(big,cl):    
+    """ filter unwanted songs, if cl is false all classical also excluded
+    """
     ick1 = Q(tags__name__icontains='bagpipe')
     ick2 = Q(tags__name__icontains='fiddle')
     ick3 = Q(tags__name__icontains='yuck')
     # by default exclude classical music
-    cq = Q(tags__name__icontains='classical')
-    return big.exclude(ick1|ick2|ick3|cq)
+    if not cl:
+        cq = Q(tags__name__icontains='classical')
+        return big.exclude(ick1|ick2|ick3|cq)
+    return big.exclude(ick1|ick2|ick3)
 
-
-def exclude_ick_xmas(big):
+def exclude_ick_xmas(big,cl):
+    """ filter Christmas and unwanted songs from list big 
+        if cl is set, classical will be left in place
+    """
     b1 = Q(tags__name__icontains='christmas')
     b2 = Q(title__icontains='christmas')
     b3 = Q(tags__name__icontains='seasonal')
     
-    return exclude_ick(big.exclude(b1|b2|b3))
+    return exclude_ick(big.exclude(b1|b2|b3),cl)
 
 
 def only_xmas(big):
+    """ filter known Christmas songs from list big """
     b1 = Q(tags__name__icontains='christmas')
     b2 = Q(title__icontains='christmas')
     b3 = Q(tags__name__icontains='seasonal')
     
-    return exclude_ick(big.filter(b1|b2|b3))
+    return exclude_ick(big.filter(b1|b2|b3),True)
+
+
+def radio_recent(justme,me,cl,xmas,count):
+    """ get list for radio recent option """
+    target = bmod.Song.newest_objects.all()
+    if xmas:
+        big = radio_select_christmas(False,me,target,False)
+    else:
+        big = radio_select(False,me,target,False)
+    rlist = big[:count]
+    rlist = random_count(rlist,count)
+    return radio_list(rlist,justme,me,cl)
+
+
+def radio_all(justme,me,cl,xmas):
+    """ get list for radio random option """
+    target = bmod.Song.random_objects.all()
+    if xmas:
+        return radio_select_christmas(justme,me,target,cl)
+    return radio_select(justme,me,target,cl)
 
 
 def radio_select(justme,me,target,cl):
@@ -285,7 +312,7 @@ def radio_select(justme,me,target,cl):
     target is the start list to select from
     if cl is true include some classical music
     """
-    big = exclude_ick_xmas(target)
+    big = exclude_ick_xmas(target,False)
     if justme:
         yuck = Q(dislikes__username=me)
         start = big.exclude(yuck)
@@ -303,7 +330,7 @@ def radio_select_christmas(justme,me,target,cl):
     if cl is true include some classical music    
     """
     # no Christmas part
-    big = exclude_ick_xmas(target)
+    big = exclude_ick_xmas(target,False)
     if justme:
         yuck = Q(dislikes__username=me)
         start = big.exclude(yuck)
@@ -366,9 +393,9 @@ def artist_radio_select(artists,xmas):
     big = bmod.Song.objects.filter(query).order_by('?')
         
     if xmas:
-        return exclude_ick(big)
+        return exclude_ick(big,True)
     else:
-        return exclude_ick_xmas(big)
+        return exclude_ick_xmas(big,True)
     
 
 def collection_radio_select(colls,xmas):
@@ -382,7 +409,7 @@ def collection_radio_select(colls,xmas):
     big = bmod.Song.objects.filter(query).order_by('?')
         
     if xmas:
-        return exclude_ick(big)
+        return exclude_ick(big,True)
     else:
-        return exclude_ick_xmas(big)
+        return exclude_ick_xmas(big,True)
     

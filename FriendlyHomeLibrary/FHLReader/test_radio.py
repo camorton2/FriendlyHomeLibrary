@@ -161,4 +161,40 @@ class Radio1(TestCase):
         self.check_christmas(radio)                
         self.assertTrue(self.check_me(radio))
 
-
+ 
+    def test9(self):
+        query.radio_recent(False,self.me,False,False,10)
+        query.radio_recent(False,self.me,False,True,15)
+        query.radio_recent(False,self.me,False,False,20)
+        query.radio_recent(False,self.me,False,True,11)
+        query.radio_recent(False,self.me,True,False,16)
+        query.radio_recent(False,self.me,True,True,17)
+        query.radio_recent(False,self.me,True,False,18)
+        query.radio_recent(False,self.me,True,True,21)
+        query.radio_recent(True,self.me,False,False,22)
+        query.radio_recent(True,self.me,False,True,23)
+        query.radio_recent(True,self.me,False,False,24)
+        query.radio_recent(True,self.me,False,True,25)
+        query.radio_recent(True,self.me,True,False,27)
+        query.radio_recent(True,self.me,True,True,35)
+        query.radio_recent(True,self.me,True,False,37)
+        query.radio_recent(True,self.me,True,True,39)
+        
+        
+    def test10(self):
+        query.radio_all(False,self.me,False,False)
+        query.radio_all(False,self.me,False,True)
+        query.radio_all(False,self.me,False,False)
+        query.radio_all(False,self.me,False,True)
+        query.radio_all(False,self.me,True,False)
+        query.radio_all(False,self.me,True,True)
+        query.radio_all(False,self.me,True,False)
+        query.radio_all(False,self.me,True,True)
+        query.radio_all(True,self.me,False,False)
+        query.radio_all(True,self.me,False,True)
+        query.radio_all(True,self.me,False,False)
+        query.radio_all(True,self.me,False,True)
+        query.radio_all(True,self.me,True,False)
+        query.radio_all(True,self.me,True,True)
+        query.radio_all(True,self.me,True,False)
+        query.radio_all(True,self.me,True,True)
