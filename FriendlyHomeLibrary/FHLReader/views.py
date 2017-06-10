@@ -366,7 +366,7 @@ class RadioChannel(View):
             else:
                 alist = rq.radio_select(justme,me,target,cl)
             
-            # after slide no more queries
+            # after slice no more queries
             rlist = alist[:count]
             print('radio count %d len %d' % (count,len(alist)))
             if recent:

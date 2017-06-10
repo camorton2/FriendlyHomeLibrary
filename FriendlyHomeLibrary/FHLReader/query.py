@@ -242,13 +242,14 @@ def radio_list(start,justme,me,cl):
     if justme:
         g1 = Q(likes__username=me)
         g2 = Q(loves__username=me)
-        set2 = bmod.Song.random_objects.filter(g1|g2)
+        set2 = exclude_ick_xmas(bmod.Song.random_objects.filter(g1|g2))
         if set2.count():
             start = mix(start,set2,10)
     if cl:
         cq = Q(tags__name__icontains='classical')
-        clst = bmod.Song.random_objects.filter(cq)
-        start = mix(start,clst,25)
+        clst = exclude_ick_xmas(bmod.Song.random_objects.filter(cq))
+        if clst.count():
+            start = mix(start,clst,25)
     return start
 
 
@@ -284,7 +285,6 @@ def radio_select(justme,me,target,cl):
     target is the start list to select from
     if cl is true include some classical music
     """
-    
     big = exclude_ick_xmas(target)
     if justme:
         yuck = Q(dislikes__username=me)
