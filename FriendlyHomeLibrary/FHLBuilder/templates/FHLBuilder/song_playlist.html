@@ -17,11 +17,11 @@
                 Sorry, your browser does not support HTML5 audio.
             </audio>
             <ul id="playlist">
-            <li class="current-song"><a href="{% static path %}"> {{song.title|title}}</a> 
-                <span style="float:right;">{{song.friendly_name}}</span></li>
+            <li class="current-song"><a href="{% static path %}"> {{song.title|title}} 
+                <span style="float:right;">{{song.friendly_name}}</span></a></li>
         {% else %}
-            <li><a href="{% static path %}">{{song.title|title}}</a> 
-                <span style="float:right;">{{song.friendly_name}}</span></li>
+            <li><a href="{% static path %}">{{song.title|title}}
+                <span style="float:right;">{{song.friendly_name}}</span></a></li>
         {% endif %}
         {% if forloop.last %}
             </ul>
@@ -32,8 +32,8 @@
 
     <ul>
     {% for song,path in songlist %}
-        <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a> 
-            <span style="float:right;">{{song.friendly_name}}</span></li>
+        <li><a href="{{ song.get_absolute_url }}">{{song.title|title}} 
+            <span style="float:right;">{{song.friendly_name}}</span></a></li>
     {% endfor %}
     </ul>
 
