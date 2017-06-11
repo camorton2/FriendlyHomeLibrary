@@ -44,6 +44,12 @@ body{
 
         {% block content %}
         <p>Welcome to the Friendly Home Library                        
+    {% if user.is_authenticated %}
+        <li><a href="{% url 'FHLUser_Logout' %}">Log Out</a></li>
+    {% else %}
+        <li><a href="{% url 'FHLUser_Login' %}">Log In</a></li>
+    {% endif %}                 
+        
         {% endblock content %}
     </main>
     </div>

@@ -1,0 +1,80 @@
+<nav>
+<div class="container">    
+    <a href="{% url 'homepage' %}">Home</a>
+    <a href="{% url 'builder_collection_list' %}">Collections</a>    
+    <a href="{% url 'builder_tag_list' %}">Tags</a>
+    <a href="{% url 'artist_list' 'actor' %}">Actors</a>
+    <a href="{% url 'artist_list' 'director' %}">Directors</a>
+    <a href="{% url 'artist_list' 'musician' %}">Musicians</a>
+    <a href="{% url 'builder_all_list' %}">All</a>
+
+    {% if perms.FHLBuilder.collection_builder %}    
+        <div class="dropdown">
+        <button class="dropbtn">Builder</button>
+        <div class="dropdown-content">
+            <a href="{% url 'builder_collection_create' %}">Create Collection</a>
+            <a href="{% url 'builder_diagnostics' %}">Diagnostics</a>
+            <a href="{% url 'builder_musician_remove' %}">Remove Musician</a>
+            <a href="{% url 'builder_collection_remove' %}">Remove Collection</a>
+            <a href="{% url 'builder_director_remove' %}">Remove Director</a>
+            <a href="{% url 'builder_actor_remove' %}">Remove Actor</a>
+            <a href="{% url 'builder_tag_remove' %}">Remove Tag</a>
+            <a href="{% url 'builder_picture_remove' %}">Remove Picture</a>
+            <a href="{% url 'builder_song_remove' %}">Remove Song</a>
+            <a href="{% url 'builder_movie_remove' %}">Remove Movie</a>
+        </div></div> 
+    {% endif %}               
+    <div class="dropdown">
+    <button class="dropbtn">Favourites</button>
+        <div class="dropdown-content">
+        <a href="{% url 'user_songs' 'liked' %}">My liked Songs</a>
+        <a href="{% url 'user_songs' 'loved' %}">My loved Songs</a>
+        <a href="{% url 'user_songs' 'both' %}">All My Songs</a>
+        <a href="{% url 'user_videos' 'liked' %}">My liked Videos</a>
+        <a href="{% url 'user_videos' 'loved' %}">My loved Videos</a> 
+        <a href="{% url 'user_videos' 'both' %}">All My Videos</a>
+        <a href="{% url 'user_pictures' 'liked' %}">My liked Pictures</a>
+        <a href="{% url 'user_pictures' 'loved' %}">My loved Pictures</a>
+        <a href="{% url 'user_pictures' 'both' %}">All My Pictures</a>                 
+    </div></div>
+    <div class="dropdown">
+    <button class="dropbtn">TV</button>
+        <div class="dropdown-content">
+        <a href="{% url 'special_channel' 'saturday-morning' %}">Saturday Morning</a>
+        <a href="{% url 'special_channel' 'sitcom' %}">Sitcom</a>
+        <a href="{% url 'special_channel' 'silly' %}">Silly</a> 
+        <a href="{% url 'special_channel' 'drama' %}">Drama</a>
+        <a href="{% url 'special_channel' 'scifi' %}">Scifi</a>
+        <a href="{% url 'special_channel' 'scary' %}">Scary</a>
+    </div></div>
+    <div class="dropdown">             
+    <button class="dropbtn">Radio</button>
+        <div class="dropdown-content">
+        <a href="{% url 'radio_channel' %}">Radio</a></li>
+        <a href="{% url 'mus-radio_channel' %}">Radio by Musician</a>
+        <a href="{% url 'col-radio_channel' %}">Radio by Collection</a>
+        <a href="{% url 'song-radio_channel' %}">Radio by Song</a>
+        <a href="{% url 'user_songs' 'random' %}">Just my songs</a>                 
+    </div></div>
+    <div class="dropdown">             
+    <button class="dropbtn">Video</button>
+        <div class="dropdown-content">
+        <a href="{% url 'user_videos' 'random' %}">My Videos</a>
+        {% for a,b in choices %}
+            <a href="{% url 'movie_channel' a %}">{{b}}</a>
+        {% endfor %}
+    </div></div>
+    <div class="dropdown">             
+    <button class="dropbtn">Picture</button>
+        <div class="dropdown-content">
+        <a href="{% url 'user_pictures' 'random' %}">Just My Pictures</a>
+    </div></div>
+    <div class="dropdown">             
+    <button class="dropbtn">Generic</button>
+        <div class="dropdown-content">
+        <a href="{% url 'random_list' %}">Random by file kind</a>
+        <a href="{% url 'recent_list' %}">Recent by file kind</a>
+        <a href="{% url 'cached_list' %}">Last Query</a>                 
+    </div></div>    
+      
+</nav>
