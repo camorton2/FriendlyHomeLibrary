@@ -17,11 +17,11 @@
                 Sorry, your browser does not support HTML5 audio.
             </audio>
             <p></p><ul id="playlist">
-            <li class="current-song"><a href="{% static path %}">{{song.friendly_name}}</a> 
-                <span style="float:right;"><a href="{{song.get_absolute_url}}">{{song.title}}</a></span></li>
+            <li class="current-song"><a href="{% static path %}">{{song.friendly_name}}</a></li> 
+                <span style="float:right;"><a href="{{song.get_absolute_url}}">{{song.title}}</a></span>
         {% else %}
-            <li><a href="{% static path %}">{{song.friendly_name}}</a>
-                <span style="float:right;"><a href="{{song.get_absolute_url}}">{{song.title}}</a></span></li>
+            <li><a href="{% static path %}">{{song.friendly_name}}</a></li>
+                <span style="float:right;"><a href="{{song.get_absolute_url}}">{{song.title}}</a></span>
         {% endif %}
         {% if forloop.last %}
             </ul>
