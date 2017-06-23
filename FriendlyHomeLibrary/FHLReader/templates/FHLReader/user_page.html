@@ -9,16 +9,18 @@
 {% endblock friendly_title %}
 
 {% block content %}
+{% if user.is_authenticated %}
 <h3>My Channels - sorted</h3>
-<li><a href="{% url 'user_songs' 'liked' %}">My liked Songs</a></li>
-<li><a href="{% url 'user_songs' 'loved' %}">My loved Songs</a></li>
-<li><a href="{% url 'user_songs' 'both' %}">All My Songs</a></li>
-<li><a href="{% url 'user_videos' 'liked' %}">My liked Videos</a></li>
-<li><a href="{% url 'user_videos' 'loved' %}">My loved Videos</a></li>
-<li><a href="{% url 'user_videos' 'both' %}">All My Videos</a></li>
-<li><a href="{% url 'user_pictures' 'liked' %}">My liked Pictures</a></li>
-<li><a href="{% url 'user_pictures' 'loved' %}">My loved Pictures</a></li>
-<li><a href="{% url 'user_pictures' 'both' %}">All My Pictures</a></li>
+    <li><a href="{% url 'user_songs' 'liked' %}">My liked Songs</a></li>
+    <li><a href="{% url 'user_songs' 'loved' %}">My loved Songs</a></li>
+    <li><a href="{% url 'user_songs' 'both' %}">All My Songs</a></li>
+    <li><a href="{% url 'user_videos' 'liked' %}">My liked Videos</a></li>
+    <li><a href="{% url 'user_videos' 'loved' %}">My loved Videos</a></li>
+    <li><a href="{% url 'user_videos' 'both' %}">All My Videos</a></li>
+    <li><a href="{% url 'user_pictures' 'liked' %}">My liked Pictures</a></li>
+    <li><a href="{% url 'user_pictures' 'loved' %}">My loved Pictures</a></li>
+    <li><a href="{% url 'user_pictures' 'both' %}">All My Pictures</a></li>
+{% endif %}
 
 <h3>TV Channels - random TV shows</h3>
 <li><a href="{% url 'special_channel' 'saturday-morning' %}">Saturday Morning</a></li>
@@ -33,17 +35,20 @@
 <li><a href="{% url 'mus-radio_channel' %}">Radio by Musician</a></li>
 <li><a href="{% url 'col-radio_channel' %}">Radio by Collection</a></li>
 <li><a href="{% url 'song-radio_channel' %}">Radio by Song</a></li>
+{% if user.is_authenticated %}
+    <li><a href="{% url 'user_songs' 'random' %}">Just my songs</a></li>
+{% endif %}
 
-<li><a href="{% url 'user_songs' 'random' %}">Just my songs</a></li>
-    
 <h3>Video Channels</h3>
 <li><a href="{% url 'user_videos' 'random' %}">My Videos</a></li>
 {% for a,b in choices %}
     <li><a href="{% url 'movie_channel' a %}">{{b}}</a></li>
 {% endfor %}
 
-<h3>Picture Channels - random pictures</h3>
-<li><a href="{% url 'user_pictures' 'random' %}">Just My Pictures</a></li>
+{% if user.is_authenticated %}
+    <h3>Picture Channels - random pictures</h3>
+    <li><a href="{% url 'user_pictures' 'random' %}">Just My Pictures</a></li>
+{% endif %}
 
 <h3>Generic Channels</h3>
 <li><a href="{% url 'random_list' %}">Random by file kind</a></li>

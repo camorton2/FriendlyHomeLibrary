@@ -19,7 +19,10 @@ class MyException(Exception):
 def my_private_directory(me):
     """ create my private working directory """
     try:
-        my_dir = (u'FHL/slides-%s' % me.username)
+        if me is None:
+            my_dir = (u'FHL/slides-%s' % 'anon')
+        else:
+            my_dir = (u'FHL/slides-%s' % me.username)
         my_path = os.path.join(settings.DRIVES[1], my_dir)
         
         drive = utils.get_drive_slink(2)

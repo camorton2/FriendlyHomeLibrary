@@ -11,6 +11,8 @@ from django.utils.text import slugify
 from FHLBuilder import models as bmod
 from FHLBuilder import choices
 
+from FHLReader import utility as rutils
+
 def find_objects(me, target):
     """
     find all members of list marked as liked or loved by me
@@ -240,6 +242,9 @@ def radio_list(start,justme,me,cl):
     add classical songs if requested
     """
     if justme:
+        if me is None:
+            # should not happen
+            raise rutils.MyException('User-specific radio from anonymous')                
         g1 = Q(likes__username=me)
         g2 = Q(loves__username=me)
         set2 = exclude_ick_xmas(bmod.Song.random_objects.filter(g1|g2),cl)
@@ -314,6 +319,9 @@ def radio_select(justme,me,target,cl):
     """
     big = exclude_ick_xmas(target,False)
     if justme:
+        if me is None:
+            # should not happen
+            raise rutils.MyException('User-specific radio from anonymous')                
         yuck = Q(dislikes__username=me)
         start = big.exclude(yuck)
     else:
@@ -332,6 +340,9 @@ def radio_select_christmas(justme,me,target,cl):
     # no Christmas part
     big = exclude_ick_xmas(target,False)
     if justme:
+        if me is None:
+            # should not happen
+            raise rutils.MyException('User-specific radio from anonymous')        
         yuck = Q(dislikes__username=me)
         start = big.exclude(yuck)
     else:
@@ -343,6 +354,9 @@ def radio_select_christmas(justme,me,target,cl):
     big = only_xmas(target)
     
     if justme:
+        if me is None:
+            # should not happen
+            raise rutils.MyException('User-specific radio from anonymous')        
         yuck = Q(dislikes__username=me)
         start = big.exclude(yuck)
     else:
@@ -413,3 +427,19 @@ def collection_radio_select(colls,xmas):
     else:
         return exclude_ick_xmas(big,True)
     
+
+def get_me(allow_anon,request):
+    """
+    get the user name or None if that is permitted
+    otherwise will raise an exception indicating that anonymouse
+    was permitted to do something not permitted
+    """
+    try:
+        me = bmod.User.objects.get(username=request.user)
+    except bmod.User.DoesNotExist:
+        if allow_anon:
+            me = None
+        else:
+            # should not happen
+            raise rutils.MyException('User-specific view from anonymous')
+    return me

@@ -98,8 +98,15 @@ def generic_collection_view(request, **kwargs):
         # all pictures view
         picture_count = models.Picture.slide_objects.all().count()
         use_all = True
-    me = models.User.objects.get(username=request.user)
 
+    try:
+        me = models.User.objects.get(username=request.user)
+    except models.User.DoesNotExist:
+        # anonymous user
+        me = None
+    except Exception as ex:
+        utility.log("ERROR unhandled exception %s" % (type(ex).__name__))
+        
     message = ''
 
     ccasts = []

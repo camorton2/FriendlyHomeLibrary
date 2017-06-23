@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.contrib.auth.models import User
+from django.forms.widgets import HiddenInput
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.shortcuts import render, redirect
@@ -20,6 +20,7 @@ import FHLReader.query as rq
 
 # Create your views here.
 
+
 class UserDetail(View):
     """
     User main page mostly to select playlists
@@ -27,8 +28,8 @@ class UserDetail(View):
     template_name = 'FHLReader/user_page.html'
     def get(self, request):
         # print("UserDetail GET")
-        me = User.objects.get(username=request.user)
-
+        me = rq.get_me(True,request)
+            
         context = {
             'me': me,
             'choices': choices.VIDEO_CHOICES
@@ -41,8 +42,8 @@ class UserSongList(View):
     Selection of liked and loved songs by user
     """
     def get(self,request,pref):
-        me = User.objects.get(username=request.user)
-
+        me = rq.get_me(False,request)
+            
         lk = Q(likes__username=me)
         lv = Q(loves__username=me)
 
@@ -72,7 +73,8 @@ class UserVideoList(View):
     Selection of liked loved videos by user
     """
     def get(self,request,pref):
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(False,request)
+            
         lk = Q(likes__username=me)
         lv = Q(loves__username=me)
 
@@ -100,7 +102,7 @@ class UserVideoList(View):
 class UserPictureList(View):
     """ selection of liked loved pictures by user """
     def get(self,request, pref):
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(False,request)
         lk = Q(likes__username=me)
         lv = Q(loves__username=me)
 
@@ -136,7 +138,7 @@ class CachedFileList(View):
     """
     def get(self,request):
         #print("CachedFileList GET")
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(True,request)
         mycache = cu.MyCache(me)
 
         songs, pictures, videos,_ = mycache.get_query()
@@ -162,7 +164,7 @@ class RandomList(View):
 
     def post(self, request):
         #print("RandomList POST")
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(True,request)
         mycache = cu.MyCache(me)
 
         if 'save-query' in request.POST:
@@ -200,7 +202,7 @@ class RecentList(View):
 
     def post(self, request):
         #print("RecentList POST")
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(True,request)
         mycache = cu.MyCache(me)
 
         rlist = []
@@ -235,7 +237,7 @@ class SpecialChannel(View):
 
     def post(self, request, select):
         #print("RandomList POST")
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(True,request)
         mycache = cu.MyCache(me)
 
         if 'save-query' in request.POST:
@@ -295,7 +297,7 @@ class MovieChannel(View):
 
 
     def post(self, request, akind):
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(True,request)
         mycache = cu.MyCache(me)
 
         if 'save-query' in request.POST:
@@ -329,15 +331,20 @@ class RadioChannel(View):
     form_class=forms.RadioForm
 
     def get(self, request):
-        #print("RandomList GET")
-        context = {'form':self.form_class(),
+        #print("RandomList GET")        
+        rform = self.form_class()
+        me = rq.get_me(True,request)
+        if me is None:
+            rform.fields['kind'].widget = HiddenInput()
+        
+        context = {'form':rform,
             'title': 'Build a Radio Channel'}
         return render(request,self.template_name,context)
 
 
     def post(self, request):
         #print("RadioChannel POST")
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(True,request)
         mycache = cu.MyCache(me)
 
         if 'save-query' in request.POST:
@@ -345,6 +352,9 @@ class RadioChannel(View):
 
         rlist = []
         bound_form = self.form_class(request.POST)
+        if me is None:
+            bound_form.fields['kind'].widget = HiddenInput()
+            
         if bound_form.is_valid():
             count = bound_form.cleaned_data['count']
             kind = bound_form.cleaned_data['kind']
@@ -392,7 +402,7 @@ class MusicianRadioChannel(View):
 
     def post(self, request):
         #print("RandomList POST")
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(True,request)
         mycache = cu.MyCache(me)
 
         rlist = []
@@ -427,7 +437,7 @@ class CollectionRadioChannel(View):
 
 
     def post(self, request):
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(True,request)
         mycache = cu.MyCache(me)
 
         rlist = []
@@ -461,7 +471,7 @@ class SongRadioChannel(View):
 
 
     def post(self, request):
-        me = User.objects.get(username=request.user)
+        me = rq.get_me(True,request)
         mycache = cu.MyCache(me)
 
         rlist = []

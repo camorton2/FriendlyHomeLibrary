@@ -9,6 +9,8 @@
     <a href="{% url 'builder_all_list' %}">All</a>
     {% if user.is_authenticated %}
         <a href="{% url 'user_page' %}">Channels: {{user.username}}</a>
+    {% else %}
+        <a href="{% url 'user_page' %}">Channels</a>
     {% endif %}
     {% if perms.FHLBuilder.collection_builder %}    
     <div class="dropdown">

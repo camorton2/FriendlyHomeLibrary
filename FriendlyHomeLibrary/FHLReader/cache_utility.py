@@ -10,7 +10,15 @@ class MyCache:
     class holds all interaction with the cache
     """
     def __init__(self,me):
-        self.me = me.username
+        if me is None:
+            # work in progress, anonymous user should not use cache
+            # if there is more than 1 anonymous user they will
+            # clobber each other
+            # I was thinking of trying redis in this case instead 
+            # of cache or even replacing cache with redis 
+            self.me = 'anon'
+        else:    
+            self.me = me.username
         self.songs = ('songs-%s' % self.me)
         self.videos = ('videos-%s' % self.me)
         self.pictures = ('pictures-%s' % self.me)

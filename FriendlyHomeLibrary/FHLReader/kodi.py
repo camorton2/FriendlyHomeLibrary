@@ -231,8 +231,11 @@ def playlist_requests(playlist,request):
         caller should catch MyException which is used for all
         errors in kodi playback
     """
-    me = models.User.objects.get(username=request.user)
-
+    try:
+        me = models.User.objects.get(username=request.user)
+    except models.User.DoesNotExist:
+        me = None
+        
     if 'kodi_local' in request.GET:
         try:
             clientip = request.META['REMOTE_ADDR']
