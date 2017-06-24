@@ -17,23 +17,20 @@ from django.conf.urls import include, url
 from django.contrib import admin
 
 from FHLBuilder import urls as builder_urls
-from FHLBuilder import views as bv
+#from FHLBuilder import views as bv
 
-from FHLReader import urls as reader_urls
+#from FHLReader import urls as reader_urls
 
-from FHLUser import urls as user_urls
+#from FHLUser import urls as user_urls
 
 urlpatterns = [
-    url(r'^$',bv.HomePage.as_view(),name='homepage'),
     url(r'^admin/', admin.site.urls),
-    url(r'^builder/',include(builder_urls)),
-    url(r'^reader/',include(reader_urls)),
-    url(r'^user/',include(user_urls)),    
+    url(r'^',include(builder_urls)),
+    url(r'^api-auth/',
+        include('rest_framework.urls',namespace='rest_framework')
+    )
+#    url(r'^reader/',include(reader_urls)),
+#    url(r'^user/',include(user_urls)),    
 ]
 
-if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns = [
-        url(r'^__DEBUG__/',include(debug_toolbar.urls)),
-    ] + urlpatterns
 

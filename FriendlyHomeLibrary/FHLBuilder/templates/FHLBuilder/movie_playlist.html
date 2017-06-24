@@ -12,7 +12,7 @@
 
 <ul id="filelist">
 {% for mv in movielist %}
-    <li><a href="{{ mv.get_absolute_url }}">{{mv.title}}</a> 
-    <span style="float:right;font-size: 16px;">{{mv.friendly_name}}</span> </li>
+    <li><a href="{{ mv.get_absolute_url }}">{{mv.friendly_name}}</a> 
+    <span style="float:right;font-size: 16px;">{{mv.title}}</span> </li>
 {% endfor %}
 </ul>
