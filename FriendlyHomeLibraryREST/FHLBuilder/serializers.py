@@ -10,77 +10,58 @@ from django.utils.timezone import now
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model =mods.Tag
-        fields = ('name','slug')
+        fields = '__all__'
 
 
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model =mods.Collection
-        fields = ('filePath','drive','title','slug')
+        fields = '__all__'
 
 
 class CommonFileSerializer(serializers.ModelSerializer):
     class Meta:
         model =mods.CommonFile
-        fields = ('fileKind','fileName','year','title','slug','data_added')
-
+        exclude = ('date_added',)
 
 class MovieSerializer(CommonFileSerializer):
     class Meta:
         model =mods.Movie
-        fields = ('collection','tags','likes','loves','dislikes')
+        exclude = ('date_added',)
 
 
-class GameSerializer(CommonFileSerializer):
-    class Meta:
-        model =mods.Game
-        fields = ('collection','tags','likes','loves','dislikes')
-
-
-class BookSerializer(CommonFileSerializer):
-    class Meta:
-        model =mods.Book
-        fields = ('collection','tags','likes','loves','dislikes')
-
-
-class Picture(CommonFileSerializer):
+class PictureSerializer(CommonFileSerializer):
     class Meta:
         model =mods.Picture
-        fields = ('collection','tags','likes','loves','diskikes'
-            'data1','data2','data3','data4','data5')
+        exclude = ('date_added',)
 
 
 class SongSerializer(CommonFileSerializer):
     class Meta:
         model =mods.Song
-        fields = ('collection','track','tags','likes','loves','dislikes')
-
-
-class ChapterSerializer(CommonFileSerializer):
-    class Meta:
-        model =mods.Chapter
-        fields = ('collection')
+        exclude = ('date_added',)
+        
 
 class ArtistSerializer(serializers.ModelSerializer):
     class Meta:
         model =mods.Artist
-        fields = ('fullName','slug')
+        fields = '__all__'
 
 
 class ActorSerializer(ArtistSerializer):
     class Meta:
         model =mods.Actor
-        fields = ('movies')
+        fields = '__all__'
 
 
 class DirectorSerializer(ArtistSerializer):
     class Meta:
         model =mods.Director
-        fields = ('movies')
+        fields = '__all__'
 
 
 class MusicianSerializer(ArtistSerializer):
     class Meta:
         model =mods.Musician
-        fields = ('albums','concerts','songs')
+        fields = '__all__'
 

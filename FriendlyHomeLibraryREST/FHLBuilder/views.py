@@ -6,11 +6,12 @@ from rest_framework.response import Response
 from rest_framework import status
 import FHLBuilder.models as db
 import FHLBuilder.serializers as ss
+from FHLBuilder import choices
 
 # Create your views here.
 
 @api_view(['GET','DELETE','PUT'])
-def get_delete_update_song(request,slug):
+def get_delete_update_song(request,slug,format=None):
     try:
         target = db.Song.objects.get(slug=slug)
     except db.Song.DoesNotExist:
@@ -23,14 +24,19 @@ def get_delete_update_song(request,slug):
         
     # delete details of a single song
     elif request.method == 'DELETE':
-        return Response({})
+        target.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
     # update details of a single song
     elif request.method == 'PUT':
-        return Response({})
+        serializer = ss.SongSerializer(target,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET','POST'])
-def get_post_songs(request):
+def get_post_songs(request,format=None):
     # all songs
     if request.method == 'GET':
         songs = db.Song.objects.all()
@@ -40,10 +46,20 @@ def get_post_songs(request):
     # insert a new record for a song
     elif request.method == 'POST':
         data = {
-           'title': request.data.get('title'),
-           'slug': request.data.get('slug'),
-           'fileName': request.data.get('fileName'),
-           #'collection': album
+            # this must be song, so either check it here
+            # or on imput
+            'fileKind': choices.SONG,
+            'fileName': request.data.get('fileName'),
+            'year': request.data.get('year'),
+            'title': request.data.get('title'),
+            'slug': request.data.get('slug'),
+            # default should be in model for date_added
+            #'date_added' = now
+            # still need to figure out how to do collection
+            #'collection' = request.data.get('collection') 
+            'track': request.data.get('track') 
+        
+           
         }    
         serializer = ss.SongSerializer(data=data)
         if(serializer.is_valid()):

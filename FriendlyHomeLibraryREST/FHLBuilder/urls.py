@@ -1,5 +1,6 @@
 # urls
 from django.conf.urls import url
+from rest_framework.urlpatterns import format_suffix_patterns
 #from django.contrib.auth.decorators import login_required
 #from django.views.decorators.cache import cache_page
 
@@ -20,3 +21,5 @@ urlpatterns = [
        name='get_post_songs'       
    ),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

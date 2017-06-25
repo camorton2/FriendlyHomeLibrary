@@ -36,7 +36,7 @@ class SongTestAdd(TestCase):
 # initialize the APIClient app
 client = Client()
 
-class SongTestViews(TestCase):
+class SongTestGet(TestCase):
     
     def setUp(self):
         a = collection.CollectionMixins()
@@ -75,22 +75,33 @@ class SongTestCreate(TestCase):
         tag = 'abc'
         path = 'mp3s/Duffy'
         album, artist = a.add_members(path,2,kind,tag)
-        #dbobj = bmodels.Song(title=title,slug=sSlug,fileName=fileName, collection=sCollection)
         rf = db.Song.objects.get(title__icontains='mercy')
-        self.assertEqual(rf.track,7)
 
         self.valid_payload = {
-           'title': 'valid title',
-           'slug': 'valid_slug',
-           'fileName': 'valid_fileName',
-           #'collection': album
+            'year': rf.year,
+            'title': rf.title,
+            'slug': 'a_slug',
+            'fileName': rf.fileName,
+            'track': rf.track,
+            #'collection': album # todo figure out nested
         }    
         self.invalid_payload = {
-           'title': '',
-           'slug': rf.slug, 
-           'fileName': rf.fileName,
-           #'collection': album
+            'year': rf.year,
+            'title': rf.title,
+            'slug': 'b_slug',
+            'fileName': rf.fileName, 
+            'track': 'a__a__a', # not valid integer
+            #'collection': album # todo figure out nested
         }    
+        self.invalid_payload1 = {
+            'year': rf.year,
+            'title': 'title',
+            'slug': rf.slug, # error not unique
+            'fileName': rf.fileName, 
+            'track': rf.track,
+            #'collection': album # todo figure out nested
+        }    
+
     
     def test_create_valid_song(self):
         response = client.post(
@@ -107,4 +118,76 @@ class SongTestCreate(TestCase):
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_invalid_song1(self):
+        response = client.post(
+            reverse('get_post_songs'),
+            data=json.dumps(self.invalid_payload1),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         
+
+class SongTestUpdate(TestCase):
+    
+    def setUp(self):
+        a = collection.CollectionMixins()
+        kind = choices.SONG
+        tag = 'abc'
+        path = 'mp3s/Duffy'
+        album, artist = a.add_members(path,2,kind,tag)
+        self.rf = db.Song.objects.get(title__icontains='mercy')
+
+        self.valid_payload = {
+            'year': '1994',
+            'title': self.rf.title,
+            'slug': 'a_slug',
+            'fileName': self.rf.fileName,
+            'track': self.rf.track,
+        }    
+        self.invalid_payload = {
+            'year': '1938',
+            'title': self.rf.title,
+            'slug': 'b_slug',
+            'fileName': self.rf.fileName, 
+            'track': 'a__a__a', # not valid integer
+        }    
+        
+    
+    def test_update_valid_song(self):
+        response = client.put(
+            reverse('get_delete_update_song',kwargs={'slug':self.rf.slug}), 
+            data=json.dumps(self.valid_payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        
+    def test_update_invalid_song(self):
+        response = client.put(
+            reverse('get_delete_update_song',kwargs={'slug':self.rf.slug}), 
+            data=json.dumps(self.invalid_payload),
+            content_type='application/json'
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+class SongTestDelete(TestCase):
+    
+    def setUp(self):
+        a = collection.CollectionMixins()
+        kind = choices.SONG
+        tag = 'abc'
+        path = 'mp3s/Duffy'
+        album, artist = a.add_members(path,2,kind,tag)
+        
+    def test_delete_valid_single_song(self):
+        rf = db.Song.objects.get(title__icontains='mercy')
+        self.assertEqual(rf.track,7)
+        response = client.delete(reverse('get_delete_update_song',
+            kwargs={'slug': rf.slug }))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        
+    def test_delete_invalid_single_song(self):
+        response = client.delete(reverse('get_delete_update_song',
+            kwargs={'slug': 'no_song_like_this' }))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)        
+
