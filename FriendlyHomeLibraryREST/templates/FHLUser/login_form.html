@@ -1,0 +1,5 @@
+<form action = "{% url 'FHLUser_Login'%}" method="post">
+{% csrf_token %}
+{{form.as_p}}
+<button type="submit">{{login_button|default:'Log in'}}</button>
+</form>

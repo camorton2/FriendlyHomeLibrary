@@ -17,92 +17,76 @@ from FHLBuilder import collection, choices
 client = Client()
 
 
-class SongTestAdd(TestCase):
+
+class PictureTestAdd(TestCase):
     """ no views, just check database creation """    
     def setUp(self):
-        self.user = db.User.objects.create(username='testb',
-            password='nothing',is_staff=True)
-        print(self.user)
-        client.login(username='testb',password='nothing')        
         a = collection.CollectionMixins()
-        kind = choices.SONG
-        tag = 'abc'
-        path = 'mp3s/Duffy'
+        kind = choices.MOVIE
+        tag = 'xxx'
+        path = 'picturesbackup/win2001'
         album, artist = a.add_members(path,2,kind,tag)
-    
+                
     def test1(self):
-        rf = db.Collection.objects.get(title__icontains='rockferry')
-        self.assertEqual(rf.title, 'Rockferry')
-        
-    def test2(self):
-        rf = db.Song.objects.get(title__icontains='mercy')
-        self.assertEqual(rf.track,7)
+        rf = db.Picture.objects.get(title__icontains='capture')
+        self.assertEqual(rf.title,'Capture_00001')
     
-    def test3(self):
-        self.assertEqual(db.Song.objects.count(),10)
+    def test2(self):
+        self.assertEqual(db.Picture.objects.count(),9)
 
 
-class SongTestGet(TestCase):
+class PictureTestGet(TestCase):
     """ view functions for get """
     def setUp(self):
-        self.user = db.User.objects.create(username='testb',
-            password='nothing',is_staff=True)
-        client.login(username='testb',password='nothing')
         a = collection.CollectionMixins()
-        kind = choices.SONG
-        tag = 'abc'
-        path = 'mp3s/Duffy'
+        kind = choices.MOVIE
+        tag = 'xxx'
+        path = 'picturesbackup/win2001'
         album, artist = a.add_members(path,2,kind,tag)
     
-    def test_get_all_songs(self):
-        response = client.get(reverse('builder_song_list'))
+    def test_get_all_pictures(self):
+        response = client.get(reverse('builder_picture_list'))
         # get data from db
-        songs = db.Song.objects.all()
-        serializer = ss.SongSerializer(songs,many=True)
+        pictures = db.Picture.objects.all()
+        serializer = ss.PictureSerializer(pictures,many=True)
         self.assertEqual(response.data,serializer.data)        
         self.assertEqual(response.status_code, status.HTTP_200_OK)
     
-    def test_get_valid_single_song(self):
-        rf = db.Song.objects.get(title__icontains='mercy')
-        self.assertEqual(rf.track,7)
-        response = client.get(reverse('builder_song_detail',
+    def test_get_valid_single_picture(self):
+        rf = db.Picture.objects.get(title__icontains='capture')
+        response = client.get(reverse('builder_picture_detail',
             kwargs={'slug': rf.slug }))
-        serializer=ss.SongSerializer(rf)
+        serializer=ss.PictureSerializer(rf)
         self.assertEqual(response.data,serializer.data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-    def test_get_invalid_single_song(self):
-        response = client.get(reverse('builder_song_detail',
-            kwargs={'slug': 'no_song_like_this' }))
+    def test_get_invalid_single_picture(self):
+        response = client.get(reverse('builder_picture_detail',
+            kwargs={'slug': 'no_picture_like_this' }))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)        
 
-class SongTestCreate(TestCase):
+class PictureTestCreate(TestCase):
     
     def setUp(self):
-        self.user = db.User.objects.create(username='testb',
-            password='nothing',is_staff=True)
-        client.login(username='testb',password='nothing')
         a = collection.CollectionMixins()
-        kind = choices.SONG
-        tag = 'abc'
-        path = 'mp3s/Duffy'
-        album, artist = a.add_members(path,2,kind,tag)
-        rf = db.Song.objects.get(title__icontains='mercy')
+        kind = choices.MOVIE
+        tag = 'xxx'
+        path = 'picturesbackup/win2001'
+        album, artist = a.add_members(path,2,kind,tag)                
+        rf = db.Picture.objects.get(title__icontains='capture')
 
         self.valid_payload = {
             'year': rf.year,
             'title': rf.title,
             'slug': 'a_slug',
             'fileName': rf.fileName,
-            'track': rf.track,
             #'collection': album # todo figure out nested
         }    
         self.invalid_payload = {
-            'year': rf.year,
+            'year': 'a_a', # error not valid year
             'title': rf.title,
             'slug': 'b_slug',
             'fileName': rf.fileName, 
-            'track': 'a__a__a', # not valid integer
             #'collection': album # todo figure out nested
         }    
         self.invalid_payload1 = {
@@ -110,102 +94,92 @@ class SongTestCreate(TestCase):
             'title': 'title',
             'slug': rf.slug, # error not unique
             'fileName': rf.fileName, 
-            'track': rf.track,
             #'collection': album # todo figure out nested
         }    
 
     
-    def test_create_valid_song(self):
+    def test_create_valid_picture(self):
         response = client.post(
-            reverse('builder_song_list'),
+            reverse('builder_picture_list'),
             data=json.dumps(self.valid_payload),
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
-    def test_create_invalid_song(self):
+    def test_create_invalid_picture(self):
         response = client.post(
-            reverse('builder_song_list'),
+            reverse('builder_picture_list'),
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_invalid_song1(self):
+    def test_create_invalid_picture1(self):
         response = client.post(
-            reverse('builder_song_list'),
+            reverse('builder_picture_list'),
             data=json.dumps(self.invalid_payload1),
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         
 
-class SongTestUpdate(TestCase):
+class PictureTestUpdate(TestCase):
     
     def setUp(self):
-        self.user = db.User.objects.create(username='testb',
-            password='nothing',is_staff=True)
-        client.login(username='testb',password='nothing')
         a = collection.CollectionMixins()
-        kind = choices.SONG
-        tag = 'abc'
-        path = 'mp3s/Duffy'
-        album, artist = a.add_members(path,2,kind,tag)
-        self.rf = db.Song.objects.get(title__icontains='mercy')
+        kind = choices.MOVIE
+        tag = 'xxx'
+        path = 'picturesbackup/win2001'
+        album, artist = a.add_members(path,2,kind,tag)                
+        self.rf = db.Picture.objects.get(title__icontains='capture')
 
         self.valid_payload = {
             'year': '1994',
             'title': self.rf.title,
             'slug': 'a_slug',
             'fileName': self.rf.fileName,
-            'track': self.rf.track,
         }    
         self.invalid_payload = {
-            'year': '1938',
+            'year': 'a_a', # not valid picture
             'title': self.rf.title,
             'slug': 'b_slug',
             'fileName': self.rf.fileName, 
-            'track': 'a__a__a', # not valid integer
         }    
         
     
-    def test_update_valid_song(self):
+    def test_update_valid_picture(self):
         response = client.put(
-            reverse('builder_song_detail',kwargs={'slug':self.rf.slug}), 
+            reverse('builder_picture_detail',kwargs={'slug':self.rf.slug}), 
             data=json.dumps(self.valid_payload),
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         
-    def test_update_invalid_song(self):
+    def test_update_invalid_picture(self):
         response = client.put(
-            reverse('builder_song_detail',kwargs={'slug':self.rf.slug}), 
+            reverse('builder_picture_detail',kwargs={'slug':self.rf.slug}), 
             data=json.dumps(self.invalid_payload),
             content_type='application/json'
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-class SongTestDelete(TestCase):
+class PictureTestDelete(TestCase):
     
     def setUp(self):
-        self.user = db.User.objects.create(username='testb',
-            password='nothing',is_staff=True)
-        client.login(username='testb',password='nothing')
         a = collection.CollectionMixins()
-        kind = choices.SONG
-        tag = 'abc'
-        path = 'mp3s/Duffy'
-        album, artist = a.add_members(path,2,kind,tag)
+        kind = choices.MOVIE
+        tag = 'xxx'
+        path = 'picturesbackup/win2001'
+        album, artist = a.add_members(path,2,kind,tag)                
         
-    def test_delete_valid_single_song(self):
-        rf = db.Song.objects.get(title__icontains='mercy')
-        self.assertEqual(rf.track,7)
-        response = client.delete(reverse('builder_song_detail',
+    def test_delete_valid_single_picture(self):
+        rf = db.Picture.objects.get(title__icontains='capture')
+        response = client.delete(reverse('builder_picture_detail',
             kwargs={'slug': rf.slug }))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         
-    def test_delete_invalid_single_song(self):
-        response = client.delete(reverse('builder_song_detail',
-            kwargs={'slug': 'no_song_like_this' }))
+    def test_delete_invalid_single_picture(self):
+        response = client.delete(reverse('builder_picture_detail',
+            kwargs={'slug': 'no_picture_like_this' }))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)        
 

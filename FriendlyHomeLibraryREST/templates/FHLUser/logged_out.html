@@ -1,0 +1,15 @@
+{% extends parent_template|default:"base.html" %}
+
+{% block title %}
+{{ block.super }} - FHL User Logged out
+{% endblock %}
+
+{% block content %}
+<div class = "row">
+<div class = "offset-by-two eight columns">
+<p>You have successfully logged out.</p>
+{% include "FHLUser/login_form.html" with login_button='Log Back In' %}
+</div>
+</div>
+{% endblock %}
+
