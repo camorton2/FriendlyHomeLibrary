@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import calendar, datetime
+
 from django.forms.widgets import HiddenInput
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.views.generic import View
+from django.views.generic.edit import FormView
 
 from FHLBuilder import choices
 from FHLBuilder.models import Song, Movie, Picture
@@ -138,8 +141,8 @@ class CachedFileList(View):
     """
     def get(self,request):
         #print("CachedFileList GET")
-        me = rq.get_me(True,request)
-        mycache = cu.MyCache(me)
+        
+        mycache = cu.MyCache(request)
 
         songs, pictures, videos,_ = mycache.get_query()
 
@@ -164,8 +167,7 @@ class RandomList(View):
 
     def post(self, request):
         #print("RandomList POST")
-        me = rq.get_me(True,request)
-        mycache = cu.MyCache(me)
+        mycache = cu.MyCache(request)
 
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
@@ -202,8 +204,7 @@ class RecentList(View):
 
     def post(self, request):
         #print("RecentList POST")
-        me = rq.get_me(True,request)
-        mycache = cu.MyCache(me)
+        mycache = cu.MyCache(request)
 
         rlist = []
         bound_form = self.form_class(request.POST)
@@ -237,8 +238,7 @@ class SpecialChannel(View):
 
     def post(self, request, select):
         #print("RandomList POST")
-        me = rq.get_me(True,request)
-        mycache = cu.MyCache(me)
+        mycache = cu.MyCache(request)
 
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
@@ -297,8 +297,7 @@ class MovieChannel(View):
 
 
     def post(self, request, akind):
-        me = rq.get_me(True,request)
-        mycache = cu.MyCache(me)
+        mycache = cu.MyCache(request)
 
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
@@ -335,6 +334,7 @@ class RadioChannel(View):
         rform = self.form_class()
         me = rq.get_me(True,request)
         if me is None:
+            # hide field from anonymous user
             rform.fields['kind'].widget = HiddenInput()
         
         context = {'form':rform,
@@ -345,7 +345,7 @@ class RadioChannel(View):
     def post(self, request):
         #print("RadioChannel POST")
         me = rq.get_me(True,request)
-        mycache = cu.MyCache(me)
+        mycache = cu.MyCache(request)
 
         if 'save-query' in request.POST:
             return redirect(reverse('cached_list'))
@@ -353,6 +353,7 @@ class RadioChannel(View):
         rlist = []
         bound_form = self.form_class(request.POST)
         if me is None:
+            # hide field from anonymous user
             bound_form.fields['kind'].widget = HiddenInput()
             
         if bound_form.is_valid():
@@ -402,8 +403,7 @@ class MusicianRadioChannel(View):
 
     def post(self, request):
         #print("RandomList POST")
-        me = rq.get_me(True,request)
-        mycache = cu.MyCache(me)
+        mycache = cu.MyCache(request)
 
         rlist = []
         bound_form = self.form_class(request.POST)
@@ -437,8 +437,7 @@ class CollectionRadioChannel(View):
 
 
     def post(self, request):
-        me = rq.get_me(True,request)
-        mycache = cu.MyCache(me)
+        mycache = cu.MyCache(request)
 
         rlist = []
         bound_form = self.form_class(request.POST)
@@ -471,8 +470,7 @@ class SongRadioChannel(View):
 
 
     def post(self, request):
-        me = rq.get_me(True,request)
-        mycache = cu.MyCache(me)
+        mycache = cu.MyCache(request)
 
         rlist = []
         bound_form = self.form_class(request.POST)
@@ -486,3 +484,127 @@ class SongRadioChannel(View):
         context = {'form':bound_form,'rlist':flist,
             'title': 'Build a  Channel'}
         return render(request,self.template_name,context)
+
+
+class DateRadioChannel(FormView):
+    template_name = 'FHLReader/channel_basic.html'
+    form_class = forms.DateAddedRadioForm
+    success_url = ''
+    random = False
+    
+    def form_valid(self,form):
+        random = form.cleaned_data['random']
+        print('form with random %s' % random)
+        try:
+            ya=int(form.cleaned_data['yearA'])
+            yb=int(form.cleaned_data['yearB'])
+            ma=int(form.cleaned_data['monthA'])
+            mb=int(form.cleaned_data['monthB'])
+        except ValueError:
+            return redirect(reverse('date_radio_channel'))
+            
+        if ya and yb:
+            if ma and mb:
+                context = {
+                    'yearA': ya,
+                    'yearB': yb,
+                    'monthA': ma,
+                    'monthB': mb
+                }
+            elif ma:
+                context = {'yearA': ya,'yearB': yb,'monthA': ma}
+            elif mb:
+                context = {'yearA': ya,'yearB': yb,'monthB': mb}
+            else:
+                context = {'yearA': ya,'yearB': yb}
+            return redirect(reverse('range_added_radio_channel',
+                kwargs=context))
+        if ya and ma:
+            context = {'yearA': ya,'monthA': ma}
+        else:
+            context = {'yearA': ya}
+        return redirect(reverse('date_added_radio_channel',
+            kwargs = context))
+
+
+def date_added_radio_channel(request,yearA,monthA=None,random=False):
+    
+    if request.method == 'POST':
+        print('request is POST')
+        if 'random' in request.POST:
+            random = request.POST.get('random')
+    if request.method == 'GET':
+        print('request is GET')
+        if 'random' in request.GET:
+            random = request.GET.get('random')
+    
+    print('date_added year %s month %s random %s' % (yearA,monthA,random))
+    
+    songs = Song.newest_objects.filter(date_added__year=yearA)
+    if monthA:
+        songs = songs.filter(date_added__month=monthA)
+        
+    if random:
+        songs = songs.order_by('?')
+    context = {'object_list':songs}
+    template_name = 'FHLReader/song_list.html'    
+    return render(request,template_name,context)
+        
+
+def range_added_radio_channel(request,yearA,yearB,
+    monthA=None,monthB=None,random=False):
+    print('radio range %s %s' % (yearA,yearB))
+
+    if request.method == 'POST':
+        if 'random' in request.POST:
+            random = request.POST.get('random')
+
+    print('range_added year %s,%s month %s,%s random %s' % 
+        (yearA,yearB,monthA,monthB,random))
+        
+    valid = yearB >= yearA
+    if monthA and monthB:
+        pass
+    elif monthA:
+        valid = False
+    elif monthB:
+        valid = False
+                
+    if valid and monthA:
+        try:
+            # first day of monthA
+            yA = int(yearA)
+            mA = int(monthA)
+            yB = int(yearB)
+            mB = int(monthB)
+            
+            dA = datetime.date(yA,mA,1)
+            
+            rangeB = calendar.monthrange(yB,mB)[1]
+            # last day of monthA
+            dB = datetime.date(yB,mB,rangeB)
+            
+            print(dA)
+            print(dB)
+            
+            q1 = Q(date_added__gte=dA)
+            q2 = Q(date_added__lte=dB)
+            songs = Song.newest_objects.filter(q1).filter(q2)
+        except ValueError:
+            songs = []
+    elif valid:
+        q1 = Q(date_added__year__gte=yearA)
+        q2 = Q(date_added__year__lte=yearB)
+        songs = Song.newest_objects.filter(q1).filter(q2)
+    else:
+        # likely better to have an error condition, but
+        # plan is to disallow this in the form
+        songs=[]
+        
+    if random:
+        songs = songs.order_by('?')
+    
+    context = {'object_list':songs}
+    template_name = 'FHLReader/song_list.html'    
+    return render(request,template_name,context)
+

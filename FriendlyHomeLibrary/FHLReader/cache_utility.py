@@ -4,25 +4,18 @@ from __future__ import unicode_literals
 from django.core.cache import cache
 
 from FHLBuilder import choices
+import FHLReader.utility as rutils
 
 class MyCache:
     """
     class holds all interaction with the cache
     """
-    def __init__(self,me):
-        if me is None:
-            # work in progress, anonymous user should not use cache
-            # if there is more than 1 anonymous user they will
-            # clobber each other
-            # I was thinking of trying redis in this case instead 
-            # of cache or even replacing cache with redis 
-            self.me = 'anon'
-        else:    
-            self.me = me.username
-        self.songs = ('songs-%s' % self.me)
-        self.videos = ('videos-%s' % self.me)
-        self.pictures = ('pictures-%s' % self.me)
-        self.channel = ('channel-%s' % self.me)
+    def __init__(self,request):
+        clientip = rutils.ip_from_request(request)
+        self.songs = ('songs-%s' % clientip)
+        self.videos = ('videos-%s' % clientip)
+        self.pictures = ('pictures-%s' % clientip)
+        self.channel = ('channel-%s' % clientip)
 
 
     def cache_query(self,songs,pictures,videos,channel):

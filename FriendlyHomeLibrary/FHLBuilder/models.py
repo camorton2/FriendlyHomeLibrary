@@ -75,6 +75,10 @@ class CommonFile(models.Model):
 
     def friendly_name(self):
         """ strip first directory from path """
+        if not self.collection:
+            print('YIKES no filepath %s %s' % (self.title,self.slug))
+            print (self)
+            return ''
         fpath = self.collection.filePath
         if '/' in fpath:
             bg = fpath.index('/')+1

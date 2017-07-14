@@ -150,6 +150,7 @@ def saturday_select(count):
         'magillagorilla','pingo','pinkpanther',
         'scoobydoo','tomandjerry','woodywoodpecker',
         'schoolhouse','thunderbirds','littlerascals',
+        'SRAmericaRock','SRGrammar','SRMult','SRScience',
         'threestooges']
     return tv_by_title(titles).order_by('?')[:count]
 

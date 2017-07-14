@@ -35,6 +35,7 @@
 <li><a href="{% url 'mus-radio_channel' %}">Radio by Musician</a></li>
 <li><a href="{% url 'col-radio_channel' %}">Radio by Collection</a></li>
 <li><a href="{% url 'song-radio_channel' %}">Radio by Song</a></li>
+<li><a href="{% url 'date_radio_channel' %}">Radio by Date Added</a></li>
 {% if user.is_authenticated %}
     <li><a href="{% url 'user_songs' 'random' %}">Just my songs</a></li>
 {% endif %}

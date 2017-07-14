@@ -15,6 +15,14 @@ class MyException(Exception):
         print('CTOR MyException %s' % msg)
         self.message = msg
 
+def ip_from_request(request):
+    try:
+        return request.META['REMOTE_ADDR']
+    except KeyError:
+        message = unicode('ERROR could not get client ip from request')
+        print(message)
+        raise MyException(message)
+
 
 def my_private_directory(me):
     """ create my private working directory """

@@ -119,12 +119,7 @@ def playback_requests(ob,request):
     if 'StreamMovie' in request.POST:
         stream_to_vlc(ob,request)
     elif 'kodi_local' in request.POST:
-        try:
-            clientip = request.META['REMOTE_ADDR']
-        except KeyError:
-            message = unicode('ERROR could not get client ip from request')
-            print(message)
-            raise rutils.MyException(message)
+        clientip = rutils.ip_from_request(request)
         time.sleep(5)
         send_to_kodi(ob,clientip)
     elif 'kodi_lf' in request.POST:
@@ -178,7 +173,7 @@ def play_kodi(playlist,host,xbmc_i):
 
 def play_to_kodi(playlist,ip,me):
     """ send the playlist to kodi for playback
-        where ob is the object, ip is the ip address
+        where ip is the ip address
         of kodi where playback is requested
     """
     host = ip + settings.KODI_PORT
