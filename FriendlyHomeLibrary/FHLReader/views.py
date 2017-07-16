@@ -603,7 +603,6 @@ def range_added_radio_channel(request,yearA,yearB,
         
     if random:
         songs = songs.order_by('?')
-    
     context = {'object_list':songs}
     template_name = 'FHLReader/song_list.html'    
     return render(request,template_name,context)

@@ -98,8 +98,6 @@ def object_path_samba(obj):
     return unicode(thePath)
 
 
-
-
 # Given a list of objects, create a list containing pairs of path,object
 # which can be passed to a playlist (song) or a picture list
 def link_file_list(things):

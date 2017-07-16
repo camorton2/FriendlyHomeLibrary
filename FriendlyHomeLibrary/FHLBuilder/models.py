@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.utils.timezone import now
 
 from FHLBuilder import choices
+import FHLBuilder.utility as bu
 
 
 # Create your models here.
@@ -85,6 +86,9 @@ class CommonFile(models.Model):
             return fpath[bg:]+ '/' + self.fileName
         return fpath+'/'+self.fileName
 
+    def path_name(self):
+        """ give the path to this object """
+        return bu.object_path(self)
     
     def __unicode__(self):
         return self.title

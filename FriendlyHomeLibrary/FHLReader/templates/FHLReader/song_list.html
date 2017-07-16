@@ -8,18 +8,17 @@
    
 {% if object_list %}
 <h4>{{listTitle}}</h4>
-
-{% load static %}
+    {% load static %}
     {% for song in object_list %}
         {% if forloop.first %}
             <audio src="" controls id="audioPlayer">
                 Sorry, your browser does not support HTML5 audio.
             </audio>
             <p></p><ul id="playlist">
-            <li class="current-song"><a href="{% static path %}">{{song.friendly_name}}</a></li> 
+            <li class="current-song"><a href="{% static song.path_name %}">{{song.friendly_name}}</a></li> 
                 <span style="float:right;"><a href="{{song.get_absolute_url}}">{{song.title}}</a></span>
         {% else %}
-            <li><a href="{% static path %}">{{song.friendly_name}}</a></li>
+            <li><a href="{% static song.path_name %}">{{song.friendly_name}}</a></li>
                 <span style="float:right;"><a href="{{song.get_absolute_url}}">{{song.title}}</a></span>
         {% endif %}
         {% if forloop.last %}
