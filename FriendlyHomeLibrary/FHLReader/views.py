@@ -14,7 +14,6 @@ from FHLBuilder import choices
 from FHLBuilder.models import Song, Movie, Picture
 
 import FHLBuilder.view_utility as vu
-import FHLBuilder.utility as bu
 
 from FHLReader import forms
 
@@ -184,9 +183,8 @@ class RandomList(View):
             rlist = rq.random_select(count,title,tag,kind)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
-        flist = bu.link_file_list(rlist)
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':flist,
+        context = {'form':bound_form,'rlist':rlist,
             'title': 'Build a Random Channel'
             }
         return render(request,self.template_name,context)
@@ -215,8 +213,7 @@ class RecentList(View):
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
             return redirect(reverse('cached_list'))
         # display the list as files with the form
-        flist = bu.link_file_list(rlist)
-        context = {'form':bound_form,'rlist':flist,
+        context = {'form':bound_form,'rlist':rlist,
             'title': 'Build a Recent Channel'}
         return render(request,self.template_name,context)
 
@@ -265,11 +262,9 @@ class SpecialChannel(View):
             cu.cache_list_bykind(rlist,choices.MOVIE,
                     'special_channel',mycache)
 
-
         # display the list as files with the form
-        flist = bu.link_file_list(rlist)
         title = ('Build a channel %s' % (select))
-        context = {'form':bound_form,'rlist':flist,
+        context = {'form':bound_form,'rlist':rlist,
             'title': title}
         return render(request,self.template_name,context)
 
@@ -314,11 +309,9 @@ class MovieChannel(View):
             rlist = rq.random_select(count,title,tag,kind,random)
             cu.cache_list_bykind(rlist,kind,'random_list',mycache)
 
-        flist = bu.link_file_list(rlist)
         title = ('Build a channel %s' % (akind))
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':flist,
-            'title': title}
+        context = {'form':bound_form,'rlist':rlist,'title': title}
         return render(request,self.template_name,context)
 
 
@@ -379,9 +372,8 @@ class RadioChannel(View):
                 # recent case simply move to cached list
                 return redirect(reverse('cached_list'))
 
-        flist = bu.link_file_list(rlist)
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':flist,
+        context = {'form':bound_form,'rlist':rlist,
             'title': 'Build a  Channel'}
         return render(request,self.template_name,context)
 
@@ -414,9 +406,8 @@ class MusicianRadioChannel(View):
             cu.cache_list_bykind(rlist,choices.SONG,'special_channel',mycache)
             return redirect(reverse('cached_list'))
 
-        flist = bu.link_file_list(rlist)
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':flist,
+        context = {'form':bound_form,'rlist':rlist,
             'title': 'Build a  Channel'}
         return render(request,self.template_name,context)
 
@@ -448,9 +439,8 @@ class CollectionRadioChannel(View):
             cu.cache_list_bykind(rlist,choices.SONG,'special_channel',mycache)
             return redirect(reverse('cached_list'))
 
-        flist = bu.link_file_list(rlist)
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':flist,
+        context = {'form':bound_form,'rlist':rlist,
             'title': 'Build a  Channel'}
         return render(request,self.template_name,context)
 
@@ -479,9 +469,8 @@ class SongRadioChannel(View):
             cu.cache_list_bykind(rlist,choices.SONG,'special_channel',mycache)
             return redirect(reverse('cached_list'))
 
-        flist = bu.link_file_list(rlist)
         # display the list as files with the form
-        context = {'form':bound_form,'rlist':flist,
+        context = {'form':bound_form,'rlist':rlist,
             'title': 'Build a  Channel'}
         return render(request,self.template_name,context)
 

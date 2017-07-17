@@ -23,7 +23,7 @@
 </div>
 <p>{{message}}</p>
 <div>
-    {% for song,path in rlist %}
+    {% for song in rlist %}
         <li><a href="{{ song.get_absolute_url }}">{{song.title|title}}</a> 
             <span style="float:right;">{{song.friendly_name}}</span></li>
     {% endfor %}

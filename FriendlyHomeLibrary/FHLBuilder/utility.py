@@ -98,17 +98,8 @@ def object_path_samba(obj):
     return unicode(thePath)
 
 
-# Given a list of objects, create a list containing pairs of path,object
-# which can be passed to a playlist (song) or a picture list
-def link_file_list(things):
-    finalList = []
-    if things is not None:
-        for one in things:
-            item = (one, object_path(one))
-            finalList.append(item)
-    return finalList
-
 def collection_sets(collections):
+    """ break a list of collections according to category  """
     songc = []
     moviec = []
     picturec = []

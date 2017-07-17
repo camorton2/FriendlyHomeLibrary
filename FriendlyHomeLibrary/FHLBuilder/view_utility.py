@@ -84,8 +84,6 @@ def generic_collection_view(request, **kwargs):
         olist,title =  movies_bykind(kind)
         movies = olist.order_by(ob)
     
-    songList = utility.link_file_list(songs)
-
     # respond to slide show
     current_picture = 1
     picture = None
@@ -203,7 +201,7 @@ def generic_collection_view(request, **kwargs):
 
     context = {
         'title':title,
-        'songlist':songList,
+        'songlist':songs,
         'picture':picture,
         'pictureCount':picture_count,
         'filename': filename,

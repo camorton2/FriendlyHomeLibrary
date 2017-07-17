@@ -537,7 +537,6 @@ class MusicianDetailView(View):
         """
         musician=get_object_or_404(models.Musician,slug__iexact=slug)
         songs = musician.songs.all()
-        slist = utility.link_file_list(songs)
         asPlayList = False
         if 'playlist' in request.GET:
             asPlayList = True
@@ -551,7 +550,7 @@ class MusicianDetailView(View):
 
         context = {
             'musician':musician,
-            'songlist':slist,
+            'songlist':songs,
             'asPlayList':asPlayList,
             'message':message}
         return render(request,self.template_name,context)
