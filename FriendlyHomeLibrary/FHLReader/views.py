@@ -483,7 +483,7 @@ class DateRadioChannel(FormView):
     
     def form_valid(self,form):
         random = form.cleaned_data['random']
-        print('form with random %s' % random)
+        #print('form with random %s' % random)
         try:
             ya=int(form.cleaned_data['yearA'])
             yb=int(form.cleaned_data['yearB'])
@@ -506,28 +506,36 @@ class DateRadioChannel(FormView):
                 context = {'yearA': ya,'yearB': yb,'monthB': mb}
             else:
                 context = {'yearA': ya,'yearB': yb}
-            return redirect(reverse('range_added_radio_channel',
-                kwargs=context))
+            reverse_value = reverse('range_added_radio_channel',
+                kwargs=context)
+            if random:
+                reverse_value = reverse_value + u'?random=True'
+            return redirect(reverse_value)
         if ya and ma:
             context = {'yearA': ya,'monthA': ma}
         else:
             context = {'yearA': ya}
-        return redirect(reverse('date_added_radio_channel',
-            kwargs = context))
+        reverse_value = reverse('date_added_radio_channel',
+            kwargs = context)
+        
+        if random:
+            reverse_value = reverse_value + u'?random=True'
+        #print(reverse_value)
+        return redirect(reverse_value)
 
 
 def date_added_radio_channel(request,yearA,monthA=None,random=False):
     
     if request.method == 'POST':
-        print('request is POST')
+        #print('request is POST')
         if 'random' in request.POST:
             random = request.POST.get('random')
     if request.method == 'GET':
-        print('request is GET')
+        #print('request is GET')
         if 'random' in request.GET:
             random = request.GET.get('random')
     
-    print('date_added year %s month %s random %s' % (yearA,monthA,random))
+    #print('date_added year %s month %s random %s' % (yearA,monthA,random))
     
     songs = Song.newest_objects.filter(date_added__year=yearA)
     if monthA:
@@ -542,14 +550,16 @@ def date_added_radio_channel(request,yearA,monthA=None,random=False):
 
 def range_added_radio_channel(request,yearA,yearB,
     monthA=None,monthB=None,random=False):
-    print('radio range %s %s' % (yearA,yearB))
+    #print('radio range %s %s' % (yearA,yearB))
 
     if request.method == 'POST':
+        #print('request is POST')
         if 'random' in request.POST:
             random = request.POST.get('random')
-
-    print('range_added year %s,%s month %s,%s random %s' % 
-        (yearA,yearB,monthA,monthB,random))
+    if request.method == 'GET':
+        #print('request is GET')
+        if 'random' in request.GET:
+            random = request.GET.get('random')
         
     valid = yearB >= yearA
     if monthA and monthB:

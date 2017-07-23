@@ -12,7 +12,9 @@ from FHLBuilder import choices, url_utility
 client = Client()
 
 class ViewGetFunction(TestCase):
-    """ testing get from views """
+    """ testing get from views 
+        Still to do: verify results rather than just status_code
+    """
     def setUp(self):
         self.me = User.objects.create_user('tester','nothere@nothere.com','notreal')
         response = client.post(reverse('FHLUser_Login'), {'username': 'tester', 'password': 'notreal'})
@@ -24,6 +26,7 @@ class ViewGetFunction(TestCase):
     def test1(self):
         r1 = client.get(reverse('user_page'))
         self.assertEqual(r1.status_code, 200)
+        #print(r1.context)
         
     def test2(self):
         #url(r'^pictures/(liked|loved|both|random)$', views.UserPictureList.as_view(), name='user_pictures'),    
@@ -123,8 +126,3 @@ class ViewGetFunction(TestCase):
         self.assertEqual(r2.status_code, 200)
 
         
-    #url(r'^radio_date$', views.DateRadioChannel.as_view(), name='date_radio_channel'),
-    #    name='date_added_radio_channel'),
-    #    name='date_added_radio_channel'),
-    #    name='range_added_radio_channel'),
-    #    name='range_added_radio_channel'),

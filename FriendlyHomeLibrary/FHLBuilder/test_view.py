@@ -13,7 +13,9 @@ from FHLBuilder import choices, collection
 client = Client()
 
 class ViewGetFunction(TestCase):
-    """ testing get from views """
+    """ testing get from views using get 
+        Still to do, check results other than status
+    """
     def setUp(self):
         self.me = User.objects.create_user('tester','nothere@nothere.com','notreal')
         response = client.post(reverse('FHLUser_Login'), {'username': 'tester', 'password': 'notreal'})
@@ -80,3 +82,14 @@ class ViewGetFunction(TestCase):
     def test11(self):
         r1 = client.get(reverse('builder_collection_detail', kwargs={'slug':self.col.slug}))
         self.assertEqual(r1.status_code, 200)
+
+    def test12(self):
+        r1 = client.get(reverse('builder_collection_create'))
+        # permission denined for reader, need builder
+        self.assertEqual(r1.status_code, 403)
+
+    def test13(self):
+        r1 = client.get(reverse('builder_collection_update',kwargs={'slug':self.col.slug}))
+        # requires builder permission
+        self.assertEqual(r1.status_code, 403)
+
