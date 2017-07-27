@@ -212,6 +212,13 @@ class DateAddedRadioForm(forms.ModelForm):
     random = forms.BooleanField(label = 'random? ', 
         initial=False,required=False)
 
+    xmas = forms.BooleanField(label = 'include Christmas', 
+        initial=False,required=False)
+
+    playback = forms.ChoiceField(choices = choices.SONGPLAY_CHOICES,
+        label = 'Playback',
+        initial=choices.WEB, required = False)
+
     def check_year(self,year):
         try:
             iyear = int(year)

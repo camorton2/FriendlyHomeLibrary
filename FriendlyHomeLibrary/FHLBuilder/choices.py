@@ -67,6 +67,8 @@ LOVE = 'lv'
 DISLIKE = 'dl'
 INDIFFERENT = 'in'
 
+# preference choices
+
 PREF_CHOICES = (
     (LOVE, 'love'),
     (LIKE, 'like'),
@@ -74,6 +76,7 @@ PREF_CHOICES = (
     (INDIFFERENT, 'indifferent')
     )
 
+# order choices
 
 NAME = 'NM'
 NEWEST = 'NN'
@@ -85,6 +88,24 @@ ORDER_CHOICES = (
     (NAME, 'By Name'),
     (NEWEST, 'Newest First'),
     (OLDEST, 'Oldest First'),
+    )
+
+# song playlist choices
+
+WEB = 'PP'
+FLIST = 'FF'
+KODI_LOCAL = 'KL'
+KODI_BF = 'BF'
+KODI_LF = 'LF'
+
+songplay = [WEB,FLIST,KODI_LOCAL,KODI_BF,KODI_LF]
+
+SONGPLAY_CHOICES = (
+    (FLIST, 'No playback, just list files'),
+    (WEB, 'html playlist'),
+    (KODI_LOCAL, 'Kodi local'),
+    (KODI_BF, 'Kodi BF'),
+    (KODI_LF, 'Kodi LF'),
     )
 
 # month for dialogue box

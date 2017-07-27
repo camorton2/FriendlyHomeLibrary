@@ -219,10 +219,9 @@ def playlist_requests_new(playlist,pattern,me,request):
     return False
 
 
-
-def playlist_requests(playlist,request):
+def playlist_select(playlist,playback,request):
     """ handle play requests for playlist
-        given the html GET request
+        given playback from choices.songplay
         caller should catch MyException which is used for all
         errors in kodi playback
     """
@@ -230,8 +229,9 @@ def playlist_requests(playlist,request):
         me = models.User.objects.get(username=request.user)
     except models.User.DoesNotExist:
         me = None
-        
-    if 'kodi_local' in request.GET:
+    
+    if playback == choices.KODI_LOCAL:
+        print('local')
         try:
             clientip = request.META['REMOTE_ADDR']
         except KeyError:
@@ -241,13 +241,30 @@ def playlist_requests(playlist,request):
         time.sleep(5)
         play_to_kodi(playlist,clientip,me)
         return True
-    elif 'kodi_lf' in request.GET:
+    elif playback == choices.KODI_LF:
+        print('lf')
         play_to_kodi(playlist,settings.HOST_LF,me)
         return True
-    elif 'kodi_bf' in request.GET:
+    elif playback == choices.KODI_BF:
+        print('bf')
         time.sleep(5)
         play_to_kodi(playlist,settings.HOST_BF,me)
         return True
+    return False
+
+
+def playlist_requests(playlist,request):
+    """ handle play requests for playlist
+        given the html GET request
+        caller should catch MyException which is used for all
+        errors in kodi playback
+    """
+    if 'kodi_local' in request.GET:
+        return playlist_select(playlist,choices.KODI_LOCAL,request)
+    elif 'kodi_lf' in request.GET:
+        return playlist_select(playlist,choices.KODI_LF,request)
+    elif 'kodi_bf' in request.GET:
+        return playlist_select(playlist,choices.KODI_BF,request)
     return False
 
 

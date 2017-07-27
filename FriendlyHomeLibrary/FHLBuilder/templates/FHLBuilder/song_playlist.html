@@ -29,7 +29,7 @@
     {% endfor %}
 
 {% else %}
-
+    {{message}}
     <ul>
     {% for song in songlist %}
         <li><a href="{{ song.get_absolute_url }}">{{song.friendly_name}} 
@@ -38,6 +38,8 @@
     </ul>
 
 {% endif %}
+{% else %}
+<h4>No songs selected</h4>
 {% endif %}
 
 <script src="{% static 'jquery.js' %}" type="text/javascript"></script>

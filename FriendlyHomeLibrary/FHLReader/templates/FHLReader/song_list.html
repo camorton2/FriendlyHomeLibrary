@@ -6,32 +6,6 @@
 
 {% block content %}
    
-{% if object_list %}
-<h4>{{listTitle}}</h4>
-    {% load static %}
-    {% for song in object_list %}
-        {% if forloop.first %}
-            <audio src="" controls id="audioPlayer">
-                Sorry, your browser does not support HTML5 audio.
-            </audio>
-            <p></p><ul id="playlist">
-            <li class="current-song"><a href="{% static song.path_name %}">{{song.friendly_name}}</a></li> 
-                <span style="float:right;"><a href="{{song.get_absolute_url}}">{{song.title}}</a></span>
-        {% else %}
-            <li><a href="{% static song.path_name %}">{{song.friendly_name}}</a></li>
-                <span style="float:right;"><a href="{{song.get_absolute_url}}">{{song.title}}</a></span>
-        {% endif %}
-        {% if forloop.last %}
-            </ul>
-        {% endif %}
-    {% endfor %}
-{% endif %}
-
-<script src="{% static 'jquery.js' %}" type="text/javascript"></script>
-<script src="{% static 'audioplay.js' %}" type="text/javascript"></script>
-<script>
-    // loads the audio player
-    init();    
-</script>
+{% include "FHLBuilder/song_playlist.html" %}
 
 {% endblock content %}

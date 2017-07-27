@@ -15,10 +15,11 @@ from FHLBuilder.models import Song, Movie, Picture
 
 import FHLBuilder.view_utility as vu
 
-from FHLReader import forms
+from FHLReader import forms, kodi
 
 import FHLReader.cache_utility as cu
 import FHLReader.query as rq
+import FHLReader.utility as rutils
 
 # Create your views here.
 
@@ -483,6 +484,9 @@ class DateRadioChannel(FormView):
     
     def form_valid(self,form):
         random = form.cleaned_data['random']
+        playback = form.cleaned_data['playback']
+        christmas = form.cleaned_data['xmas']
+        print('form with playback %s' % playback)
         #print('form with random %s' % random)
         try:
             ya=int(form.cleaned_data['yearA'])
@@ -491,7 +495,13 @@ class DateRadioChannel(FormView):
             mb=int(form.cleaned_data['monthB'])
         except ValueError:
             return redirect(reverse('date_radio_channel'))
-            
+
+        my_options = u'?playback=' + playback        
+        if random:
+            my_options = my_options + u'&random=True'
+        if christmas:
+            my_options = my_options + u'&christmas=True'
+
         if ya and yb:
             if ma and mb:
                 context = {
@@ -508,59 +518,84 @@ class DateRadioChannel(FormView):
                 context = {'yearA': ya,'yearB': yb}
             reverse_value = reverse('range_added_radio_channel',
                 kwargs=context)
-            if random:
-                reverse_value = reverse_value + u'?random=True'
+            reverse_value = reverse_value + my_options
             return redirect(reverse_value)
+            
         if ya and ma:
             context = {'yearA': ya,'monthA': ma}
         else:
             context = {'yearA': ya}
         reverse_value = reverse('date_added_radio_channel',
             kwargs = context)
-        
-        if random:
-            reverse_value = reverse_value + u'?random=True'
+        reverse_value = reverse_value + my_options        
+            
         #print(reverse_value)
         return redirect(reverse_value)
 
 
-def date_added_radio_channel(request,yearA,monthA=None,random=False):
+def send_to_playlist(songs,request):
+
+    # default values to be replaced if option is in request
+    christmas = False
+    playback = choices.WEB
+    random = False
     
     if request.method == 'POST':
-        #print('request is POST')
         if 'random' in request.POST:
             random = request.POST.get('random')
+        if 'playback' in request.POST:
+            playback = request.POST.get('playback')
+        if 'christmas' in request.POST:
+            christmas = request.POST.get('christmas')
     if request.method == 'GET':
-        #print('request is GET')
         if 'random' in request.GET:
             random = request.GET.get('random')
+        if 'playback' in request.GET:
+            playback = request.GET.get('playback')
+        if 'christmas' in request.GET:
+            christmas = request.GET.get('christmas')
+    print('options xmas %s random %s playback %s' % (christmas,random,playback))            
     
-    #print('date_added year %s month %s random %s' % (yearA,monthA,random))
+    message = u''
+    if random:
+        songs = songs.order_by('?')
+    if not christmas:
+        songs = rq.exclude_xmas(songs)
+
     
+    if playback == choices.WEB:
+        asPlayList = True
+    elif playback == choices.FLIST:
+        asPlayList = False
+    else:
+        asPlayList = False
+        try:
+            if kodi.playlist_select(songs,playback,request):
+                message = u'success - songs sent to Kodi' 
+        except rutils.MyException,ex:
+            message = ex.message
+            print('Caught %s' % ex.message)
+        
+    context = {
+        'songlist':songs,
+        'asPlayList':asPlayList,
+        'listTitle':'Date added radio',
+        'message':message}
+    template_name = 'FHLReader/song_list.html'    
+    return render(request,template_name,context)
+
+
+def date_added_radio_channel(request,yearA,monthA=None):    
     songs = Song.newest_objects.filter(date_added__year=yearA)
     if monthA:
         songs = songs.filter(date_added__month=monthA)
         
-    if random:
-        songs = songs.order_by('?')
-    context = {'object_list':songs}
-    template_name = 'FHLReader/song_list.html'    
-    return render(request,template_name,context)
-        
+    return send_to_playlist(songs,request)
 
-def range_added_radio_channel(request,yearA,yearB,
-    monthA=None,monthB=None,random=False):
-    #print('radio range %s %s' % (yearA,yearB))
 
-    if request.method == 'POST':
-        #print('request is POST')
-        if 'random' in request.POST:
-            random = request.POST.get('random')
-    if request.method == 'GET':
-        #print('request is GET')
-        if 'random' in request.GET:
-            random = request.GET.get('random')
-        
+def range_added_radio_channel(request,yearA,yearB,monthA=None,
+    monthB=None):
+
     valid = yearB >= yearA
     if monthA and monthB:
         pass
@@ -576,16 +611,10 @@ def range_added_radio_channel(request,yearA,yearB,
             mA = int(monthA)
             yB = int(yearB)
             mB = int(monthB)
-            
-            dA = datetime.date(yA,mA,1)
-            
+            dA = datetime.date(yA,mA,1)            
             rangeB = calendar.monthrange(yB,mB)[1]
             # last day of monthA
             dB = datetime.date(yB,mB,rangeB)
-            
-            print(dA)
-            print(dB)
-            
             q1 = Q(date_added__gte=dA)
             q2 = Q(date_added__lte=dB)
             songs = Song.newest_objects.filter(q1).filter(q2)
@@ -600,9 +629,4 @@ def range_added_radio_channel(request,yearA,yearB,
         # plan is to disallow this in the form
         songs=[]
         
-    if random:
-        songs = songs.order_by('?')
-    context = {'object_list':songs}
-    template_name = 'FHLReader/song_list.html'    
-    return render(request,template_name,context)
-
+    return send_to_playlist(songs,request)

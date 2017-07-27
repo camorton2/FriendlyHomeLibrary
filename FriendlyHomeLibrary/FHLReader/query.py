@@ -271,15 +271,21 @@ def exclude_ick(big,cl):
         return big.exclude(ick1|ick2|ick3|cq)
     return big.exclude(ick1|ick2|ick3)
 
+
+def exclude_xmas(big):
+    """ filter Christmas songs from list big 
+    """
+    b1 = Q(tags__name__icontains='christmas')
+    b2 = Q(title__icontains='christmas')
+    b3 = Q(tags__name__icontains='seasonal')    
+    return big.exclude(b1|b2|b3)
+
+
 def exclude_ick_xmas(big,cl):
     """ filter Christmas and unwanted songs from list big 
         if cl is set, classical will be left in place
     """
-    b1 = Q(tags__name__icontains='christmas')
-    b2 = Q(title__icontains='christmas')
-    b3 = Q(tags__name__icontains='seasonal')
-    
-    return exclude_ick(big.exclude(b1|b2|b3),cl)
+    return exclude_ick(exclude_xmas(big),cl)
 
 
 def only_xmas(big):

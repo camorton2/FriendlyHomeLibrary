@@ -26,7 +26,8 @@ class ViewGetFunction(TestCase):
     def test1(self):
         r1 = client.get(reverse('user_page'))
         self.assertEqual(r1.status_code, 200)
-        #print(r1.context)
+        self.assertEqual(r1.request['PATH_INFO'],'/reader/')
+        
         
     def test2(self):
         #url(r'^pictures/(liked|loved|both|random)$', views.UserPictureList.as_view(), name='user_pictures'),    
