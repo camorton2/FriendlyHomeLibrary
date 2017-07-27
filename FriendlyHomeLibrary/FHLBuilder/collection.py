@@ -366,7 +366,7 @@ def remove_movie(target):
     for dtor in target.movie_directors.all():
         target.movie_directors.remove(dtor)
     for act in target.movie_actors.all():
-        target.movie_directors.remove(act)
+        target.movie_actors.remove(act)
     for lk in target.likes.all():
         target.likes.remove(lk)
     for lv in target.loves.all():
