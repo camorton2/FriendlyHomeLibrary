@@ -269,11 +269,14 @@ def playlist_requests(playlist,request):
 
 
 def slideshow_kodi(playlist,host,xbmc_i, me):
-    """ in progress """    
+    """ kodi playlist is from a directory, so this annotates the 
+        pictures in the playlist and copies them to /tmp/slides-username
+        Still to do: clean up pictures from previous slide shows
+    """    
     
     print("picturelist to kodi")
     try:
-        file_path,_,smb_path = rutils.my_private_directory(me)
+        file_path,_ = rutils.my_private_directory(me)
         # put all the pictures in the directory
         for picture in playlist:
             _,_ = rutils.annotate(picture,me)
@@ -281,8 +284,8 @@ def slideshow_kodi(playlist,host,xbmc_i, me):
         ping_result = xbmc_i.JSONRPC.Ping()
         look_at_res('ping',ping_result)
         if ping_result:
-            print('after ping with file_path %s' % smb_path)
-            path_context = { 'directory': smb_path}
+            print('after ping with file_path %s' % file_path)
+            path_context = { 'directory': file_path}
             open_context = {'item':path_context}
 
             # play it

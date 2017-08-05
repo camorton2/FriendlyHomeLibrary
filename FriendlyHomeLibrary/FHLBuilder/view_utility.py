@@ -111,7 +111,7 @@ def generic_collection_view(request, **kwargs):
 
     #print(request.GET)
     if 'options' in request.GET and not slideshow:
-        print('A hey go get cc ss %s' % slideshow)
+        #print('A hey go get cc ss %s' % slideshow)
         ccasts = chromecast.find_chrome_casts()
         val = request.GET.get('options')
         if val == 'slideshow':
