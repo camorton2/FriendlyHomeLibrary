@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^videos/(liked|loved|both|random)$', views.UserVideoList.as_view(), name='user_videos'),
     url(vchannel, views.MovieChannel.as_view(), name='movie_channel'),    
     url(schannel, views.SpecialChannel.as_view(), name='special_channel'),
+    #url(r'^picture$', views.picture_channel, name='picture_channel'),
     url(r'^radio$', views.RadioChannel.as_view(), name='radio_channel'),
     url(r'^radio_mus$', views.MusicianRadioChannel.as_view(), name='mus-radio_channel'),
     url(r'^radio_col$', views.CollectionRadioChannel.as_view(), name='col-radio_channel'),

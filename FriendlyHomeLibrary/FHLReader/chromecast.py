@@ -70,6 +70,9 @@ def cast_slides(devs,pictures,me, add_title):
         print(cast.device)
         print(cast.status)
         mc=cast.media_controller
+        if add_title:
+            # cleanup working directory
+            rutils.cleanup_my_private_directory(me)
 
         for picture in pictures:
             tmp_file = None
@@ -106,6 +109,10 @@ def cast_slides_all(pictures,me, add_title):
             print(cc.status)
             mc = cc.media_controller
             mcs.append(mc)
+            
+        if add_title:
+            # cleanup working directory
+            rutils.cleanup_my_private_directory(me)
  
         for picture in pictures:
             tmp_file = None

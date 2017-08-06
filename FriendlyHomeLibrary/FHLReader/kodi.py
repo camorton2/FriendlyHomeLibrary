@@ -276,6 +276,7 @@ def slideshow_kodi(playlist,host,xbmc_i, me):
     
     print("picturelist to kodi")
     try:
+        rutils.cleanup_my_private_directory(me)
         file_path,_ = rutils.my_private_directory(me)
         # put all the pictures in the directory
         for picture in playlist:

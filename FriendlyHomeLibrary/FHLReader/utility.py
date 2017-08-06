@@ -59,12 +59,20 @@ def my_private_directory(me):
         raise MyException(message)
 
 
-#def cleanup_my_private_directory(me):
-#    pass
-
+def cleanup_my_private_directory(me):
+    my_path, _ = my_private_directory(me)
+    print('cleanup my_path %s' % (my_path))  
+    if os.path.exists(my_path):
+        print('cleanup exists')
+        for target in os.listdir(my_path):
+            tpath = os.path.join(my_path,target)
+            print('to delete %s' % (tpath))
+            os.remove(tpath)
+    
 
 def annotate(picture,me):
     """ decorate a picture with its friendly_name """
+    #print('start annotate')
     filename = picture.fileName
     me_local, me_web = my_private_directory(me)
     tmp_file = os.path.join(me_local,filename)
