@@ -128,7 +128,6 @@ def generic_collection_view(request, **kwargs):
             chromecast.cast_slides_all(pictures,me,False)
         else:
             # kodi playlist options
-            me = models.User.objects.get(username=request.user)
             try:
                 res = kodi.playlist_requests_new(pictures,val,me,request)
                 if res:

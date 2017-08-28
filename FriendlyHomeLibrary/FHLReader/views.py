@@ -19,10 +19,10 @@ from FHLReader import forms, kodi
 
 import FHLReader.cache_utility as cu
 import FHLReader.query as rq
+import FHLReader.chromecast as cc
 import FHLReader.utility as rutils
 
 # Create your views here.
-
 
 class UserDetail(View):
     """
@@ -475,6 +475,7 @@ class SongRadioChannel(View):
             'title': 'Build a  Channel'}
         return render(request,self.template_name,context)
 
+#### TODO date confirmation duplicated code!!!!!!!!!!!!!!!!
 
 class DateRadioChannel(FormView):
     template_name = 'FHLReader/channel_basic.html'
@@ -531,6 +532,68 @@ class DateRadioChannel(FormView):
             
         #print(reverse_value)
         return redirect(reverse_value)
+
+
+class DatePictureChannel(FormView):
+    template_name = 'FHLReader/channel_basic.html'
+    form_class = forms.DateAddedPictureForm
+    success_url = ''
+    random = False
+    
+    def form_valid(self,form):
+        random = form.cleaned_data['random']
+        playback = form.cleaned_data['playback']
+        thumb = form.cleaned_data['thumb']
+        smut = form.cleaned_data['smut']
+        print('form with pb %s smut %s, thumb %s' % (playback,smut,thumb))
+        #print('form with random %s' % random)
+        try:
+            ya=int(form.cleaned_data['yearA'])
+            yb=int(form.cleaned_data['yearB'])
+            ma=int(form.cleaned_data['monthA'])
+            mb=int(form.cleaned_data['monthB'])
+        except ValueError:
+            return redirect(reverse('date_radio_channel'))
+
+        my_options = u'?playback=' + playback        
+        if random:
+            my_options = my_options + u'&random=True'
+        if thumb:
+            my_options = my_options + u'&thumb=True'
+        if smut:
+            my_options = my_options + u'&smut=True'
+
+
+        if ya and yb:
+            if ma and mb:
+                context = {
+                    'yearA': ya,
+                    'yearB': yb,
+                    'monthA': ma,
+                    'monthB': mb
+                }
+            elif ma:
+                context = {'yearA': ya,'yearB': yb,'monthA': ma}
+            elif mb:
+                context = {'yearA': ya,'yearB': yb,'monthB': mb}
+            else:
+                context = {'yearA': ya,'yearB': yb}
+            reverse_value = reverse('range_added_picture_channel',
+                kwargs=context)
+            reverse_value = reverse_value + my_options
+            return redirect(reverse_value)
+            
+        if ya and ma:
+            context = {'yearA': ya,'monthA': ma}
+        else:
+            context = {'yearA': ya}
+        reverse_value = reverse('date_added_picture_channel',
+            kwargs = context)
+        reverse_value = reverse_value + my_options        
+            
+        #print(reverse_value)
+        return redirect(reverse_value)
+
 
 
 def send_to_playlist(songs,request):
@@ -630,3 +693,110 @@ def range_added_radio_channel(request,yearA,yearB,monthA=None,
         songs=[]
         
     return send_to_playlist(songs,request)
+
+
+def send_to_slideshow(pictures,request):
+
+    # default values to be replaced if option is in request
+    playback = choices.FLIST
+    random = False
+    smut = False
+    thumb = False
+    
+    if request.method == 'POST':
+        if 'random' in request.POST:
+            random = request.POST.get('random')
+        if 'playback' in request.POST:
+            playback = request.POST.get('playback')
+        if 'thumb' in request.POST:
+            thumb = request.POST.get('thumb')
+            print('thumb')
+        if 'smut' in request.POST:
+            smut = request.POST.get('smut')
+            print('smut')
+    if request.method == 'GET':
+        if 'random' in request.GET:
+            random = request.GET.get('random')
+        if 'thumb' in request.GET:
+            thumb = request.GET.get('thumb')
+        if 'smut' in request.GET:
+            smut = request.GET.get('smut')
+        if 'playback' in request.GET:
+            playback = request.GET.get('playback')
+            
+    message = u''
+    if random:
+        pictures = pictures.order_by('?')
+    if not smut:
+        pictures = pictures.exclude(collection__filePath__icontains='smut')
+    if not thumb:
+        pictures = pictures.exclude(fileName__iendswith=choices.picts[7])
+
+    if playback == choices.FLIST:
+        pass
+    elif playback == choices.CCAST:
+        me = rq.get_me(True,request)
+        cc.cast_slides_all(pictures,me,False)
+    else:
+        try:
+            if kodi.playlist_select(pictures,playback,request):
+                message = u'success - pictures sent to Kodi' 
+        except rutils.MyException,ex:
+            message = ex.message
+            print('Caught %s' % ex.message)
+        
+    print('pictures options random %s playback %s length %d' % (random,playback,pictures.count()))        
+    context = {
+        'title':'date-added pictures',
+        'pictures':pictures,
+        'message': message,
+        }
+    template_name = 'FHLReader/picture_list.html'    
+    return render(request,template_name,context)
+
+
+def date_added_picture_channel(request,yearA,monthA=None):    
+    pictures = Picture.newest_objects.filter(date_added__year=yearA)
+    if monthA:
+        pictures = pictures.filter(date_added__month=monthA)
+        
+    return send_to_slideshow(pictures,request)
+
+
+def range_added_picture_channel(request,yearA,yearB,monthA=None,
+    monthB=None):
+
+    valid = yearB >= yearA
+    if monthA and monthB:
+        pass
+    elif monthA:
+        valid = False
+    elif monthB:
+        valid = False
+                
+    if valid and monthA:
+        try:
+            # first day of monthA
+            yA = int(yearA)
+            mA = int(monthA)
+            yB = int(yearB)
+            mB = int(monthB)
+            dA = datetime.date(yA,mA,1)            
+            rangeB = calendar.monthrange(yB,mB)[1]
+            # last day of monthA
+            dB = datetime.date(yB,mB,rangeB)
+            q1 = Q(date_added__gte=dA)
+            q2 = Q(date_added__lte=dB)
+            pictures = Picture.newest_objects.filter(q1).filter(q2)
+        except ValueError:
+            picturess = []
+    elif valid:
+        q1 = Q(date_added__year__gte=yearA)
+        q2 = Q(date_added__year__lte=yearB)
+        pictures = Picture.newest_objects.filter(q1).filter(q2)
+    else:
+        # likely better to have an error condition, but
+        # plan is to disallow this in the form
+        pictures=[]
+        
+    return send_to_slideshow(pictures,request)

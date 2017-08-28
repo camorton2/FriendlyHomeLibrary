@@ -186,7 +186,7 @@ class MovieChannelForm(forms.ModelForm):
 
 
 
-class DateAddedRadioForm(forms.ModelForm):
+class DateAddedForm(forms.ModelForm):
     """
     The idea is to allow the user to create a playlist
     based on a year and optional month
@@ -212,12 +212,6 @@ class DateAddedRadioForm(forms.ModelForm):
     random = forms.BooleanField(label = 'random? ', 
         initial=False,required=False)
 
-    xmas = forms.BooleanField(label = 'include Christmas', 
-        initial=False,required=False)
-
-    playback = forms.ChoiceField(choices = choices.SONGPLAY_CHOICES,
-        label = 'Playback',
-        initial=choices.WEB, required = False)
 
     def check_year(self,year):
         try:
@@ -283,3 +277,25 @@ class DateAddedRadioForm(forms.ModelForm):
             elif ma or mb:
                 raise ValidationError(u'Specify no months or both')
             
+
+class DateAddedRadioForm(DateAddedForm):
+    xmas = forms.BooleanField(label = 'include Christmas', 
+        initial=False,required=False)
+
+    playback = forms.ChoiceField(choices = choices.SONGPLAY_CHOICES,
+        label = 'Playback',
+        initial=choices.WEB, required = False)
+
+
+
+class DateAddedPictureForm(DateAddedForm):
+    thumb = forms.BooleanField(label = 'include Thumbnails', 
+        initial=False,required=False)
+
+    smut = forms.BooleanField(label = 'include Smut', 
+        initial=False,required=False)
+
+    playback = forms.ChoiceField(choices = choices.PICTUREPLAY_CHOICES,
+        label = 'SlideShow',
+        initial=choices.FLIST, required = False)
+

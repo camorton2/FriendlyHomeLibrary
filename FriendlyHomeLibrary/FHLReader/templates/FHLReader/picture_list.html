@@ -1,0 +1,17 @@
+{% extends parent_template|default:"FHLReader/base_reader.html" %}
+
+{% block title %}
+{{ block.super }} generated channel
+{% endblock title %}
+
+{% block content %}
+
+   <h3>{{title}} {{pictures.count}}</h3>
+   <p>{{ message }}</p>
+   
+   {% load static %}
+   {% for x in pictures %}
+      <a href="{{x.get_absolute_url}}"><img src="{% static x.path_name %}" style="width:10%"></a>
+   {% endfor %}
+   
+{% endblock content %}

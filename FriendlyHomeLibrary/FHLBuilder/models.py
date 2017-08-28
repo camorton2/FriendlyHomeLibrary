@@ -177,6 +177,25 @@ class Slide_Manager(models.Manager):
         return super(Slide_Manager,self).get_queryset().exclude(q1 | q2)
 
 
+class Newest_Picture_Manager(models.Manager):
+    def get_queryset(self):
+        return super(Newest_Picture_Manager,self). \
+            get_queryset(). \
+            order_by('-date_added','collection')
+
+
+class Oldest_Picture_Manager(models.Manager):
+    def get_queryset(self):
+        return super(Oldest_Picture_Manager,self). \
+            get_queryset(). \
+            order_by('date_added','collection')
+
+
+class Random_Picture_Manager(models.Manager):
+    def get_queryset(self):
+        return super(Random_Picture_Manager,self).get_queryset().order_by('?')
+
+
 class Picture(CommonFile):
     collection = models.ForeignKey(Collection,
       models.SET_NULL,
@@ -197,6 +216,14 @@ class Picture(CommonFile):
     objects = models.Manager() 
     # excludes extensions not wanted in slide shows
     slide_objects = Slide_Manager()
+    # sets up order for recent
+    newest_objects = Newest_Picture_Manager()
+    # sets up order for old
+    oldest_objects = Oldest_Picture_Manager()    
+    # setups up order for random
+    random_objects = Random_Picture_Manager()
+
+
     
     def get_absolute_url(self):
         return reverse('builder_picture_detail',kwargs={'slug': self.slug})

@@ -182,6 +182,7 @@ def play_to_kodi(playlist,ip,me):
         xbmc_i = init_xbmc(host)
         if playlist[0] and playlist[0].fileKind == choices.PICTURE:
             slideshow_kodi(playlist,host,xbmc_i,me)
+            print('after calling slideshow_kodi')
         else:
             play_kodi(playlist,host,xbmc_i)
     except Exception as ex:

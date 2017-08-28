@@ -97,6 +97,7 @@ FLIST = 'FF'
 KODI_LOCAL = 'KL'
 KODI_BF = 'BF'
 KODI_LF = 'LF'
+CCAST = 'ccast'
 
 songplay = [WEB,FLIST,KODI_LOCAL,KODI_BF,KODI_LF]
 
@@ -107,6 +108,17 @@ SONGPLAY_CHOICES = (
     (KODI_BF, 'Kodi BF'),
     (KODI_LF, 'Kodi LF'),
     )
+
+pictureplay = [FLIST,CCAST,KODI_LOCAL,KODI_BF,KODI_LF]
+
+PICTUREPLAY_CHOICES = (
+    (FLIST, 'No slideshow, just files'),
+    (CCAST,'Chrome-Cast'),
+    (KODI_LOCAL, 'Kodi local'),
+    (KODI_BF, 'Kodi BF'),
+    (KODI_LF, 'Kodi LF'),
+    )
+
 
 # month for dialogue box
 
