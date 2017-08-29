@@ -20,7 +20,7 @@ from FHLBuilder import query
 from FHLBuilder import diagnostics
 import FHLBuilder.view_utility as vu
 
-from FHLReader import kodi, chromecast
+from FHLReader import kodi
 from FHLReader import utility as rutils
 
 
@@ -607,17 +607,18 @@ class PictureDetailView(View):
                 picture.title=new_picture.title
                 picture.year=new_picture.year
 
-                cast = bound_form.cleaned_data['cast']
-                if len(cast):
-                    #print('cast %s' % cast)
-                    try:
-                        message = u'success'
-                        #print('view calls cast_picture')
-                        chromecast.cast_picture(cast,picture)
-                    except rutils.MyException,ex:
-                        message = ex.message
-                        #print('Caught %s' % ex.message)
-
+#### this was not such a great idea -- too slow
+#                cast = bound_form.cleaned_data['cast']
+#                if len(cast):
+#                    #print('cast %s' % cast)
+#                    try:
+#                        message = u'success'
+#                        #print('view calls cast_picture')
+#                        chromecast.cast_picture(cast,picture)
+#                    except rutils.MyException,ex:
+#                        message = ex.message
+#                        #print('Caught %s' % ex.message)
+#########################################################
                 # tag
                 tq = bound_form.cleaned_data['tag']
                 if len(tq):
@@ -639,8 +640,7 @@ class PictureDetailView(View):
                 formContext = {
                     'picture':picture,
                     'playit':playit,
-                    'objectForm':bound_form,
-                    'message':message}
+                    'objectForm':bound_form}
                 return render(request,self.template_name, formContext)
 
         pictureContext = {
