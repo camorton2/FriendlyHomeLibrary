@@ -88,7 +88,10 @@ def add_musician(aName, aSlug):
         raise rutils.MyException('No Way - no unknown musicians')
     if aSlug == 'unknown-artist-mus':
         raise rutils.MyException('No Way - no unknown-artist musicians')
-        
+    if aSlug == 'None-mus':
+        raise rutils.MyException('No Way - no None-artist musicians')
+    if aSlug == 'none-mus':
+        raise rutils.MyException('No Way - no none-artist musicians')
     try:
         dbobj = bmodels.Musician.objects.get(slug__iexact=aSlug)
     except bmodels.Musician.DoesNotExist:
@@ -180,6 +183,10 @@ def fix_song(song,theFile,collection):
         if myArtist is None :
             #myArtist = u'various'
             myArtist = pick_artist(collection.filePath)
+        elif myArtist == 'None':
+            myArtist = pick_artist(collection.filePath)
+        elif myArtist == 'none':
+            myArtist = pick_artist(collection.filePath)
         elif myArtist == 'unknown':
             myArtist = pick_artist(collection.filePath)
         elif myArtist == 'Unknown':
@@ -192,11 +199,15 @@ def fix_song(song,theFile,collection):
             title=song.title
         elif title == 'None':
             title=song.title
+        elif title == 'none':
+            title=song.title
             
         album = tag.album
         if album is None:
             pass
         elif album == 'None':
+            pass
+        elif album == 'none':
             pass
         else:
             collection.title = album
@@ -220,6 +231,8 @@ def fix_song(song,theFile,collection):
     if genre is None:
         pass
     elif genre.name == 'None':
+        pass
+    elif genre.name == 'none':
         pass
     elif genre.name == 'Unknown':
         pass

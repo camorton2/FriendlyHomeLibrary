@@ -387,16 +387,18 @@ def christmas(rest, xmas):
     
     if month == 12:
         if day in [23,24,25,26]:
-            return mix(xmas,rest,15)
-        if day < 15:
-            return mix(xmas,rest,4)
-        return mix(xmas,rest,8)
+            return mix(xmas,rest,10)
+        if day < 10:
+            return mix(rest,xmas,6)
+        elif day < 15:
+            return mix(rest,xmas,4)
+        return mix(xmas,rest,5)
     if month == 1:
         if day < 4:
             return mix(xmas,rest,4)
     if month == 11:
         if day < 25:
-            return mix(rest,xmas,8)
+            return mix(rest,xmas,10)
         else:
             return mix(rest,xmas,5)
             
