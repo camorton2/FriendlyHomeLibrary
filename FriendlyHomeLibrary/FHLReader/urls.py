@@ -65,7 +65,7 @@ urlpatterns = [
         views.range_added_picture_channel,
         name='range_added_picture_channel'),
         
-        
+    url(r'^discography$', views.discography_list, name='discography_list'),
     url(r'^random$', views.RandomList.as_view(), name='random_list'),
     url(r'^recent$', views.RecentList.as_view(), name='recent_list'),
     url(r'^cached$', views.CachedFileList.as_view(), name='cached_list'),

@@ -46,8 +46,6 @@
     <li><a href="{% url 'movie_channel' a %}">{{b}}</a></li>
 {% endfor %}
 
-<li><a href="{% url 'date_radio_channel' %}">Radio by Date Added</a></li>
-
 <h3>Picture Channels - random pictures</h3>
 <li><a href="{% url 'date_picture_channel' %}">Picture by Date Added</a></li>
 {% if user.is_authenticated %}

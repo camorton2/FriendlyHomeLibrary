@@ -72,7 +72,7 @@ def cast_slides(devs,pictures,me, add_title):
         mc=cast.media_controller
         if add_title:
             # cleanup working directory
-            rutils.cleanup_my_private_directory(me)
+            rutils.cleanup_my_private_directory(me,'slides')
 
         for picture in pictures:
             tmp_file = None
@@ -112,7 +112,7 @@ def cast_slides_all(pictures,me, add_title):
             
         if add_title:
             # cleanup working directory
-            rutils.cleanup_my_private_directory(me)
+            rutils.cleanup_my_private_directory(me,'slides')
  
         for picture in pictures:
             tmp_file = None

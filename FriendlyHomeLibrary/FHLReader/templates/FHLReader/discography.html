@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-u">
+<title>
+    {% block title %}
+    Friendly Home Library
+    {% endblock %}
+</title>
+<body>
+{% block extrastyle %}
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+{% endblock extrastyle %}
+
+{% block friendly_title %}
+<h2>Friendly Home Library: Full Discography</h2>
+{% endblock friendly_title %}
+
+{% block content %}
+<br>Written to file: {{my_file}}
+
+{% for musician in mlist %}
+{% if musician.albums.count %}
+
+<div data-role="collapsible">
+    <h4><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a> Albums</h4>
+    <ul id='filelist'>
+        {% for album in musician.albums.all %}
+            <li><a href="{{album.get_absolute_url}}">{{album.title}}</a></li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% if musician.concerts.count %}
+<div data-role="collapsible">
+    <h4><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a> Albums</h4>
+    <ul id='filelist'>
+    {% for video in musician.concerts.all %}
+        <li><a href="{{video.get_absolute_url}}">{{video.title}}</a></li>
+    {% endfor %}
+    </ul>
+    </div>
+{% endif %}
+
+{% endif %}
+
+{% endfor %}
+
+{% endblock %}
+
+</body>
+</html>

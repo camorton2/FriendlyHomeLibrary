@@ -8,6 +8,7 @@
     Friendly Home Library
     {% endblock %}
 </title>
+{% block extrastyle %}
 <meta http-equiv="X-UA-Compatible" context="IE=edge,chrome=1">
 <meta name "viewpoart" context="width=device-width,initial-scale=1>
 <!--[if IE]><script
@@ -24,6 +25,7 @@ body{
     font: 20px Ariel, sans-serif;
 }
 </style>
+{% endblock extrastyle %}
 
 </head>
 
@@ -49,7 +51,7 @@ body{
     {% else %}
         <li><a href="{% url 'FHLUser_Login' %}">Log In</a></li>
     {% endif %}                 
-        
+        <li><a href="{% url 'discography_list' %}">Discography</a></li>
         {% endblock content %}
     </main>
     </div>

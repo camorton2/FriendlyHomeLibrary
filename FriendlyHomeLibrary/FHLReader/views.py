@@ -7,11 +7,12 @@ from django.forms.widgets import HiddenInput
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.shortcuts import render, redirect
+from django.template.loader import render_to_string
 from django.views.generic import View
 from django.views.generic.edit import FormView
 
 from FHLBuilder import choices
-from FHLBuilder.models import Song, Movie, Picture
+from FHLBuilder.models import Song, Movie, Picture, Musician
 
 import FHLBuilder.view_utility as vu
 
@@ -807,3 +808,29 @@ def range_added_picture_channel(request,yearA,yearB,monthA=None,
         pictures=[]
         
     return send_to_slideshow(pictures,request)
+
+def discography_list(request):
+    me = rq.get_me(True,request)
+    
+    rutils.cleanup_my_private_directory(me,u'discography')
+    my_path,_ = rutils.my_private_directory(me,u'discography')
+    my_file = (u'%s/d%s%s' % (my_path, datetime.date.today(),u'.html'))
+    context = {
+        'title':'Full discography by artist',
+        'mlist':Musician.objects.all(),
+        'my_file':my_file
+    }
+    
+    template_name = 'FHLReader/discography.html'    
+    content = render_to_string(template_name, context)
+    
+    try:
+        with open(my_file,'w') as static_file:
+            static_file.write(content.encode('utf8'))
+    except Exception as ex:
+        # would eventually like to catch the correct message
+        message = unicode('Error writing file %s' % (type(ex).__name__))
+        print (message)
+        raise rutils.MyException(message)
+        
+    return render(request,template_name,context)

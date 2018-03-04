@@ -24,13 +24,13 @@ def ip_from_request(request):
         raise MyException(message)
 
 
-def my_private_directory(me):
+def my_private_directory(me, identifier):
     """ create my private working directory """
     try:
         if me is None:
-            my_dir = (u'slides-%s' % 'anon')
+            my_dir = (u'%s-%s' % (identifier, 'anon'))
         else:
-            my_dir = (u'slides-%s' % me.username)
+            my_dir = (u'%s-%s' % (identifier, me.username))
         
         
         # my_path is hard-coded in /tmp, kodi does not like samba
@@ -59,8 +59,8 @@ def my_private_directory(me):
         raise MyException(message)
 
 
-def cleanup_my_private_directory(me):
-    my_path, _ = my_private_directory(me)
+def cleanup_my_private_directory(me,identifier):
+    my_path, _ = my_private_directory(me, identifier)
     print('cleanup my_path %s' % (my_path))  
     if os.path.exists(my_path):
         print('cleanup exists')
@@ -74,7 +74,7 @@ def annotate(picture,me):
     """ decorate a picture with its friendly_name """
     #print('start annotate')
     filename = picture.fileName
-    me_local, me_web = my_private_directory(me)
+    me_local, me_web = my_private_directory(me,'slides')
     tmp_file = os.path.join(me_local,filename)
     web_file = os.path.join(me_web,filename)
     pic_path = utils.object_path_local(picture)
