@@ -10,10 +10,24 @@
 </title>
 <body>
 {% block extrastyle %}
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
-<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<style type="text/css">
+.collapsibleList li > input + * {
+ display: none;
+}
+ 
+.collapsibleList li > input:checked + * {
+ display: block;
+}
+
+.collapsibleList li > input {
+ display: none;
+}
+
+.collapsibleList label {
+ cursor: pointer;
+}
+ </style>
+
 {% endblock extrastyle %}
 
 {% block friendly_title %}
@@ -26,25 +40,17 @@
 {% for musician in mlist %}
 {% if musician.albums.count %}
 
-<div data-role="collapsible">
-    <h4><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a> Albums</h4>
-    <ul id='filelist'>
+<ul class="collapsibleList">
+ <li>
+  <label for="{{musician.slug}}">{{musician.fullName}}</label>
+  <input type="checkbox" id="{{musician.slug}}"/>
+  <ul>
         {% for album in musician.albums.all %}
             <li><a href="{{album.get_absolute_url}}">{{album.title}}</a></li>
         {% endfor %}
-    </ul>
-</div>
-
-{% if musician.concerts.count %}
-<div data-role="collapsible">
-    <h4><a href="{{musician.get_absolute_url}}">{{musician.fullName}}</a> Albums</h4>
-    <ul id='filelist'>
-    {% for video in musician.concerts.all %}
-        <li><a href="{{video.get_absolute_url}}">{{video.title}}</a></li>
-    {% endfor %}
-    </ul>
-    </div>
-{% endif %}
+  </ul>
+ </li>
+</ul>
 
 {% endif %}
 
