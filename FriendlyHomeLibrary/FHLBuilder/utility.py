@@ -132,10 +132,14 @@ def collection_sets(collections):
 
 
 def rescan(myreq,a):
-    
+    '''
+    Cheats to make local rescans easier
+    Ideally this should not be hard-coded with magic drive numbers
+    but it's working for now
+    '''
     if 'rescan-songs' in myreq:
         print('rescan scons')
-        _,_ = a.add_members('mp3s',2,choices.CONCERT,'')            
+        _,_ = a.add_members('mp3s',3,choices.CONCERT,'')            
     elif 'rescan-pictures' in myreq:
         print('rescan pictures')
         _,_ = a.add_members('picturesbackup',2,choices.MINI_MOVIE,'')            
