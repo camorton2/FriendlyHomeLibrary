@@ -9,9 +9,12 @@ from FHLBuilder import choices
 
 def move_songs_to_drive(to_drive):
     print(u'Start')
+    count = 0
     for current in models.Song.objects.all():
         if current.collection.drive is not to_drive:
+            count = count+1
             current.collection.drive = to_drive
-            current.save()
+            current.collection.save()
     print(u'Done')
+    print(count)
     
