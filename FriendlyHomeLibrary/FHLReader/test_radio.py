@@ -18,7 +18,7 @@ class Radio1(TestCase):
         a = CollectionMixins()
         kind = choices.SONG
         xtag = collection.add_tag('christmas','christmas')
-        _,_ = a.add_members('mp3s/Chris_Isaak',2,kind,'isa')
+        _,_ = a.add_members('mp3s/Chris Isaak',2,kind,'isa')
         _,_ = a.add_members('mp3s/Chris_Rea',2,kind,'rea')
         _,_ = a.add_members('mp3s/Good_Family',2,kind,'goo')
         _,_ = a.add_members('mp3s/Dixie_Chicks',2,kind,'goo')
