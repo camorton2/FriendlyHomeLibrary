@@ -14,6 +14,7 @@
     <li><a href="{% url 'user_songs' 'liked' %}">My liked Songs</a></li>
     <li><a href="{% url 'user_songs' 'loved' %}">My loved Songs</a></li>
     <li><a href="{% url 'user_songs' 'both' %}">All My Songs</a></li>
+    <li><a href="{% url 'transfer_favourites' %}">Transfer My Songs to My Directory</a></li>
     <li><a href="{% url 'user_videos' 'liked' %}">My liked Videos</a></li>
     <li><a href="{% url 'user_videos' 'loved' %}">My loved Videos</a></li>
     <li><a href="{% url 'user_videos' 'both' %}">All My Videos</a></li>
@@ -41,7 +42,9 @@
 {% endif %}
 
 <h3>Video Channels</h3>
+{% if user.is_authenticated %}
 <li><a href="{% url 'user_videos' 'random' %}">My Videos</a></li>
+{% endif %}
 {% for a,b in choices %}
     <li><a href="{% url 'movie_channel' a %}">{{b}}</a></li>
 {% endfor %}

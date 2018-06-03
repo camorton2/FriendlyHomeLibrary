@@ -834,3 +834,17 @@ def discography_list(request):
         raise rutils.MyException(message)
         
     return render(request,template_name,context)
+
+def transfer_favourites(request):
+    me = rq.get_me(True,request)
+    
+    lk = Q(likes__username=me)
+    lv = Q(loves__username=me)
+    songs = Song.objects.filter(lv|lk)
+    my_path = rutils.transfer_to_my_directory(me,songs)
+    
+    context = {'songs':songs,'title':"Transfered to directory"+my_path}
+    reverse_value = reverse('user_songs', kwargs = context)
+    return redirect(reverse_value)
+
+    

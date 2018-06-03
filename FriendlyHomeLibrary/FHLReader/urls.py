@@ -27,7 +27,7 @@ urlpatterns = [
     url(r'^radio_song$', views.SongRadioChannel.as_view(), name='song-radio_channel'),
     url(r'^radio_date$', views.DateRadioChannel.as_view(), name='date_radio_channel'),
     url(r'^picture_date$', views.DatePictureChannel.as_view(), name='date_picture_channel'),
-    # since this is year added, limit 2000-2017, no library before that
+    # since this is year added, limit 2000-2018, no library before that
     
     # radio by date
     # single year
@@ -66,6 +66,7 @@ urlpatterns = [
         name='range_added_picture_channel'),
         
     url(r'^discography$', views.discography_list, name='discography_list'),
+    url(r'^transfer_favourites$', views.transfer_favourites, name='transfer_favourites'),
     url(r'^random$', views.RandomList.as_view(), name='random_list'),
     url(r'^recent$', views.RecentList.as_view(), name='recent_list'),
     url(r'^cached$', views.CachedFileList.as_view(), name='cached_list'),

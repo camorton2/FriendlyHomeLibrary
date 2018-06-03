@@ -5,6 +5,7 @@ import os
 
 import FHLBuilder.utility as utils
 from FriendlyHomeLibrary import settings
+from shutil import copyfile
 
 ### Utilities
 
@@ -88,5 +89,16 @@ def annotate(picture,me):
     # print('acmd %s' % acmd)    
     os.system(acmd)
     return web_file, tmp_file
+
+def transfer_to_my_directory(me,songs):
+    cleanup_my_private_directory(me,u'favourites')
+    my_path,_ = my_private_directory(me,u'favourites')
+        
+    for song in songs:
+        src_path = utils.object_path_local(song)
+        dest_path = os.path.join(my_path,song.friendly_name())
+        print('source %s destination %s' % (src_path,dest_path))
+        copyfile(src_path,dest_path)
     
+    return my_path
     
