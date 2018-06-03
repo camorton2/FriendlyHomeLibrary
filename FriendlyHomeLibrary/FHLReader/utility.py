@@ -102,7 +102,7 @@ def transfer_to_my_directory(me,songs):
         print('source %s destination %s' % (src_path,dest_path))
         try:
             
-            copyfile(src_path,dest_path)
+            copy(src_path,dest_path)
         except Exception as ex:
             # would eventually like to catch the correct message
             message = unicode('Error during file copy %s' % (type(ex).__name__))
