@@ -96,9 +96,19 @@ def transfer_to_my_directory(me,songs):
         
     for song in songs:
         src_path = utils.object_path_local(song)
-        dest_path = os.path.join(my_path,song.friendly_name())
+        song_path = os.path.basename(song.friendly_name())
+        dest_path = os.path.join(my_path,song_path)
+        
         print('source %s destination %s' % (src_path,dest_path))
-        copyfile(src_path,dest_path)
+        try:
+            
+            copyfile(src_path,dest_path)
+        except Exception as ex:
+            # would eventually like to catch the correct message
+            message = unicode('Error during file copy %s' % (type(ex).__name__))
+            print (message)
+            raise MyException(message)
+
     
     return my_path
     
