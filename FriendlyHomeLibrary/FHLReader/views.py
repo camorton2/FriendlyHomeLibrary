@@ -842,10 +842,10 @@ def transfer_favourites(request):
     lv = Q(loves__username=me)
     songs = Song.objects.filter(lv|lk)
     my_path = rutils.transfer_to_my_directory(me,songs)
+
+    title = 'Transferred to directory ' + my_path
+    vargs = {'songs':songs,'title':title}
+    return vu.generic_collection_view(request,**vargs)
     
-    #context = {'songs':songs,'title':"Transfered to directory "+my_path}
-    context = {'pref':'both'}
-    reverse_value = reverse('user_songs', kwargs = context)
-    return redirect(reverse_value)
 
     
