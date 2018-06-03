@@ -99,12 +99,12 @@ def transfer_to_my_directory(me,songs):
         song_path = os.path.basename(song.friendly_name())
         dest_path = os.path.join(my_path,song_path)
         
-        print('source %s destination %s' % (src_path,dest_path))
+        # print('source %s destination %s' % (src_path,dest_path))
         try:
-            cmd = 'cp ' + src_path + ' ' + dest_path
+            cmd = 'cp ' + '"' + src_path + '" "' + dest_path + '"'
             print(cmd)
             os.system(cmd)
-            # copy(src_path,dest_path)
+            #copy(src_path,dest_path)
         except Exception as ex:
             # would eventually like to catch the correct message
             message = unicode('Error during file copy %s' % (type(ex).__name__))
