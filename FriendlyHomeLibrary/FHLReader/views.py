@@ -623,6 +623,9 @@ def send_to_playlist(songs,request):
     message = u''
     if random:
         songs = songs.order_by('?')
+        # get rid of things not wanted for radio
+        songs = rq.exclude_ick(songs,True)
+
     if not christmas:
         songs = rq.exclude_xmas(songs)
     else:
@@ -630,10 +633,7 @@ def send_to_playlist(songs,request):
         # intersperse them in the big list
         xmas_list = rq.only_xmas(Song.random_objects.all())
         songs = rq.christmas(songs, xmas_list)
-    
-    # get rid of things not wanted for radio
-    songs = rq.exclude_ick(songs,True)
-    
+        
     if playback == choices.WEB:
         asPlayList = True
     elif playback == choices.FLIST:
