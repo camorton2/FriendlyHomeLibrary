@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 import datetime
 
@@ -29,73 +26,73 @@ def log(msg):
 
 def slugCompare(s1,s2):
     remove = str('-_')
-    c1 = str(s1).translate(None,remove)
-    c2 = str(s2).translate(None,remove)
+    c1 = str(s1).translate(remove)
+    c2 = str(s2).translate(remove)
     return c1==c2
 
 def get_drive(driveNo):
-    return unicode(settings.DRIVES[driveNo-1])
+    return str(settings.DRIVES[driveNo-1])
 
 def get_drive_samba(driveNo):
-    return unicode(settings.SDRIVES[driveNo-1])
+    return str(settings.SDRIVES[driveNo-1])
 
 def get_drive_slink(driveNo):
-    return unicode(settings.LDRIVES[driveNo-1])
+    return str(settings.LDRIVES[driveNo-1])
 
 
 def object_path(obj):
     """ return the path from links in django's static path """
     if obj is None:
-        message = unicode('error - request path object None')
+        message = str('error - request path object None')
         raise Exception(message)        
     if obj.collection is None:
-        message = unicode('error - request path object collection none %s type %s' % (obj.title,type(obj)))
+        message = str('error - request path object collection none %s type %s' % (obj.title,type(obj)))
         raise Exception(message)
     drive = get_drive_slink(obj.collection.drive)
-    thePath = unicode(os.path.join(u'links/', drive))
-    thePath = unicode(os.path.join(thePath, obj.collection.filePath,obj.fileName))
-    return unicode(thePath)
+    thePath = str(os.path.join(u'links/', drive))
+    thePath = str(os.path.join(thePath, obj.collection.filePath,obj.fileName))
+    return str(thePath)
 
 
 def object_path_with_static(obj):
     """ return the path from static/links django's static path """
-    drive=unicode(u'drive') + unicode(obj.collection.drive)
+    drive=str(u'drive') + str(obj.collection.drive)
     thePath = os.path.join(u'static/links/', drive)
     thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName)
-    return unicode(thePath)
+    return str(thePath)
 
 
 def object_path_no_static(obj):
     """ return the path from static/links django's static path """
-    drive=unicode(u'drive') + unicode(obj.collection.drive)
+    drive=str(u'drive') + str(obj.collection.drive)
     thePath = os.path.join(u'links/', drive)
     thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName)
-    return unicode(thePath)
+    return str(thePath)
 
 
 def object_path_web(obj):
     """ return the path from static/links django's static path """
-    #drive=using path+unicode(u'drive') + unicode(obj.collection.drive)
+    #drive=using path+str(u'drive') + str(obj.collection.drive)
     drive = get_drive_slink(obj.collection.drive)
     thePath = os.path.join(u'links/', drive)
     thePath = os.path.join(settings.HTTP_PREFIX,thePath)
     thePath = os.path.join(thePath, obj.collection.filePath,obj.fileName)
-    return unicode(thePath)
+    return str(thePath)
 
 
 
 def object_path_local(obj):
     """ real path to object using local samba link """
     thePath = get_drive(obj.collection.drive)
-    thePath = unicode(os.path.join(thePath, obj.collection.filePath,obj.fileName))
-    return unicode(thePath)
+    thePath = str(os.path.join(thePath, obj.collection.filePath,obj.fileName))
+    return str(thePath)
 
 
 def object_path_samba(obj):
     """ real samba path to object for use on all machines """
     thePath = get_drive_samba(obj.collection.drive)
-    thePath = unicode(os.path.join(thePath, obj.collection.filePath,obj.fileName))
-    return unicode(thePath)
+    thePath = str(os.path.join(thePath, obj.collection.filePath,obj.fileName))
+    return str(thePath)
 
 
 def collection_sets(collections):

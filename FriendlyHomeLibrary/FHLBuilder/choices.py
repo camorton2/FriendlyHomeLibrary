@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 MOVIE = 'MV'
 MOVIE_3D = 'M3'
 MINI_MOVIE = 'MM'
@@ -176,5 +173,7 @@ movs = [
     '.wav'
     ]
 
-
+audio = [
+        '.mp3'
+    ]
 

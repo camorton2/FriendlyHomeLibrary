@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
-from eyed3 import mp3,id3
+from eyed3 import mp3,id3,core
 #import enzyme
 import exifread
 import time
+import fleep
 
 from django.utils.text import slugify
 
@@ -29,12 +27,12 @@ def add_collection(cAlbum, cSlug, cPath,cDrive,saveIt=True):
         dbobj = bmodels.Collection.objects.get(slug__iexact=cSlug)
         if dbobj.filePath != cPath:
             # create a new slug by adding -1
-            fslug = slugify( unicode( '%s-%d' % (cSlug,1) ))
+            fslug = slugify( str( '%s-%d' % (cSlug,1) ))
             return add_collection(cAlbum, fslug, cPath, cDrive, saveIt)
     except bmodels.Collection.DoesNotExist:
         utility.log("---> ADD Collection %s slug %s path %s" % (cAlbum,cSlug,cPath))
-        path = unicode(cPath)
-        album = unicode(cAlbum)
+        path = str(cPath)
+        album = str(cAlbum)
         dbobj = bmodels.Collection(filePath=path,title=album,slug=cSlug,drive=cDrive)
         if saveIt:
             dbobj.save()
@@ -47,8 +45,8 @@ def add_song(sTitle, sFileName, sSlug, sCollection):
     except bmodels.Song.DoesNotExist:
         utility.log("---> ADD Song slug %s: " % (sSlug))
         sCollection.save()
-        title = unicode(sTitle)
-        fileName = unicode(sFileName)
+        title = str(sTitle)
+        fileName = str(sFileName)
         dbobj = bmodels.Song(title=title,slug=sSlug,fileName=fileName, collection=sCollection)
         dbobj.save()
     dbobj.fileKind = choices.SONG
@@ -61,8 +59,8 @@ def add_movie(mTitle, mFileName, mSlug, mCollection, fKind=choices.MOVIE):
     except bmodels.Movie.DoesNotExist:
         utility.log("---> ADD Movie slug %s: " % (mSlug))
         mCollection.save()
-        title = unicode(mTitle)
-        fileName = unicode(mFileName)
+        title = str(mTitle)
+        fileName = str(mFileName)
         dbobj = bmodels.Movie(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
         dbobj.save()
     setFileKind(dbobj,fKind)
@@ -75,8 +73,8 @@ def add_picture(mTitle, mFileName, mSlug, mCollection):
     except bmodels.Picture.DoesNotExist:
         utility.log("---> ADD Picture %s: " % (mSlug))
         mCollection.save()
-        title = unicode(mTitle)
-        fileName = unicode(mFileName)
+        title = str(mTitle)
+        fileName = str(mFileName)
         dbobj = bmodels.Picture(title=title,slug=mSlug,fileName=fileName, collection=mCollection)
         dbobj.save()
     dbobj.fileKind = choices.PICTURE
@@ -99,7 +97,7 @@ def add_musician(aName, aSlug):
         for b in bmodels.Musician.objects.all():
             if utility.slugCompare(aSlug,b.slug):
                 return b
-        name = unicode(aName)
+        name = str(aName)
         dbobj = bmodels.Musician(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
@@ -109,7 +107,7 @@ def add_actor(aName, aSlug):
         dbobj = bmodels.Actor.objects.get(slug__iexact=aSlug)
     except bmodels.Actor.DoesNotExist:
         # print("---> ADD Actor %s, slug %s" % (aName, aSlug))
-        name = unicode(aName)
+        name = str(aName)
         dbobj = bmodels.Actor(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
@@ -119,7 +117,7 @@ def add_director(aName, aSlug):
         dbobj = bmodels.Director.objects.get(slug__iexact=aSlug)
     except bmodels.Director.DoesNotExist:
         # print("---> ADD Director %s, slug %s" % (aName, aSlug))
-        name = unicode(aName)
+        name = str(aName)
         dbobj = bmodels.Director(fullName=name,slug=aSlug)
         dbobj.save()
     return dbobj
@@ -129,11 +127,15 @@ def add_tag(tName, tSlug):
         dbobj = bmodels.Tag.objects.get(slug__iexact=tSlug)
     except bmodels.Tag.DoesNotExist:
         # print("---> ADD Tag %s, slug %s" % (tName, tSlug))
-        name = unicode(tName)
+        name = str(tName)
         dbobj = bmodels.Tag(name=name,slug=tSlug)
         dbobj.save()
     return dbobj
 
+def as_audio(ext):
+    if any(k == ext.lower() for k in choices.audio):
+        return True
+    return False
 
 def as_picture(ext):
     if any(k == ext.lower() for k in choices.picts):
@@ -179,7 +181,7 @@ def fix_song(song,theFile,collection):
         myArtist = pick_artist(collection.filePath)
         title = song.title
     else:
-        myArtist = unicode(tag.artist)
+        myArtist = str(tag.artist)
         if myArtist is None :
             #myArtist = u'various'
             myArtist = pick_artist(collection.filePath)
@@ -194,7 +196,7 @@ def fix_song(song,theFile,collection):
         elif myArtist == 'Unknown Artist':
             myArtist = pick_artist(collection.filePath)
         
-        title = unicode(tag.title)
+        title = str(tag.title)
         if title is None:
             title=song.title
         elif title == 'None':
@@ -218,7 +220,7 @@ def fix_song(song,theFile,collection):
     song.track = t1
     
     # musician has name, slug
-    artistSlug = slugify( unicode('%s%s' % (myArtist,'-mus')))
+    artistSlug = slugify( str('%s%s' % (myArtist,'-mus')))
     
     musician = add_musician(aName=myArtist, aSlug=artistSlug)
     musician.albums.add(collection)
@@ -241,8 +243,8 @@ def fix_song(song,theFile,collection):
     elif genre.name == '<not-set>':
         pass                
     else:
-        genreSlug = slugify(unicode('%s' % (genre.name)))
-        gen = add_tag(unicode(genre.name),genreSlug)
+        genreSlug = slugify(str('%s' % (genre.name)))
+        gen = add_tag(str(genre.name),genreSlug)
         song.tags.add(gen)
 
     return musician
@@ -257,7 +259,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
     
     musician = None
 
-    theFile = unicode(os.path.join(root,myfile))
+    theFile = str(os.path.join(root,myfile))
     try:
         statinfo = os.stat(theFile)
     except Exception as ex:
@@ -268,21 +270,22 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
     if not statinfo.st_size:
         utility.log("SKIP file with 0 size %s" % theFile)
         return musician
-    base = unicode(os.path.basename(theFile))
+    base = str(os.path.basename(theFile))
     mTitle, extension = os.path.splitext(base)
-    mTitle = unicode(mTitle)
-    extension = unicode(extension)
+    mTitle = str(mTitle)
+    extension = str(extension)
     adate = time.gmtime(os.path.getmtime(theFile))
     fdate = time.strftime('%Y-%m-%d',adate)
 
-    if mp3.isMp3File(theFile):
+    if as_audio(extension):
+        print('yes it is an mp3 file %s %s' % (mTitle,base))
         nc = newCollection
-        sSlug = slugify( unicode('%s%s-sg' % (nc.slug,mTitle)))            
+        sSlug = slugify( str('%s%s-sg' % (nc.slug,mTitle)))            
         song = add_song(mTitle,base,sSlug,nc)
         song.date_added = fdate
 
         if len(formTag):
-            xSlug = slugify(unicode('%s' % (formTag)))
+            xSlug = slugify(str('%s' % (formTag)))
             xTag=add_tag(formTag,xSlug)
             song.tags.add(xTag)
 
@@ -305,25 +308,25 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
 
         nc = newCollection
         if as_movie(extension):
-            mSlug = slugify( unicode('%s%s-mv' % (nc.slug,mTitle)))            
+            mSlug = slugify( str('%s%s-mv' % (nc.slug,mTitle)))            
             movie = add_movie(mTitle,base,mSlug,nc,formKind)
             movie.date_added = fdate
             
             if len(formTag):
-                xSlug = slugify(unicode('%s' % (formTag)))
+                xSlug = slugify(str('%s' % (formTag)))
                 xTag=add_tag(formTag,xSlug)
                 movie.tags.add(xTag)
                 
             movie.save()
         elif as_picture(extension):
-            mSlug = slugify( unicode('%s%s-pict' % (nc.slug,mTitle)))
+            mSlug = slugify( str('%s%s-pict' % (nc.slug,mTitle)))
             picture = add_picture(mTitle,base,mSlug,nc)
             picture.date_added = fdate
             picture.save()
             
             # supposed to be faster with details=False
             #itags = exifread.process_file(theFile, details=False)
-            fname = unicode(theFile)
+            fname = str(theFile)
             try:
                 #print("before open file open file %s" % fname)
                 with open(fname,'r') as f:
@@ -361,7 +364,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
                 utility.log("ERROR (opening for info) %s unhandled exception %s" % (fname,type(ex).__name__))
 
             if len(formTag):
-                xSlug = slugify(unicode('%s' % (formTag)))
+                xSlug = slugify(str('%s' % (formTag)))
                 xTag=add_tag(formTag,xSlug)
                 picture.tags.add(xTag)
                 

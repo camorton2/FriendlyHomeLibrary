@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function
-
 import time, os
 import pychromecast
 
@@ -15,7 +12,7 @@ def find_chrome_casts():
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just pass it back for display
-        message = unicode('Chromecast fail' % (type(ex).__name__))
+        message = str('Chromecast fail' % (type(ex).__name__))
         print (message)
         raise rutils.MyException(message)
     
@@ -52,7 +49,7 @@ def cast_picture(devs,picture):
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just pass it back for display
-        message = unicode('ChromeCast exception %s' % (type(ex).__name__))
+        message = str('ChromeCast exception %s' % (type(ex).__name__))
         print (message)
         raise rutils.MyException(message)
 
@@ -91,7 +88,7 @@ def cast_slides(devs,pictures,me, add_title):
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just pass it back for display
-        message = unicode('ChromeCast exception %s' % (type(ex).__name__))
+        message = str('ChromeCast exception %s' % (type(ex).__name__))
         print (message)
         raise rutils.MyException(message)
 
@@ -133,7 +130,7 @@ def cast_slides_all(pictures,me, add_title):
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just pass it back for display
-        message = unicode('ChromeCast exception %s' % (type(ex).__name__))
+        message = str('ChromeCast exception %s' % (type(ex).__name__))
         print (message)
         raise rutils.MyException(message)
 

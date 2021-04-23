@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 import time
 
@@ -29,7 +26,7 @@ def get_json_rpc(host):
 
 def init_xbmc(ip):
     """ given an ip address, setup the kodi connection """
-    host = unicode('http://%s' % ip)
+    host = str('http://%s' % ip)
     user = settings.XBMC_USER
     password = settings.XBMC_PASSWD
     xbmc_i = XBMC(get_json_rpc(host), user, password)
@@ -81,7 +78,7 @@ def to_kodi(thefile,host,xbmc_i):
         result = xbmc_i.Player.Open(context)
         look_at_res('Player.Open', result)
     else:
-        message = unicode('Error unable to ping kodi at host %s' % host)
+        message = str('Error unable to ping kodi at host %s' % host)
         raise rutils.MyException(message)
 
 
@@ -103,7 +100,7 @@ def send_to_kodi(ob,ip,local=False):
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just pass it back for display
-        message = unicode('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
+        message = str('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
         print (message)
         raise rutils.MyException(message)
 
@@ -167,7 +164,7 @@ def play_kodi(playlist,host,xbmc_i):
         result = xbmc_i.Player.Open(open_context)
         look_at_res('playlist open', result)
     else:
-        message = unicode('Error unable to ping kodi at host %s' % host)
+        message = str('Error unable to ping kodi at host %s' % host)
         raise rutils.MyException(message)
 
 
@@ -188,7 +185,7 @@ def play_to_kodi(playlist,ip,me):
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just give back message
-        message = unicode('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
+        message = str('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
         print (message)
         raise rutils.MyException(message)
 
@@ -204,7 +201,7 @@ def playlist_requests_new(playlist,pattern,me,request):
         try:
             clientip = request.META['REMOTE_ADDR']
         except KeyError:
-            message = unicode('ERROR could not get client ip from request')
+            message = str('ERROR could not get client ip from request')
             print(message)
             raise rutils.MyException(message)
         time.sleep(5)
@@ -236,7 +233,7 @@ def playlist_select(playlist,playback,request):
         try:
             clientip = request.META['REMOTE_ADDR']
         except KeyError:
-            message = unicode('ERROR could not get client ip from request')
+            message = str('ERROR could not get client ip from request')
             print(message)
             raise rutils.MyException(message)
         time.sleep(5)
@@ -294,13 +291,13 @@ def slideshow_kodi(playlist,host,xbmc_i, me):
             result = xbmc_i.Player.Open(open_context)
             look_at_res('playlist open', result)
         else:
-            message = unicode('Error unable to ping kodi at host %s' % host)
+            message = str('Error unable to ping kodi at host %s' % host)
             raise rutils.MyException(message)
 
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just give back message
-        message = unicode('Cannot create/link kodi directory %s' % (type(ex).__name__))
+        message = str('Cannot create/link kodi directory %s' % (type(ex).__name__))
         print (message)
         print (playlist)
         raise rutils.MyException(message)

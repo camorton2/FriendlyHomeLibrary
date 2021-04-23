@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils.text import slugify
 
@@ -97,13 +94,13 @@ class SongDetailView(View):
                 # tag
                 tq = bound_form.cleaned_data['tag']
                 if len(tq):
-                    tqSlug = slugify(unicode(tq))
+                    tqSlug = slugify(str(tq))
                     new_tag = collection.add_tag(tq,tqSlug)
                     song.tags.add(new_tag)
                 # new musician
                 mus = bound_form.cleaned_data['musician']
                 if len(mus):
-                    mSlug = slugify(unicode(mus+'-mus'))
+                    mSlug = slugify(str(mus+'-mus'))
                     new_mus = collection.add_musician(mus,mSlug)
                     new_mus.songs.add(song)
 
@@ -191,7 +188,7 @@ class CollectionMixins:
         if path[0] == '/':
             path = path[1:]
         spath = path.replace('/','-')
-        upath = unicode('%s' % (spath))
+        upath = str('%s' % (spath))
         slug = slugify(upath)
         title = upath
         #print('add collection slug %s spath %s upath %s path %s' % (slug,spath,upath,path))
@@ -220,7 +217,7 @@ class CollectionMixins:
             raise rutils.MyException(message)
         for root, _, files in os.walk(scanPath):
             try:
-                myroot = unicode(root[len(setPath):])
+                myroot = str(root[len(setPath):])
                 if knownCollection is None:
                     album = self.handle_collection(myroot,drive)
                 else:
@@ -228,8 +225,8 @@ class CollectionMixins:
                 for obj in files:
                     try:
                         artist = collection.add_file(
-                            unicode(root),
-                            unicode(obj),
+                            str(root),
+                            str(obj),
                             myroot,
                             album,
                             kind,
@@ -356,7 +353,7 @@ class CollectionUpdate(View,CollectionMixins):
                     bound_form.cleaned_data['tag'],
                     target
                     )
-            except rutils.MyException,ex:
+            except rutils.MyException as ex:
                 message = ex.message
                 context = {'form':bound_form,'message':message}
                 return render(request,self.template_name,context)
@@ -422,25 +419,25 @@ class MovieDetailView(View):
                 # tag
                 tq = bound_form.cleaned_data['tag']
                 if len(tq):
-                    tqSlug = slugify(unicode(tq))
+                    tqSlug = slugify(str(tq))
                     new_tag = collection.add_tag(tq,tqSlug)
                     movie.tags.add(new_tag)
                 # new actor
                 act = bound_form.cleaned_data['actor']
                 if len(act):
-                    actSlug = slugify(unicode(act+'-act'))
+                    actSlug = slugify(str(act+'-act'))
                     new_actor = collection.add_actor(act,actSlug)
                     new_actor.movies.add(movie)
                 # new director
                 dtr = bound_form.cleaned_data['director']
                 if len(dtr):
-                    dtrSlug = slugify(unicode(dtr+'-dtr'))
+                    dtrSlug = slugify(str(dtr+'-dtr'))
                     new_dtr = collection.add_director(dtr,dtrSlug)
                     new_dtr.movies.add(movie)
                 # new musician - for concerts
                 mus = bound_form.cleaned_data['musician']
                 if len(mus):
-                    mSlug = slugify(unicode(mus+'-mus'))
+                    mSlug = slugify(str(mus+'-mus'))
                     new_mus = collection.add_musician(mus,mSlug)
                     new_mus.concerts.add(movie)
 
@@ -463,7 +460,7 @@ class MovieDetailView(View):
         try:
             message = u'success'
             vlcPlugin = kodi.playback_requests(movie,request)
-        except rutils.MyException,ex:
+        except rutils.MyException as ex:
             message = ex.message
             print('Caught %s' % ex.message)
             vlcPlugin=False
@@ -544,7 +541,7 @@ class MusicianDetailView(View):
         try:
             if songs and kodi.playlist_requests(songs,request):
                 message = u'success - songs sent'
-        except rutils.MyException,ex:
+        except rutils.MyException as ex:
             message = ex.message
             print('Caught %s' % ex.message)
 
@@ -615,14 +612,14 @@ class PictureDetailView(View):
 #                        message = u'success'
 #                        #print('view calls cast_picture')
 #                        chromecast.cast_picture(cast,picture)
-#                    except rutils.MyException,ex:
+#                    except rutils.MyException as ex:
 #                        message = ex.message
 #                        #print('Caught %s' % ex.message)
 #########################################################
                 # tag
                 tq = bound_form.cleaned_data['tag']
                 if len(tq):
-                    tqSlug = slugify(unicode(tq))
+                    tqSlug = slugify(str(tq))
                     new_tag = collection.add_tag(tq,tqSlug)
                     picture.tags.add(new_tag)
 

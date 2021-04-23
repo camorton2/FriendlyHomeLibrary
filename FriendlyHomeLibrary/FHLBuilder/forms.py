@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import os
 
 from django import forms
@@ -135,9 +132,9 @@ class CollectionForm(forms.ModelForm):
             #print('last a %s b %s last %s' % (a,b,last))
             #print('new_path unchanged %s' % new_path)
             if len(last):
-                final = unicode(new_path)
+                final = str(new_path)
             else:
-                final = unicode(new_path[:-1])
+                final = str(new_path[:-1])
             if final[0]=='/':
                 return final[1:]
             return final

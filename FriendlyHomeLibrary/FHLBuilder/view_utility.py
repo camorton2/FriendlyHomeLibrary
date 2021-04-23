@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import render,redirect
 from django.utils.text import slugify
 
@@ -132,7 +129,7 @@ def generic_collection_view(request, **kwargs):
                 res = kodi.playlist_requests_new(pictures,val,me,request)
                 if res:
                     message = u'success - pictures sent'
-            except rutils.MyException,ex:
+            except rutils.MyException as ex:
                 message = ex.message
                 #print('Caught %s' % ex.message)
             
@@ -175,7 +172,7 @@ def generic_collection_view(request, **kwargs):
     # tags all objects
     if 'tq' in request.GET and request.GET['tq']:
         tq = request.GET['tq']
-        tqSlug = slugify(unicode(tq))
+        tqSlug = slugify(str(tq))
         new_tag = collection.add_tag(tq,tqSlug)
 
         for obj in songs:
@@ -194,7 +191,7 @@ def generic_collection_view(request, **kwargs):
         elif pictures and kodi.playlist_requests(pictures,request):
             message = u'success - pictures sent'
 
-    except rutils.MyException,ex:
+    except rutils.MyException as ex:
         message = ex.message
         print('Caught %s' % ex.message)
 

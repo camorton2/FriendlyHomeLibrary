@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import calendar, datetime
 
 from django.forms.widgets import HiddenInput
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.template.loader import render_to_string
@@ -643,7 +640,7 @@ def send_to_playlist(songs,request):
         try:
             if kodi.playlist_select(songs,playback,request):
                 message = u'success - songs sent to Kodi' 
-        except rutils.MyException,ex:
+        except rutils.MyException as ex:
             message = ex.message
             print('Caught %s' % ex.message)
         
@@ -749,7 +746,7 @@ def send_to_slideshow(pictures,request):
         try:
             if kodi.playlist_select(pictures,playback,request):
                 message = u'success - pictures sent to Kodi' 
-        except rutils.MyException,ex:
+        except rutils.MyException as ex:
             message = ex.message
             print('Caught %s' % ex.message)
         
@@ -829,7 +826,7 @@ def discography_list(request):
             static_file.write(content.encode('utf8'))
     except Exception as ex:
         # would eventually like to catch the correct message
-        message = unicode('Error writing file %s' % (type(ex).__name__))
+        message = str('Error writing file %s' % (type(ex).__name__))
         print (message)
         raise rutils.MyException(message)
         

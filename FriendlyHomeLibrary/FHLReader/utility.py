@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals, print_function
-
 import os
 
 import FHLBuilder.utility as utils
@@ -20,7 +17,7 @@ def ip_from_request(request):
     try:
         return request.META['REMOTE_ADDR']
     except KeyError:
-        message = unicode('ERROR could not get client ip from request')
+        message = str('ERROR could not get client ip from request')
         print(message)
         raise MyException(message)
 
@@ -55,7 +52,7 @@ def my_private_directory(me, identifier):
         return my_path,web_path
     except Exception as ex:
         # would eventually like to catch the correct message
-        message = unicode('Error creating my working directory %s' % (type(ex).__name__))
+        message = str('Error creating my working directory %s' % (type(ex).__name__))
         print (message)
         raise MyException(message)
 
@@ -107,7 +104,7 @@ def transfer_to_my_directory(me,songs):
             #copy(src_path,dest_path)
         except Exception as ex:
             # would eventually like to catch the correct message
-            message = unicode('Error during file copy %s' % (type(ex).__name__))
+            message = str('Error during file copy %s' % (type(ex).__name__))
             print (message)
             raise MyException(message)
 

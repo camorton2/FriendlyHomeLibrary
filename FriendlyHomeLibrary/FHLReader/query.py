@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import datetime
 
 import random, operator
@@ -73,7 +70,7 @@ def random_count(mylist,count):
     if mysize <= count:
         count = mysize
 
-    rand_entities = random.sample( xrange(mysize), count)
+    rand_entities = random.sample( range(mysize), count)
     flist = []
     for ind in rand_entities:
         flist.append(mylist[ind])
@@ -87,7 +84,7 @@ def tag_select(kind,tag):
     """
     mylist = bmod.CommonFile.objects.none()
     if len(tag):
-        tSlug = slugify(unicode('%s' % (tag)))
+        tSlug = slugify(str('%s' % (tag)))
         try:
             target = bmod.Tag.objects.get(slug__iexact=tSlug)
             mylist = kind_from_tag(kind,target)

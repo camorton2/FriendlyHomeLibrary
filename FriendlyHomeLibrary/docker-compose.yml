@@ -1,0 +1,36 @@
+version: "3.9"
+   
+services:
+  db:
+    image: postgres
+    restart: always
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+      - /media/localMusic:/media/mp3s
+      - /media/movies:/media/movies
+      - /media/other:/media/other
+      - /home/catherine/Friendly/static:/static
+      - /media/localMusic:/static/links/drive3/mp3s
+      - /media/movies:/static/links/drive1/movies
+      - /media/other:/static/links/drive2/other  
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+

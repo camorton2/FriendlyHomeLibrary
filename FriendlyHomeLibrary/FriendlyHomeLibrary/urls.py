@@ -30,10 +30,11 @@ urlpatterns = [
     url(r'^reader/',include(reader_urls)),
     url(r'^user/',include(user_urls)),    
 ]
-
+'''
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns = [
         url(r'^__DEBUG__/',include(debug_toolbar.urls)),
     ] + urlpatterns
+'''
 
