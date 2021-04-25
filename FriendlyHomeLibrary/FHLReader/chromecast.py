@@ -8,21 +8,22 @@ import FHLReader.utility as rutils
 def find_chrome_casts():
     """ find all chromecasts and return an enumerated list """
     try:
-        chromecasts = pychromecast.get_chromecasts()
+        chromecasts, browser = pychromecast.discovery.discover_chromecasts()
+        pychromecast.discovery.stop_discovery(browser)
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just pass it back for display
+        print('failed cc discovery')
         message = str('Chromecast fail' % (type(ex).__name__))
         print (message)
         raise rutils.MyException(message)
     
     res = []
     for x in chromecasts:
-        item = chromecasts.index(x),x.device.friendly_name
-        res.append(item)
-        x.disconnect()
+         item = chromecasts.index(x),x.device.friendly_name
+         res.append(item)
+         x.disconnect()
         
-    print(res)
     return res
        
        
