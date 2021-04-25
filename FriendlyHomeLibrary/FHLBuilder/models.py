@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.db import models
@@ -19,7 +16,7 @@ class Tag(models.Model):
     name = models.CharField(max_length=CHAR_LENGTH,unique=True)
     slug = models.SlugField(max_length=CHAR_LENGTH, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
@@ -48,7 +45,7 @@ class Collection(models.Model):
         return reverse('builder_collection_detail',kwargs={'slug': self.slug})
     def get_update_url(self):
         return reverse('builder_collection_update',kwargs={'slug': self.slug})
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 
@@ -90,7 +87,7 @@ class CommonFile(models.Model):
         """ give the path to this object """
         return bu.object_path(self)
     
-    def __unicode__(self):
+    def __str__(self):
         return self.title
     class Meta:
         ordering = ['title']
@@ -304,7 +301,7 @@ class Artist(models.Model):
     def get_update_url(self):
         return reverse('builder_artist_update',kwargs={'slug': self.slug})
         
-    def __unicode__(self):
+    def __str__(self):
         return self.fullName
         
         

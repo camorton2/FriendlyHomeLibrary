@@ -25,7 +25,7 @@ def log(msg):
         
 
 def slugCompare(s1,s2):
-    remove = str('-_')
+    remove = str.maketrans('-','_')
     c1 = str(s1).translate(remove)
     c2 = str(s2).translate(remove)
     return c1==c2
