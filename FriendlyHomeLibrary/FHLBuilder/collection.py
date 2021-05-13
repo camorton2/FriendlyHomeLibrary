@@ -278,7 +278,7 @@ def add_file(root,myfile,path,newCollection,formKind,formTag):
     fdate = time.strftime('%Y-%m-%d',adate)
 
     if as_audio(extension):
-        print('yes it is an mp3 file %s %s' % (mTitle,base))
+        # print('yes it is an mp3 file %s %s' % (mTitle,base))
         nc = newCollection
         sSlug = slugify( str('%s%s-sg' % (nc.slug,mTitle)))            
         song = add_song(mTitle,base,sSlug,nc)

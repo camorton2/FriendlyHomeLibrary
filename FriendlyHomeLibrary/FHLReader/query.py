@@ -9,6 +9,8 @@ from FHLBuilder import models as bmod
 from FHLBuilder import choices
 
 from FHLReader import utility as rutils
+from functools import reduce
+ 
 
 def find_objects(me, target):
     """

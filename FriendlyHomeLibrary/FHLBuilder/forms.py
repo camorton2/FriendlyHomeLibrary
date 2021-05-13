@@ -122,11 +122,13 @@ class CollectionForm(forms.ModelForm):
         for i,drive in enumerate(settings.DRIVES,1):
             toCheck = os.path.join(settings.MY_MEDIA_FILES_ROOT,drive,new_path)
             utility.log("checking drive %d name %s path %s" % (i,drive,new_path))
-            utility.log(toCheck)
+            utility.log("to check %s" % toCheck)
             if os.path.exists(toCheck):
                 self.drive=i
                 utility.log("OK selecting drive %d" % i)
                 break
+            else: 
+                utility.log("not found on drive %d" % i)
         if self.drive > 0:
             a,b,last = new_path.rpartition('/')
             #print('last a %s b %s last %s' % (a,b,last))

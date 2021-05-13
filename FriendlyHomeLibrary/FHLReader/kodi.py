@@ -21,11 +21,13 @@ def get_json_rpc(host):
     jsonrpc = "jsonrpc"
     if not host.endswith("/"):
         jsonrpc = "/" + jsonrpc
+    utils.log("JSON rpc %s" % host + jsonrpc)
     return host + jsonrpc
 
 
 def init_xbmc(ip):
     """ given an ip address, setup the kodi connection """
+    utils.log("init_xmbc with ip %s" % ip)
     host = str('http://%s' % ip)
     user = settings.XBMC_USER
     password = settings.XBMC_PASSWD
@@ -44,17 +46,20 @@ def look_at_res(msg, res):
             # Application.SetVolume returns an integer
         # JSONRPC.Ping() returns the string 'pong'
         elif "result" in res and res["result"] == "pong":
-            print("OK ping returned pong")
+            utils.log("OK ping returned pong")
             success = True
         elif "error" in res and "message" in res["error"]:
             message = (res["error"]["message"])
             amsg = ('msg %s %s' % (msg,message))
+            utils.log(amsg)
             raise rutils.MyException(amsg)
         else:
             message = ("Kodi Unknown error : '%s'" % (res))
             amsg = ('msg %s %s' % (msg,message))
+            utils.log(amsg)
             raise rutils.MyException(amsg)
         if success:
+            utils.log("Success")
             print("Success.")
     return success
 
@@ -70,7 +75,7 @@ def to_kodi(thefile,host,xbmc_i):
     ping_result = xbmc_i.JSONRPC.Ping()
     look_at_res('ping', ping_result)
     if ping_result:
-        print('File to kodi %s' % thefile)
+        utils.log('File to kodi %s' % thefile)
         context = {'item':{'file':thefile}}
         #guess at what a close might look like, not working
         #cresult = xbmc_i.Player.Close()
@@ -95,13 +100,15 @@ def send_to_kodi(ob,ip,local=False):
     else:
         thefile = utils.object_path_samba(ob)
     try:
+        utils.log("Host %s" % host)
+        utils.log("ip %s" % ip)
         xbmc_i = init_xbmc(host)
         to_kodi(thefile,host,xbmc_i)
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just pass it back for display
         message = str('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
-        print (message)
+        utils.log (message)
         raise rutils.MyException(message)
 
 
@@ -174,19 +181,19 @@ def play_to_kodi(playlist,ip,me):
         of kodi where playback is requested
     """
     host = ip + settings.KODI_PORT
-    print('play_to_kodi host %s' % host)
+    utils.log('play_to_kodi host %s' % host)
     try:
         xbmc_i = init_xbmc(host)
         if playlist[0] and playlist[0].fileKind == choices.PICTURE:
             slideshow_kodi(playlist,host,xbmc_i,me)
-            print('after calling slideshow_kodi')
+            utils.log('after calling slideshow_kodi')
         else:
             play_kodi(playlist,host,xbmc_i)
     except Exception as ex:
         # in this case I want to see what the exception is
         # but there's no way to handle it, just give back message
         message = str('Cannot init_xbmc host %s exception %s' % (host,type(ex).__name__))
-        print (message)
+        utils.log (message)
         raise rutils.MyException(message)
 
 
@@ -202,7 +209,7 @@ def playlist_requests_new(playlist,pattern,me,request):
             clientip = request.META['REMOTE_ADDR']
         except KeyError:
             message = str('ERROR could not get client ip from request')
-            print(message)
+            utils.log(message)
             raise rutils.MyException(message)
         time.sleep(5)
         play_to_kodi(playlist,clientip,me)
@@ -229,22 +236,22 @@ def playlist_select(playlist,playback,request):
         me = None
     
     if playback == choices.KODI_LOCAL:
-        print('local')
+        utils.log('local')
         try:
             clientip = request.META['REMOTE_ADDR']
         except KeyError:
             message = str('ERROR could not get client ip from request')
-            print(message)
+            utils.log(message)
             raise rutils.MyException(message)
         time.sleep(5)
         play_to_kodi(playlist,clientip,me)
         return True
     elif playback == choices.KODI_LF:
-        print('lf')
+        utils.log('lf')
         play_to_kodi(playlist,settings.HOST_LF,me)
         return True
     elif playback == choices.KODI_BF:
-        print('bf')
+        utils.log('bf')
         time.sleep(5)
         play_to_kodi(playlist,settings.HOST_BF,me)
         return True
@@ -272,7 +279,7 @@ def slideshow_kodi(playlist,host,xbmc_i, me):
         Still to do: clean up pictures from previous slide shows
     """    
     
-    print("picturelist to kodi")
+    utils.log("picturelist to kodi")
     try:
         rutils.cleanup_my_private_directory(me,'slides')
         file_path,_ = rutils.my_private_directory(me,'slides')
@@ -283,7 +290,7 @@ def slideshow_kodi(playlist,host,xbmc_i, me):
         ping_result = xbmc_i.JSONRPC.Ping()
         look_at_res('ping',ping_result)
         if ping_result:
-            print('after ping with file_path %s' % file_path)
+            utils.log('after ping with file_path %s' % file_path)
             path_context = { 'directory': file_path}
             open_context = {'item':path_context}
 
@@ -298,8 +305,8 @@ def slideshow_kodi(playlist,host,xbmc_i, me):
         # in this case I want to see what the exception is
         # but there's no way to handle it, just give back message
         message = str('Cannot create/link kodi directory %s' % (type(ex).__name__))
-        print (message)
-        print (playlist)
+        utils.log (message)
+        utils.log (playlist)
         raise rutils.MyException(message)
 
     
@@ -310,7 +317,7 @@ def stream_to_vlc(movie,request):
         html request
         note, no correct interface at this time, uses command line
     """
-    print("User pressed StreamMovie")
+    utils.log("User pressed StreamMovie")
     try:
         clientip = request.META['REMOTE_ADDR']
     except KeyError:
@@ -320,7 +327,7 @@ def stream_to_vlc(movie,request):
     #playit = "/home/catherine/FHL/FriendlyHomeLibrary/static/mediafiles/" + movie.collection.filePath + '/' + movie.fileName
     playit = utils.object_path_with_static(movie)
     sstr = ("vlc -vvv %s --sout \'#rtp{dst=%s,port=1234,sdp=rtsp://%s:8080/test.sdp}\'" % (playit,clientip,hostip[:-5]))
-    print(sstr)
+    utils.log(sstr)
     os.system(sstr)
 
 

@@ -28,7 +28,7 @@ services:
       - /home/catherine/Friendly/static:/static
       - /media/localMusic:/static/links/drive3/mp3s
       - /media/movies:/static/links/drive1/movies
-      - /media/other:/static/links/drive2/other  
+      - /media/other:/static/links/drive2/other 
     ports:
       - "8000:8000"
     depends_on:
