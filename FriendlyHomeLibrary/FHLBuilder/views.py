@@ -533,7 +533,7 @@ class MusicianDetailView(View):
         details of a musician as well as playlist for songs
         """
         musician=get_object_or_404(models.Musician,slug__iexact=slug)
-        songs = musician.songs.all()
+        songs = musician.songs.all().order_by('collection','track')
         asPlayList = False
         if 'playlist' in request.GET:
             asPlayList = True
