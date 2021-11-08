@@ -5,8 +5,8 @@ from FHLReader import views
 
 from FHLBuilder.url_utility import vchannel, schannel
 
-mYearA = r'(?P<yearA>200[0-9]|201[0-9])'
-mYearB = r'(?P<yearB>200[0-9]|201[0-9])'
+mYearA = r'(?P<yearA>200[0-9]|201[0-9]|202[0-9]|203[0-9]|204[0-9])'
+mYearB = r'(?P<yearB>200[0-9]|201[0-9]|202[0-9]|203[0-9]|204[0-9])'
 mMonthA = r'(?P<monthA>[1-9]|1[0-2])'
 mMonthB = r'(?P<monthB>[1-9]|1[0-2])'
 
